@@ -4,7 +4,7 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.1] - 2026-08-15
 
 ### Fixed
 
@@ -25,6 +25,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - **Proven against the artifact, and the proof discriminates:** the identical object-shaped
     `ui_render` call returns `isError: true` on the previous binary and `isError: false` on the
     rebuilt one.
+
+- **The plugin cache is keyed on VERSION, so a fix at an unchanged version never deploys.**
+  After rebuilding with the `ui_render` fix, `claude plugin install ui-mcp@local-marketplace`
+  answered *"already installed"* and did nothing — the cache kept the previous binary and the
+  object-shaped call still failed there. `install` asks whether the plugin is installed, not which
+  version. `claude plugin update ui-mcp@local-marketplace` is the command that re-fetches, and it
+  only has something to fetch once the version moves. Hence 0.1.1: `Directory.Build.props` (the
+  single version source), `.claude-plugin/plugin.json`, and the marketplace entry.
+  Verified on the deployed copy: `serverInfo.version` is `0.1.1` and the object-shaped render
+  returns `isError: false`.
 
 - **The publish recipe was undocumented, and the obvious command produces the wrong artifact.**
   README said `dotnet publish src/UiMcp -c Release -o bundle`. That yields a 156 KB launcher plus
