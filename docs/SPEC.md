@@ -178,10 +178,43 @@ Not shippable until every line is true:
 
 | Risk | Mitigation |
 |---|---|
-| A stdio MCP server may have no desktop to draw on when started by a scheduled task under S4U | Verify early. If it fails, the window must be user-session-hosted and the server must say so rather than fail silently. |
+| ~~A stdio MCP server may have no desktop to draw on~~ **PARTLY RETIRED 2026-08-15 — see 10.1** | Measured, not assumed. Retired for the production path; the S4U case named below is still open. |
 | Two agents render to one window and fight | v0.1: last write wins, and `ui_status` reports which agent rendered last. Arbitration is a v0.2 question. |
 | WPF crash takes the MCP server down | Host the UI thread with a supervisor; a dead window must not kill tool serving. `ui_status` reports `windowAlive=false`. |
 | Bundled exe grows large (self-contained + WPF) | Measure it. Windows-mcp already carries a bundled exe, so the pattern is accepted; the number is not yet known. |
+
+### 10.1 Desktop availability — measured 2026-08-15
+
+Retired for the production path, still open for one case. The distinction matters, so both are
+recorded rather than one summary verdict.
+
+| Case | Status |
+|---|---|
+| Host started by `ResumeStarship` (**`LogonType: Interactive`**) | **RETIRED.** |
+| Host started under **S4U** — the case this risk originally named | **NOT TESTED.** |
+
+**Evidence for the retired case.** A probe (`tools/probe-desktop.ps1`) created a real WPF window,
+resolved its native `HWND`, and asked the OS `IsWindowVisible`:
+
+- **Control**, from a child of `claude.exe`: `HWND 3868598`, visible `True`.
+- **Test**, run inside `WindowsMcp`'s process tree (a real stdio MCP server, running unelevated):
+  `HWND 1770336`, visible `True`. Different handle, so not a cached result.
+- All 59 live MCP server processes are in **session 1**, not session 0.
+- The window was also seen by a human. Three independent methods agree.
+
+**Why S4U is still open.** `ResumeStarship` is `InteractiveToken`, which requires a logged-on
+session by definition, so a desktop is expected there. S4U runs whether or not anyone is logged on
+and is the case that plausibly has none. Measured ancestry:
+`svchost (session 0) -> pwsh (session 1) -> claude (session 1)`. No task that starts `claude.exe`
+uses S4U today, so the case does not currently arise. **If the host is ever moved to an S4U
+trigger, re-run the probe before assuming the window still appears.**
+
+**Residual, stated rather than glossed:** the probe proves a *descendant* of an MCP server can
+create a window. ui-mcp will create it *in its own process*. Session, window station and desktop
+are inherited by children, so the gap is small - but it is a gap, and it closes for good the first
+time `ui_open` puts a real window on screen.
+
+---
 
 **Open, needs a decision before v0.2:** whether ui-mcp should replace the HTML console or sit
 beside it. Two surfaces rendering one tree is fine; two surfaces with different data is the

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    TARGET FRAMEWORK IS DELIBERATELY net9.0, NOT net9.0-windows.
+
+    SPEC section 8 says this project "must not reference WPF" because that is the seam keeping the
+    validator and path resolver testable on any runner. A plain net9.0 target makes that a COMPILER
+    guarantee rather than a convention someone has to remember: WPF assemblies are unavailable to a
+    non-Windows TFM, so a stray `using System.Windows;` fails the build instead of quietly eroding
+    the boundary. Same reasoning as preferring a type over a comment.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UiMcp.Tests" />
+  </ItemGroup>
+
+</Project>

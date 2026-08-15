@@ -7,22 +7,45 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
 - [x] (2026-08-14) Specification written — `docs/SPEC.md`. Architecture, tool contract, catalog,
       safety invariants, testing strategy, v0.1 definition of done, risks.
 
-## 🟢 READY — next session, in order
+## Done 2026-08-15
 
-- [ ] (2026-08-14) **Scaffold the solution.** `src/UiMcp` (net9.0-windows, `<UseWPF>true</UseWPF>`,
-      Exe), `src/UiMcp.Abstractions` (**no WPF reference** — that is the seam that keeps the
-      validator testable), `tests/UiMcp.Tests` (xunit + FluentAssertions), `global.json` pinned to
-      SDK 9.0.314 `rollForward: latestFeature`, mirroring Windows-mcp.
+- [x] (2026-08-15) **Desktop assumption — PARTLY retired, and the split matters.** Taken OUT OF
+      ORDER, ahead of the scaffold: its own title said EARLY, and a failure would have changed the
+      hosting model and therefore the scaffold. Probe: `tools/probe-desktop.ps1`.
+      **RETIRED for the production path** (host started by `ResumeStarship`, `LogonType:
+      Interactive`): a real WPF window created inside `WindowsMcp`'s process tree returned
+      `HWND 1770336` with the OS reporting `IsWindowVisible=True`; control from a `claude.exe` child
+      gave a different handle (`3868598`), so neither is a cached result; all 59 live MCP processes
+      are in session 1; and a human confirmed seeing the window. Three independent methods.
+      **NOT retired for S4U** — the case the risk originally named. `ResumeStarship` is
+      `InteractiveToken`, which requires a logged-on session by definition, so a desktop is expected
+      there. No task that starts `claude.exe` uses S4U today, so it does not arise; if the host ever
+      moves to an S4U trigger, re-run the probe first. See SPEC 10.1.
+      **Residual:** the probe proves a *descendant* of an MCP server can draw. ui-mcp will draw
+      *in-process*. Children inherit session/window-station/desktop so the gap is small, but it does
+      not fully close until `ui_open` puts a real window up.
+
+- [x] (2026-08-15) **Scaffold the solution.** `src/UiMcp` (net9.0-windows10.0.19041.0, `UseWPF`,
+      Exe), `src/UiMcp.Abstractions`, `tests/UiMcp.Tests` (xunit + FluentAssertions + Moq),
+      `global.json` pinned to 9.0.314 `rollForward: latestFeature` (resolves 9.0.317 here — verified,
+      not assumed), `Directory.Build.props` as the single version source, `UiMcp.sln`.
+      **Abstractions targets plain `net9.0`, NOT `net9.0-windows`** — the spec says it must not
+      reference WPF, and a non-Windows TFM makes that a compiler guarantee instead of a convention.
+      `dotnet build`: **0 warnings, 0 errors**. Proven to SERVE, not merely compile: the built exe
+      answered a real MCP `initialize` with `{name: ui-mcp, version: 0.1.0, protocol: 2024-11-05}`,
+      and that version arrived via Directory.Build.props -> assembly -> `ServerVersion`, so the
+      no-hardcoded-version wiring is verified too.
+
+## 🟢 READY — next session, in order
 - [ ] (2026-08-14) **Catalog + validator, TDD.** Port the nine components from
       `AdminLTE/JSON-UI/catalog.js`. Failing test first for each rejection path.
       **Every rejection test needs a paired positive control** — a validator that refuses
       everything passes a naive rejection suite.
 - [ ] (2026-08-14) **Path resolver, TDD.** Port from `render.js`: nested objects, array indices,
       `$item` scope, prototype-access refusal. Missing path returns **null**, never 0 or "".
-- [ ] (2026-08-14) **Verify the desktop assumption EARLY, before building the UI.** Can a stdio MCP
-      server started by the host actually create a visible window? If not, everything above still
-      holds but the hosting model changes. This is the cheapest risk to retire and the most
-      expensive to discover late.
+- [ ] (2026-08-15) **Re-check the desktop assumption IF the host ever moves to an S4U trigger.**
+      Not currently reachable - every task that starts `claude.exe` is `InteractiveToken` today.
+      `tools/probe-desktop.ps1` answers it in one run. See SPEC 10.1.
 - [ ] (2026-08-14) **WPF host on an STA thread** with `Dispatcher` marshalling; supervisor so a
       window crash does not take tool serving down.
 - [ ] (2026-08-14) **Tools:** `ui_open`, `ui_render`, `ui_status`, `ui_close`.

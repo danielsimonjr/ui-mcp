@@ -1,0 +1,16 @@
+<Project>
+
+  <!--
+    ONE place the version is written. Program.ServerVersion reads it back off the assembly rather
+    than repeating it as a literal. Windows-mcp learned this the expensive way: a hardcoded "0.4.1"
+    survived three releases, and a server that misreports its own version makes a stale-bundle
+    deploy invisible - the deploy looks fine because the thing you ask is the thing that is wrong.
+  -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>danielsimonjr</Authors>
+    <Company>danielsimonjr</Company>
+    <Product>ui-mcp</Product>
+  </PropertyGroup>
+
+</Project>
