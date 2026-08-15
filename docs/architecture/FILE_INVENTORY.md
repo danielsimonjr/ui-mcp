@@ -1,0 +1,122 @@
+# ui-mcp — File Inventory
+
+Every scanned file, its project, area and disposition.
+
+> **Derived from `file-inventory.json`.** ui-mcp has no Markdown-emitting analyser of its own,
+> so this file is authored from that artifact rather than generated. Refresh it by re-running
+> `repo_map.py map` and updating both the table and the Verification block.
+
+## Scope — what is counted
+
+**17 files.** `obj/` and `bin/` are excluded as build output. The whole working tree contains
+**35** `.cs` files; the other 18 are compiler-generated (`*.AssemblyInfo.cs`,
+`*.GlobalUsings.g.cs`, and copies under `bin/`). Counting them would credit more than half the
+repository to the compiler and add namespaces no developer declared.
+
+## By project
+
+| Project | Files | LOC |
+|---|---|---|
+| `UiMcp` | 6 | 841 |
+| `UiMcp.Abstractions` | 6 | 551 |
+| `UiMcp.Tests` | 5 | 984 |
+| **Total** | **17** | **2376** |
+
+Attribution is by owning `.csproj` — for a .NET repo the project file is what a `package.json`
+is elsewhere: the unit declaring one compilation, its target framework and its dependencies.
+
+## By area and disposition
+
+| Area | Files |
+|---|---|
+| `src` | 12 |
+| `tests` | 5 |
+
+| Disposition | Files |
+|---|---|
+| `reachable` | 10 |
+| `build-entry` | 1 |
+| `test-only` | 1 |
+| `orphan` | **0** |
+| `test` | 5 |
+
+## Every file
+
+### `UiMcp.Abstractions` — 6 files, 551 LOC
+
+| File | LOC | Disposition | Holds |
+|---|---|---|---|
+| `src/UiMcp.Abstractions/CatalogValidator.cs` | 147 | reachable | The nine-component catalog and `Validate` |
+| `src/UiMcp.Abstractions/PropTypes.cs` | 112 | reachable | Prop validators; charset and prototype guards |
+| `src/UiMcp.Abstractions/PathResolver.cs` | 110 | reachable | Path binding and `Display`; the UNKNOWN rule |
+| `src/UiMcp.Abstractions/RenderRules.cs` | 71 | reachable | Render judgement with no WPF |
+| `src/UiMcp.Abstractions/ValidatedNode.cs` | 21 | reachable | `ValidatedNode`, `ValidatedColumn` |
+| `src/UiMcp.Abstractions/UiValidationException.cs` | 13 | reachable | The refusal type |
+
+### `UiMcp` — 6 files, 841 LOC
+
+| File | LOC | Disposition | Holds |
+|---|---|---|---|
+| `src/UiMcp/Rendering/TreeRenderer.cs` | 248 | reachable | `ValidatedNode` → WPF `UIElement` |
+| `src/UiMcp/Tools/UiTools.cs` | 140 | **test-only** ⚠ | The four MCP tools |
+| `src/UiMcp/Hosting/UiThreadHost.cs` | 130 | reachable | STA thread, dispatcher, supervisor |
+| `src/UiMcp/Hosting/UiSurface.cs` | 124 | reachable | The real WPF surface |
+| `src/UiMcp/Program.cs` | 46 | **build-entry** | Composition root, `Main` |
+| `src/UiMcp/Hosting/IUiSurface.cs` | 37 | reachable | `IUiSurface`, `UiSurfaceStatus` |
+
+> ⚠ **`UiTools.cs` is NOT dead code.** Its `test-only` disposition is an artifact of static
+> analysis, and the docs would be lying if they repeated it without saying so. `Program.cs`
+> registers tools with `.WithToolsFromAssembly()`, which discovers `[McpServerTool]` methods by
+> **source generator** — so no `using UiMcp.Tools;` exists for a static scan to follow, and the
+> only in-repo edge into the file comes from `UiToolsTests.cs`.
+>
+> Verified live, not inferred: a `tools/list` against the shipped binary returns all four tools,
+> and an end-to-end `ui_open` → `ui_render` → `ui_status` session drove a real window that an
+> independent process observed. Any file reachable only through reflection or attribute
+> discovery will show this way.
+
+### `UiMcp.Tests` — 5 files, 984 LOC
+
+| File | LOC | Disposition | Covers |
+|---|---|---|---|
+| `tests/UiMcp.Tests/UiToolsTests.cs` | 214 | test | The four tools, refusal ordering |
+| `tests/UiMcp.Tests/CatalogValidatorTests.cs` | 212 | test | Catalog, props, caps, boundaries |
+| `tests/UiMcp.Tests/UiThreadHostTests.cs` | 147 | test | STA, marshalling, supervisor, shutdown |
+| `tests/UiMcp.Tests/PathResolverTests.cs` | 128 | test | Paths, indices, `$item`, UNKNOWN |
+| `tests/UiMcp.Tests/RenderRulesTests.cs` | 97 | test | Units, deltas, gauge clamp, empty text |
+
+## Not scanned
+
+| Path | Why |
+|---|---|
+| `**/obj/`, `**/bin/` | Build output — 18 generated `.cs` files |
+| `bundle/UiMcp.exe` | The 28.42 MB shipped binary |
+| `*.csproj`, `*.sln`, `Directory.Build.props`, `global.json` | Build configuration, not `.cs` source |
+| `.mcp.json`, `.claude-plugin/plugin.json` | Plugin manifests |
+| `tools/probe-desktop.ps1` | PowerShell probe |
+| `examples/starship-view.json` | Sample tree |
+| `docs/` | This documentation |
+
+`Directory.Build.props` is worth naming despite not being scanned: it is the **single source**
+of the version, which `Program.ServerVersion` reads off the assembly rather than duplicating.
+
+## Verification
+
+Generated 2026-08-15 by `repo_map.py map`.
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+
+| Claim | Value | Source |
+|---|---|---|
+| totalFiles | 17 | file-inventory.json |
+| totalSourceFiles | 17 | dependency-graph.json |
+| totalLinesOfCode | 2376 | dependency-graph.json |
+| orphanedFiles | 0 | dependency-graph.json |
+| testOnlyFiles | 1 | dependency-graph.json |
+| entryRoots | 1 | dependency-graph.json |
+| noImporterFileCount | 0 | unused-analysis.json |
+
+**Claims the gate cannot hold:** per-project file/LOC splits and per-file LOC come from
+`file-inventory.json`'s `files` array (each entry carries `package` and `loc`), summed here —
+the gate checks the totals, not the breakdown. The **35 vs 17** split was measured by
+enumerating `.cs` files in the working tree with and without `obj`/`bin`. The "Holds" and
+"Covers" columns are source-read.

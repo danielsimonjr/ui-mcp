@@ -3,7 +3,9 @@
 An MCP server that hosts a native Windows window and renders **catalog-constrained JSON UI trees**.
 Any agent connected to the host can draw to it; nothing else can.
 
-> **Status: specification only. No implementation yet.** See [`docs/SPEC.md`](docs/SPEC.md).
+> **Status: v0.1.1, implemented and installed.** Four tools, nine components, 132 tests
+> passing. Design intent is in [`docs/SPEC.md`](docs/SPEC.md); the as-built architecture is in
+> [`docs/architecture/`](docs/architecture/OVERVIEW.md).
 
 ## What it is for
 
@@ -28,6 +30,25 @@ spot displayed as a green zero reads as health.
 ## Catalog
 
 `StatusBanner` · `Panel` · `Row` · `Metric` · `Field` · `Gauge` · `Repeat` · `Table` · `Note`
+
+## Documentation
+
+Every numeric claim in these is derived from a parse of the source and re-checked by a gate
+that exits non-zero when the code moves
+(`python repo_map.py check <repo> --docs docs/architecture`).
+
+| Document | Answers |
+|---|---|
+| [OVERVIEW.md](docs/architecture/OVERVIEW.md) | What this is, what it does, how it is laid out |
+| [ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | Why it is built this way — principles and decisions |
+| [COMPONENTS.md](docs/architecture/COMPONENTS.md) | Each module, with real signatures |
+| [DATAFLOW.md](docs/architecture/DATAFLOW.md) | How a `ui_render` call travels end to end |
+| [API.md](docs/architecture/API.md) | The MCP tool surface and the tree format |
+| [FILE_INVENTORY.md](docs/architecture/FILE_INVENTORY.md) | Every file, its project and disposition |
+| [TEST_COVERAGE.md](docs/architecture/TEST_COVERAGE.md) | What is tested, and the gaps that matter |
+| [DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) | Who depends on whom |
+| [unused-analysis.md](docs/architecture/unused-analysis.md) | Exports with no external user |
+| [duplicate-symbols.md](docs/architecture/duplicate-symbols.md) | Names defined more than once |
 
 ## Relationship to other work here
 

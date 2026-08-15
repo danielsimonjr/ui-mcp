@@ -158,7 +158,41 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
 - [ ] Decide whether ui-mcp replaces the HTML console or sits beside it. Two surfaces rendering one
       tree is fine; two surfaces with different data is the two-sources-of-truth failure.
 
-## Blocked
+- [x] (2026-08-15) **Published to GitHub** — approved and done. Public, MIT, `main`, issues
+      disabled, matching the Windows-mcp shape. Bundle present at 29,799,584 bytes.
 
-- [ ] **Publish to GitHub — needs the owner's approval.** The repo is local-only
-      (`git init`, no remote). Creating a remote repository is an outward-facing act.
+- [x] (2026-08-15) **Architecture documentation — all ten canonical documents**, in
+      `docs/architecture/`, plus a Documentation index in the README.
+      **Unblocked by teaching `repo_map` to parse C#** (`skills` `7264f55`, `45c27ec`): before
+      that, every .NET repo scanned to an empty graph and could not be documented against a
+      drift gate at all.
+      **The gate exits 0, and was mutation-proven rather than trusted:** changing
+      `totalLinesOfCode` from 2376 to 9999 in OVERVIEW.md made `check` exit 1 naming the file
+      and the claim; restored byte-identical (SHA256 verified). A gate that has never been
+      shown to fail is not evidence.
+      Also corrected a stale README banner that still read *"specification only, no
+      implementation yet"* on a released, installed v0.1.1.
+
+## 🟢 READY — found by writing the docs
+
+- [ ] 🟢 **`TreeRenderer` has no unit tests — 248 lines, the largest source file.** The design
+      pushed all judgement into `RenderRules` (well tested) leaving the renderer "thin enough to
+      check by reading"; at 248 lines it is not. Unverified automatically: the nine-way switch,
+      the `Repeat` 64 / `Table` 200 truncation caps (the constants are tested, nothing asserts
+      the renderer applies them), `$item` scope propagation, per-row column resolution, the
+      tone→brush map. **Both defects ever found by running this system lived in exactly this
+      gap** — the `$item` validator/resolver seam and the double `treeHash`. Start with the
+      caps and `$item` scoping.
+- [ ] **A seam test walking every catalog component through validate → render.** The `$item`
+      bug was two components each correct alone with nobody testing the join.
+- [ ] **Add `dotnet test` to CI.** The workflow builds and gates bundle freshness plus an MCP
+      `initialize` handshake, but never runs the 132 tests — so they are a local habit, not a
+      gate.
+- [ ] **Make `ComponentSpec` and `PropRule` `internal`.** Both are `public` while every use is
+      inside `CatalogValidator.cs` (confirmed by grep). Narrows the public surface of
+      `UiMcp.Abstractions` at no cost to any caller. Surfaced by `unused-analysis.md`.
+- [ ] `UiSurface` has no unit tests (124 lines) — needs an STA-gated fixture. Lowest priority:
+      `UiThreadHost` underneath it is thoroughly tested, so the gap is WPF-object handling, not
+      the threading model.
+
+## Blocked

@@ -4,6 +4,44 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Architecture documentation — all ten canonical documents** in `docs/architecture/`
+  (OVERVIEW, ARCHITECTURE, COMPONENTS, DATAFLOW, API, FILE_INVENTORY, TEST_COVERAGE,
+  DEPENDENCY_GRAPH, unused-analysis, duplicate-symbols), plus a Documentation index in the
+  README. Every numeric claim carries a `## Verification` block derived from a real parse of
+  the source, and `repo_map.py check` exits non-zero when the code moves away from them.
+  - **The gate was mutation-proven, not trusted.** Changing `totalLinesOfCode` from 2376 to
+    9999 in OVERVIEW.md made `check` exit 1 naming both the file and the claim; the file was
+    then restored byte-identical (SHA-256 verified). A gate that has never been shown to fail
+    is not evidence.
+  - Claims a graph metric cannot hold — the four tools, the nine components, the 132-test
+    figure — are written with their actual basis stated, so a reader can tell a gate-enforced
+    number from a hand-verified one.
+  - This was **unblocked by teaching `repo_map` to parse C#** (`skills` `7264f55`, `45c27ec`).
+    Before that, every .NET repo scanned to an empty graph and could not be documented against
+    a drift gate at all.
+
+### Fixed
+
+- **The README declared the project unimplemented.** Its status banner still read
+  *"specification only. No implementation yet."* on a repository that is released at v0.1.1,
+  installed as a plugin, and serving four tools — the most misleading single line in the repo.
+
+### Notes — real gaps surfaced by writing the documentation
+
+Recorded in `todo.md`, not fixed here, because documenting is not the same act as changing:
+
+- **`TreeRenderer` has no unit tests** — 248 lines, the largest source file. Its truncation
+  caps (64 `Repeat` items / 200 `Table` rows) are tested as *constants* while nothing asserts
+  the renderer applies them, and `$item` scope propagation is likewise unverified. Both defects
+  ever found by running this system lived in exactly this gap.
+- **`dotnet test` does not run in CI** — the 132 tests are a local habit, not a gate.
+- **`ComponentSpec` and `PropRule` are `public`** while every use is confined to
+  `CatalogValidator.cs`.
+
 ## [0.1.1] - 2026-08-15
 
 ### Fixed
