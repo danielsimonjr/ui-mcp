@@ -37,10 +37,18 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       no-hardcoded-version wiring is verified too.
 
 ## 🟢 READY — next session, in order
-- [ ] (2026-08-14) **Catalog + validator, TDD.** Port the nine components from
-      `AdminLTE/JSON-UI/catalog.js`. Failing test first for each rejection path.
-      **Every rejection test needs a paired positive control** — a validator that refuses
-      everything passes a naive rejection suite.
+- [x] (2026-08-15) **Catalog + validator, TDD.** All nine components ported from
+      `AdminLTE/JSON-UI/catalog.js`. **44 tests, 44 pass, 0 warnings.** Every rejection path is
+      paired with a positive control, and boundaries are tested on both sides (500/501 chars,
+      64/65 children, depth 11/13, 8/9 table columns).
+      **Proven to have teeth by mutation, not by passing:** with `ForbiddenPathTokens` emptied the
+      suite failed exactly 5 tests — the 4 prototype-path cases plus the nested table-column case —
+      then the file was restored byte-identical (SHA256 verified). A green suite that has never been
+      shown to fail is not evidence.
+      Two deliberate hardenings over the JS: the prototype check runs **before** the charset check
+      (`__proto__` is charset-legal, so a future regex edit could otherwise let it through), and
+      `ValidatedNode` is a distinct type from raw JSON so "was this validated?" is a compiler
+      question, not a call-site reading exercise.
 - [ ] (2026-08-14) **Path resolver, TDD.** Port from `render.js`: nested objects, array indices,
       `$item` scope, prototype-access refusal. Missing path returns **null**, never 0 or "".
 - [ ] (2026-08-15) **Re-check the desktop assumption IF the host ever moves to an S4U trigger.**

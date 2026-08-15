@@ -8,6 +8,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Catalog and validator** (`UiMcp.Abstractions`): all nine components ported from
+  `AdminLTE/JSON-UI/catalog.js` — `StatusBanner` · `Panel` · `Row` · `Metric` · `Field` · `Gauge` ·
+  `Repeat` · `Table` · `Note`. Enforces the SPEC section 6 invariants: unknown component and unknown
+  prop are **refused, not ignored**; tone is a closed set; paths are charset-restricted and refuse
+  `__proto__` / `constructor` / `prototype`; depth capped at 12, children at 64, table columns at 8.
+  **44 tests, 44 passing, 0 warnings.**
+  - **Every rejection test is paired with a positive control**, and boundaries are tested on both
+    sides (500 vs 501 chars, 64 vs 65 children, depth 11 vs 13, 8 vs 9 columns). A validator that
+    refuses everything passes a naive rejection suite perfectly.
+  - **The suite was proven able to fail, not merely observed passing.** Emptying
+    `ForbiddenPathTokens` broke exactly 5 tests — the 4 prototype-path cases plus the nested
+    table-column case — and the file was then restored byte-identical (SHA256 verified). A green
+    suite that has never been shown to go red is not evidence that it checks anything.
+  - Two deliberate hardenings over the JS original: the **prototype check runs before the charset
+    check** (`__proto__` is charset-legal, so ordering the charset rule first would let a future
+    regex edit quietly reopen the hole), and **`ValidatedNode` is a distinct type from raw JSON**, so
+    "has this been validated?" is answered by the compiler rather than by reading call sites.
+  - Column paths are validated through the same `Path` rule as top-level paths, so the prototype
+    guard reaches *inside* the array — nested paths are exactly where a boundary check gets skipped.
+  - `UiValidationException` is its own type so the MCP layer can report a deliberate refusal
+    verbatim instead of letting the SDK flatten it to "An error occurred invoking '&lt;tool&gt;'",
+    which would hide the guard at the moment it did its job.
+
 - **C# solution scaffold**, mirroring `Windows-mcp`: `src/UiMcp` (net9.0-windows10.0.19041.0,
   `UseWPF`, Exe), `src/UiMcp.Abstractions`, `tests/UiMcp.Tests` (xunit + FluentAssertions + Moq),
   `global.json`, `Directory.Build.props`, `UiMcp.sln`. Builds **0 warnings, 0 errors**.
