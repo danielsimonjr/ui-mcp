@@ -110,9 +110,29 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
           (`7d4ef2048c4b` vs `febd32fc836e`) - the tool hashed raw JSON, the surface hashed
           structure. Same name, two functions. Fixed by deleting the duplicate and reading the
           value back from the surface, so they cannot disagree. Now verified equal live.
-- [ ] (2026-08-14) **Publish + wire:** `bundle/UiMcp.exe`, `.claude-plugin/plugin.json`,
-      `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`, marketplace entry.
-      **Confirm it SERVES TOOLS in a live session** — installed is not serving.
+- [x] (2026-08-15) **Publish + wire — repo side DONE.** `bundle/UiMcp.exe` (28.42 MB, one file),
+      `.claude-plugin/plugin.json`, `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`.
+      **Deployment model decided by measurement** (SPEC 10.2): framework-dependent 28.42 MB over
+      self-contained 153.7 MB, because `WindowsDesktop.App 9.0.19` is present on BOTH machines and
+      the bundle is committed and cache-cloned per version.
+      **Tested the artifact that SHIPS, not the dev build:** `bundle/UiMcp.exe` answered a real MCP
+      `initialize` with `ui-mcp v0.1.0`.
+      **Trap caught before it bit:** `~/.gitignore_global` line 3 ignores `.mcp.json` everywhere, so
+      a normal commit would have shipped a plugin that installs and serves NOTHING - and the failure
+      would have looked like a broken server, not a missing file. Fixed structurally with a `!` rule
+      in the repo `.gitignore` (which takes precedence over `core.excludesFile`) rather than with
+      `git add -f`, because a force-add rots the moment anyone commits normally.
+
+- [ ] 🟢 **READY — marketplace registration + live serving check.** The last mile, and it needs
+      Daniel for two user-only slash commands.
+      1. Add a `plugins[]` entry to `~/Github/skills/.claude-plugin/marketplace.json`
+      2. Enable `"ui-mcp@local-marketplace": true` in `~/.claude/settings.json`
+      3. `/plugin marketplace update local-marketplace` then `/reload-plugins` (USER-INVOKED ONLY)
+      4. **Confirm it SERVES TOOLS in a live session** — installed is not serving. Look for
+         `mcp__plugin_ui-mcp_ui-mcp__ui_open` and friends, and call one.
+      NOTE: after editing marketplace.json, re-run the consumer that parses it. Valid JSON is not a
+      valid manifest - a name sweep once deleted the schema-required `owner` field and broke every
+      marketplace refresh for a day, silently.
 
 ## Deferred
 

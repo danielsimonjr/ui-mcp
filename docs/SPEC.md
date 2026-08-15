@@ -181,7 +181,7 @@ Not shippable until every line is true:
 | ~~A stdio MCP server may have no desktop to draw on~~ **PARTLY RETIRED 2026-08-15 — see 10.1** | Measured, not assumed. Retired for the production path; the S4U case named below is still open. |
 | Two agents render to one window and fight | v0.1: last write wins, and `ui_status` reports which agent rendered last. Arbitration is a v0.2 question. |
 | WPF crash takes the MCP server down | Host the UI thread with a supervisor; a dead window must not kill tool serving. `ui_status` reports `windowAlive=false`. |
-| Bundled exe grows large (self-contained + WPF) | Measure it. Windows-mcp already carries a bundled exe, so the pattern is accepted; the number is not yet known. |
+| ~~Bundled exe grows large (self-contained + WPF)~~ **MEASURED AND DECIDED 2026-08-15 — see 10.2** | Framework-dependent, 28.42 MB. Self-contained measured 153.7 MB and was rejected. |
 
 ### 10.1 Desktop availability — measured 2026-08-15
 
@@ -213,6 +213,30 @@ trigger, re-run the probe before assuming the window still appears.**
 create a window. ui-mcp will create it *in its own process*. Session, window station and desktop
 are inherited by children, so the gap is small - but it is a gap, and it closes for good the first
 time `ui_open` puts a real window on screen.
+
+### 10.2 Deployment model — decided 2026-08-15
+
+**Decision: framework-dependent single file.** Both options were built and measured rather than
+argued about.
+
+| Option | Bundle | Requires |
+|---|---|---|
+| Self-contained | **153.7 MB** | nothing |
+| **Framework-dependent (chosen)** | **28.42 MB** | .NET Desktop Runtime 9 |
+
+**Why.** 5.4x smaller, and the dependency is already satisfied: `WindowsDesktop.App 9.0.19` is
+installed on **both** the ZBOOK and the EVO (verified with `dotnet --list-runtimes` on each). The
+bundle is committed to git and the plugin cache clones it per version, so 125 MB of avoidable
+payload would be paid on every version, on every machine, forever.
+
+**The cost, stated rather than buried.** A machine without the .NET 9 Desktop Runtime cannot run
+this server. That is acceptable here because ui-mcp is WPF: it already requires Windows with a
+desktop, so the set of machines that could run a self-contained build but not this one is small.
+The failure is also legible - the .NET host prints an explicit "you must install the .NET Desktop
+Runtime" message rather than failing silently.
+
+**Revisit if** ui-mcp is ever deployed to a machine outside this pair, or if a runtime-version
+mismatch appears. Switching back is a one-flag change to the publish command.
 
 ---
 

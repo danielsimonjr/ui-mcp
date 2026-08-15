@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "ui-mcp": {
+      "type": "stdio",
+      "command": "${CLAUDE_PLUGIN_ROOT}/bundle/UiMcp.exe",
+      "args": [],
+      "env": {}
+    }
+  }
+}

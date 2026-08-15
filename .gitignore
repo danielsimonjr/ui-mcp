@@ -3,3 +3,16 @@ obj/
 *.user
 .vs/
 node_modules/
+
+# ~/.gitignore_global line 3 ignores .mcp.json everywhere - a sensible default for ordinary repos,
+# and exactly wrong here, where .mcp.json IS the deliverable. A repo .gitignore takes precedence
+# over core.excludesFile, so this negation un-ignores it structurally.
+#
+# Committing it via `git add -f` would also work and would rot: the next person (or the next me)
+# commits normally, .mcp.json silently stays out, the plugin installs and serves NOTHING, and the
+# failure looks like a broken server rather than a missing file. Never `git add -f -A` either -
+# that overrides .gitignore wholesale and drags in node_modules.
+!.mcp.json
+
+# The published server is committed - the plugin is served from this path, not built on the fly.
+!bundle/

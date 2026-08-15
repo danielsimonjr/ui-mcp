@@ -8,6 +8,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Plugin packaging** — `bundle/UiMcp.exe` (28.42 MB, single file), `.claude-plugin/plugin.json`,
+  `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`.
+  - **Deployment model decided by measurement, not preference** (SPEC 10.2). Both were built:
+    self-contained **153.7 MB** vs framework-dependent **28.42 MB**. Chose framework-dependent
+    because `WindowsDesktop.App 9.0.19` is installed on **both** the ZBOOK and the EVO (verified via
+    `dotnet --list-runtimes` on each), and the bundle is committed and cache-cloned per version, so
+    125 MB of avoidable payload would be paid on every version on every machine forever. The cost is
+    stated in the spec rather than buried: a machine without the runtime cannot run this server.
+  - **Tested the artifact that SHIPS.** `bundle/UiMcp.exe` answered a real MCP `initialize` with
+    `ui-mcp v0.1.0`. A dev build passing proves nothing about the published one — different runtime,
+    different failure modes.
+  - **Caught a trap that would have shipped a silently useless plugin.** `~/.gitignore_global`
+    line 3 ignores `.mcp.json` **everywhere**. A normal commit would have omitted it, the plugin
+    would have installed and served **nothing**, and the symptom would have looked like a broken
+    server rather than a missing file. Fixed structurally with a `!.mcp.json` negation in the repo
+    `.gitignore` (repo rules take precedence over `core.excludesFile`) rather than with
+    `git add -f`, which works once and rots the moment anyone commits normally.
+
 - **The renderer** — `RenderRules` (Abstractions) + `TreeRenderer` (WPF), all nine components.
   **129 tests, 0 warnings.** Rendered live: `examples/starship-view.json` bound to real
   `briefing.ps1 -Json` output, 19 nodes, window confirmed by an independent process.
