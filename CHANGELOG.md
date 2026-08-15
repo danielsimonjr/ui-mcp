@@ -8,6 +8,26 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`UiMcp.Hosting.UiThreadHost`** — the single STA thread WPF requires, and the only route from a
+  tool handler to the UI. **87 tests, all passing, 0 warnings.** SPEC section 3's "two threads, one
+  direction": handlers marshal and get a Task; the UI thread never waits on MCP.
+  - Verified: STA apartment, all work on one UI thread, **50 concurrent marshals with no deadlock**
+    (SPEC section 7 names this case), fail-fast after shutdown instead of queueing onto a dead pump,
+    idempotent shutdown, refused double-start.
+  - **The supervisor almost passed for the wrong reason.** The first fault tests were satisfied by a
+    framework guarantee — `Dispatcher.InvokeAsync` captures exceptions into the returned Task, so
+    awaited work was never at risk. The case the spec means is a **window event handler throwing
+    with nobody awaiting it**, which reaches `Dispatcher.UnhandledException` and terminates the
+    process. Added `Post()` to model that path and a handler that marks it handled.
+  - **Mutation-proven, starkly:** with `e.Handled = false` the **test host process crashed** mid-run
+    (`Unhandled exception ... window handler blew up`) and the run aborted. Restored byte-identical.
+    That is precisely the failure the supervisor exists to prevent: a dead window is a degraded
+    display, a dead process is an outage, and they must not be the same event.
+  - `LastFault` records what was absorbed so `ui_status` can report a degraded display honestly.
+    A supervisor that hides the fault it caught is a silent failure with extra steps.
+  - The UI thread is a **background** thread: a foreground one would keep the process alive after
+    MCP shutdown, turning a clean exit into a hang that looks like an ignored SIGTERM.
+
 - **Path resolver and display formatter** (`UiMcp.Abstractions.PathResolver`), ported from
   `AdminLTE/JSON-UI/render.js`. Nested keys, array indices, consecutive indices (`grid[1][0]`),
   `$item` scope, prototype refusal. **74 tests total, all passing, 0 warnings.**

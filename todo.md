@@ -65,8 +65,20 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
 - [ ] (2026-08-15) **Re-check the desktop assumption IF the host ever moves to an S4U trigger.**
       Not currently reachable - every task that starts `claude.exe` is `InteractiveToken` today.
       `tools/probe-desktop.ps1` answers it in one run. See SPEC 10.1.
-- [ ] (2026-08-14) **WPF host on an STA thread** with `Dispatcher` marshalling; supervisor so a
-      window crash does not take tool serving down.
+- [x] (2026-08-15) **WPF host on an STA thread** (`UiMcp.Hosting.UiThreadHost`) with `Dispatcher`
+      marshalling and a real supervisor. **87 tests, all passing.** Covers: STA apartment, single UI
+      thread for all work, 50 concurrent marshals without deadlock (SPEC 7 names this), fail-fast
+      after shutdown rather than queueing onto a dead pump, idempotent shutdown, refused double-start.
+      **The supervisor test nearly passed for the wrong reason, and finding that was the point.**
+      The first two fault tests passed on a FRAMEWORK guarantee - `Dispatcher.InvokeAsync` captures
+      exceptions into the returned Task, so awaited work was never going to kill anything. The case
+      the spec actually means is a window event handler throwing with nobody awaiting it: that
+      reaches `Dispatcher.UnhandledException` and terminates the PROCESS. Added `Post()` to model
+      that path, plus a `UnhandledException` handler that marks it handled and records `LastFault`.
+      **Mutation-proven, and unusually starkly:** with `e.Handled = false` the TEST HOST PROCESS
+      CRASHED mid-run (`Unhandled exception ... window handler blew up`). Restored byte-identical.
+      The fault is recorded rather than swallowed so `ui_status` can report a degraded display -
+      a supervisor that hides what it absorbed is a silent failure with extra steps.
 - [ ] (2026-08-14) **Tools:** `ui_open`, `ui_render`, `ui_status`, `ui_close`.
 - [ ] (2026-08-14) **Renderer** for the nine components; validated tree in, WPF visual tree out.
 - [ ] (2026-08-14) **Publish + wire:** `bundle/UiMcp.exe`, `.claude-plugin/plugin.json`,
