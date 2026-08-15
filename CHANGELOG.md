@@ -6,6 +6,33 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`ui_render` refused an object-shaped `tree`, and could not say why.** `tree` and `data` were
+  declared `string`, so a caller passing an actual JSON **object** — the natural reading of the
+  tool's own description, *"The UI tree as JSON"* — failed inside the MCP SDK's parameter binding
+  **before the method ran**. Every refusal path in `Render` was therefore unreachable: the caller
+  got only `"An error occurred invoking 'ui_render'."`, while the real cause
+  (`System.Text.Json: The JSON value could not be converted to System.String`) went to stderr,
+  where an agent calling the tool cannot read it. Refusing *with a reason* is this server's whole
+  posture, and this was the one path that could not.
+  - Both parameters are now `JsonElement` and accept either shape: the payload itself, or a JSON
+    string containing it. SPEC 4 calls `tree` "catalog JSON" and never required a stringified
+    form, so this is the contract rather than a loosening of it.
+  - **Found by driving the DEPLOYED plugin over stdio, not by any unit test** — the same way the
+    `$item` and `treeHash` defects were found. 129 → 132 tests; both shapes are pinned, because
+    either alone would let the other regress.
+  - **Proven against the artifact, and the proof discriminates:** the identical object-shaped
+    `ui_render` call returns `isError: true` on the previous binary and `isError: false` on the
+    rebuilt one.
+
+- **The publish recipe was undocumented, and the obvious command produces the wrong artifact.**
+  README said `dotnet publish src/UiMcp -c Release -o bundle`. That yields a 156 KB launcher plus
+  **45 loose DLLs** in `bundle/`, not the single 29,799,584-byte executable `.mcp.json` points at
+  — found by running it and having to clean up after. The full recipe
+  (`-r win-x64 --self-contained false -p:PublishSingleFile=true`) is now in the README, reproduces
+  the committed artifact byte-for-byte in size, and says why each flag is load-bearing.
+
 ### Added
 
 - **Installed as a plugin, and the deployed artifact is verified serving.** Registered in the

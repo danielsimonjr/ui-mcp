@@ -43,13 +43,26 @@ spot displayed as a green zero reads as health.
 ```powershell
 dotnet build
 dotnet test
-dotnet publish src/UiMcp -c Release -o bundle
+
+# The publish recipe is load-bearing — all four flags matter.
+dotnet publish src/UiMcp -c Release -o bundle `
+  -r win-x64 --self-contained false -p:PublishSingleFile=true
 ```
 
-`bundle/UiMcp.exe` is committed — it is the artifact the plugin runs, and it is
-framework-dependent (28.42 MB) rather than self-contained (153.7 MB) because
-`WindowsDesktop.App 9.0.x` is present on both target machines. Re-publish after any change to
-`src/`, or the plugin keeps serving the previous build.
+`bundle/UiMcp.exe` is committed — it is the artifact the plugin runs.
+
+**Do not drop the flags.** A bare `dotnet publish -c Release -o bundle` produces a 156 KB
+launcher plus **45 loose DLLs** scattered into `bundle/`, not the single 29,799,584-byte
+executable `.mcp.json` points at. The recipe was previously undocumented and reconstructing it
+cost a cleanup; the byte size is the check that it is right.
+
+`--self-contained false` is the measured choice (SPEC 10.2): framework-dependent 28.42 MB
+against self-contained 153.7 MB, because `WindowsDesktop.App 9.0.x` is present on both target
+machines. Switching back is one flag.
+
+Publish also emits `.pdb` files; only `UiMcp.exe` is committed. **Re-publish after any change to
+`src/`, or the plugin keeps serving the previous build** — and re-run
+`claude plugin install ui-mcp@local-marketplace` so the plugin cache picks it up.
 
 ## Install as a plugin
 

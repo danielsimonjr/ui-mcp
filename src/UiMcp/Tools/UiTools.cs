@@ -45,18 +45,26 @@ public sealed class UiTools
         "Repeat, Table, Note. Bind values with dotted paths into `data`; an unresolvable path renders " +
         "as UNKNOWN, never as 0.")]
     public string Render(
-        [Description("The UI tree as JSON")] string tree,
-        [Description("Optional data object the tree's paths resolve against, as JSON")] string? data = null)
+        [Description("The UI tree, as a JSON object (a JSON string containing it is also accepted)")]
+        JsonElement tree,
+        [Description("Optional data the tree's paths resolve against, as a JSON object (a JSON string is also accepted)")]
+        JsonElement? data = null)
     {
-        JsonElement treeEl;
-        try { treeEl = JsonDocument.Parse(tree).RootElement; }
-        catch (JsonException e) { return Rejected($"tree is not valid JSON: {e.Message}"); }
+        // `JsonElement`, not `string`. When this took `string`, a caller passing an actual JSON
+        // OBJECT - the natural reading of "The UI tree as JSON" - failed inside the SDK's parameter
+        // binding, BEFORE this method ran, so none of the refusal paths below could report anything.
+        // All the caller got was "An error occurred invoking 'ui_render'", with the real cause
+        // (System.Text.Json: "The JSON value could not be converted to System.String") on stderr,
+        // which an agent calling the tool cannot read. Found by driving the deployed plugin, not by
+        // a unit test. SPEC 4 says "catalog JSON" and does not require a stringified form.
+        if (!TryUnwrap(tree, out var treeEl, out var treeError))
+            return Rejected($"tree is not valid JSON: {treeError}");
 
         JsonElement dataEl = default;
-        if (!string.IsNullOrWhiteSpace(data))
+        if (data is { } rawData && rawData.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.Null))
         {
-            try { dataEl = JsonDocument.Parse(data).RootElement; }
-            catch (JsonException e) { return Rejected($"data is not valid JSON: {e.Message}"); }
+            if (!TryUnwrap(rawData, out dataEl, out var dataError))
+                return Rejected($"data is not valid JSON: {dataError}");
         }
 
         ValidatedNode validated;
@@ -103,6 +111,42 @@ public sealed class UiTools
     {
         _surface.Close();
         return Json(new { ok = true });
+    }
+
+    /// <summary>
+    /// Accept a JSON value that is either the payload itself or a JSON string containing it.
+    ///
+    /// Both shapes are real: an agent naturally sends an object, while every caller written against
+    /// the previous <c>string</c> signature sends a string. Refusing either would break somebody,
+    /// and refusing the object shape was the defect this exists to close.
+    ///
+    /// Returns false with a reason instead of throwing, so the caller gets a rejection it can read
+    /// rather than a generic invocation error.
+    /// </summary>
+    private static bool TryUnwrap(JsonElement value, out JsonElement parsed, out string error)
+    {
+        if (value.ValueKind != JsonValueKind.String)
+        {
+            parsed = value;
+            error = string.Empty;
+            return true;
+        }
+
+        try
+        {
+            // Not disposed deliberately: RootElement must outlive this scope, and the document is
+            // collected once nothing references it - the same lifetime the previous string-parsing
+            // path relied on.
+            parsed = JsonDocument.Parse(value.GetString() ?? string.Empty).RootElement;
+            error = string.Empty;
+            return true;
+        }
+        catch (JsonException e)
+        {
+            parsed = default;
+            error = e.Message;
+            return false;
+        }
     }
 
     private static string Rejected(string reason) => Json(new { ok = false, rejected = reason });

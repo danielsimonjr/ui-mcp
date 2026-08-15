@@ -135,6 +135,17 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       answered a real MCP `initialize` with `{"name":"ui-mcp","version":"0.1.0"}` and advertised
       all four tools — `ui_open`, `ui_render`, `ui_status`, `ui_close`.
 
+- [x] (2026-08-15) **`ui_render` accepts an object-shaped tree; publish recipe documented.**
+      Found by driving the DEPLOYED plugin, not by a unit test: `tree`/`data` were `string`, so a
+      caller sending a JSON OBJECT failed in SDK parameter binding BEFORE the method ran, making
+      every refusal path unreachable - the caller saw only "An error occurred invoking
+      'ui_render'". Both are now `JsonElement` and take either shape. 129 -> 132 tests, both
+      shapes pinned. **The proof discriminates:** the same object-shaped call is `isError: true`
+      on the old binary and `isError: false` on the rebuilt one.
+      Also: the README publish command was missing `-r win-x64 --self-contained false
+      -p:PublishSingleFile=true`, so it emitted a 156 KB launcher plus 45 loose DLLs instead of the
+      single 29,799,584-byte exe. Documented with the reason each flag is load-bearing.
+
 - [ ] 🟢 **READY — the in-session bind is the only part left, and it IS user-only.**
       `/reload-plugins` in a live session, then confirm `mcp__plugin_ui-mcp_ui-mcp__ui_open`
       exists and CALL it. Installed is not serving: this session was checked and the tools are

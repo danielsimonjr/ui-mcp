@@ -46,6 +46,67 @@ public class UiToolsTests
     }
 
     private const string ValidTree = """{"type":"Note","props":{"text":"all nominal"}}""";
+    private const string SomeData = """{"x":1}""";
+
+    // ---- ui_render: the tree may arrive as an object OR as a JSON string -----------------------
+
+    // Found by driving the DEPLOYED plugin over stdio, not by any unit test. `tree` was declared
+    // `string`, so a caller passing an actual JSON OBJECT - the natural reading of the tool's own
+    // description, "The UI tree as JSON" - failed during SDK parameter binding, BEFORE the method
+    // ran. The caller saw only "An error occurred invoking 'ui_render'"; the real cause
+    // (System.Text.Json: "The JSON value could not be converted to System.String") went to stderr,
+    // where an agent calling this tool cannot see it. Refusing WITH A REASON is this server's whole
+    // posture, and that path could not refuse with anything.
+    //
+    // SPEC 4 calls `tree` "catalog JSON" and does not require a stringified form, so accepting both
+    // is the contract rather than a loosening of it. Both shapes are pinned because either alone
+    // would let the other regress.
+
+    [Fact]
+    public void Render_TreePassedAsJsonObject_IsAccepted()
+    {
+        var spy = new SpySurface();
+        var tools = new UiTools(spy);
+
+        var result = tools.Render(AsJson(ValidTree));
+
+        result.Should().NotContain("rejected");
+        spy.RenderCalls.Should().Be(1, "an object-shaped tree is the natural way to call this");
+        spy.LastTree!.Type.Should().Be("Note");
+    }
+
+    [Fact]
+    public void Render_TreePassedAsJsonString_IsStillAccepted_PositiveControl()
+    {
+        var spy = new SpySurface();
+        var tools = new UiTools(spy);
+
+        // The string form is what every existing caller sends; accepting objects must not drop it.
+        var result = tools.Render(AsJsonStringValue(ValidTree));
+
+        result.Should().NotContain("rejected");
+        spy.RenderCalls.Should().Be(1);
+        spy.LastTree!.Type.Should().Be("Note");
+    }
+
+    [Fact]
+    public void Render_DataPassedAsJsonObject_IsAccepted()
+    {
+        var spy = new SpySurface();
+        var tools = new UiTools(spy);
+
+        var result = tools.Render(AsJson(ValidTree), AsJson(SomeData));
+
+        result.Should().NotContain("rejected");
+        spy.RenderCalls.Should().Be(1);
+    }
+
+    /// <summary>The tree as a JSON object - the way an agent would naturally send it.</summary>
+    private static JsonElement AsJson(string json) => JsonDocument.Parse(json).RootElement;
+
+    /// <summary>The tree wrapped as a JSON *string* value - the legacy caller shape.</summary>
+    private static JsonElement AsJsonStringValue(string json) =>
+        JsonDocument.Parse(JsonSerializer.Serialize(json)).RootElement;
 
     // ---- ui_render: refuse first, render second ------------------------------------------------
 
@@ -55,7 +116,7 @@ public class UiToolsTests
         var spy = new SpySurface();
         var tools = new UiTools(spy);
 
-        var result = tools.Render("""{"type":"Script","props":{}}""");
+        var result = tools.Render(AsJson("""{"type":"Script","props":{}}"""));
 
         result.Should().Contain("rejected");
         spy.RenderCalls.Should().Be(0, "an invalid tree must never touch the window");
@@ -67,7 +128,7 @@ public class UiToolsTests
         var spy = new SpySurface();
         var tools = new UiTools(spy);
 
-        var result = tools.Render(ValidTree);
+        var result = tools.Render(AsJson(ValidTree));
 
         result.Should().NotContain("rejected");
         spy.RenderCalls.Should().Be(1);
@@ -88,7 +149,7 @@ public class UiToolsTests
         ]}
         """;
 
-        tools.Render(tree).Should().Contain("rejected");
+        tools.Render(AsJson(tree)).Should().Contain("rejected");
         spy.RenderCalls.Should().Be(0, "a partially valid tree is refused whole, not drawn in part");
     }
 
@@ -96,7 +157,7 @@ public class UiToolsTests
     public void Render_RejectionMessage_NamesTheOffendingComponentAndProp()
     {
         var tools = new UiTools(new SpySurface());
-        var result = tools.Render("""{"type":"Note","props":{"text":"hi","onclick":"x"}}""");
+        var result = tools.Render(AsJson("""{"type":"Note","props":{"text":"hi","onclick":"x"}}"""));
         result.Should().Contain("Note").And.Contain("onclick");
     }
 
@@ -106,7 +167,7 @@ public class UiToolsTests
         var spy = new SpySurface();
         var tools = new UiTools(spy);
 
-        var act = () => tools.Render("{ this is not json");
+        var act = () => tools.Render(AsJsonStringValue("{ this is not json"));
 
         act.Should().NotThrow("a bad payload is a refusal, not a server fault");
         spy.RenderCalls.Should().Be(0);
@@ -118,7 +179,7 @@ public class UiToolsTests
         var spy = new SpySurface();
         var tools = new UiTools(spy);
 
-        tools.Render(ValidTree, "{ not json either").Should().Contain("rejected");
+        tools.Render(AsJson(ValidTree), AsJsonStringValue("{ not json either")).Should().Contain("rejected");
         spy.RenderCalls.Should().Be(0);
     }
 
@@ -136,7 +197,7 @@ public class UiToolsTests
         var spy = new SpySurface();
         var tools = new UiTools(spy);
 
-        var rendered = tools.Render(ValidTree);
+        var rendered = tools.Render(AsJson(ValidTree));
         var status = tools.Status();
 
         rendered.Should().Contain("surface-computed-hash");
