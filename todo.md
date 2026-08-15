@@ -123,16 +123,22 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       in the repo `.gitignore` (which takes precedence over `core.excludesFile`) rather than with
       `git add -f`, because a force-add rots the moment anyone commits normally.
 
-- [ ] 🟢 **READY — marketplace registration + live serving check.** The last mile, and it needs
-      Daniel for two user-only slash commands.
-      1. Add a `plugins[]` entry to `~/Github/skills/.claude-plugin/marketplace.json`
-      2. Enable `"ui-mcp@local-marketplace": true` in `~/.claude/settings.json`
-      3. `/plugin marketplace update local-marketplace` then `/reload-plugins` (USER-INVOKED ONLY)
-      4. **Confirm it SERVES TOOLS in a live session** — installed is not serving. Look for
-         `mcp__plugin_ui-mcp_ui-mcp__ui_open` and friends, and call one.
-      NOTE: after editing marketplace.json, re-run the consumer that parses it. Valid JSON is not a
-      valid manifest - a name sweep once deleted the schema-required `owner` field and broke every
-      marketplace refresh for a day, silently.
+- [x] (2026-08-15) **Marketplace registration + install — DONE, and steps 3-4 did NOT need the
+      slash commands after all.** Registered as `./ui-mcp` (a symlink to this repo, matching the
+      `episodic-memory` precedent) and enabled in settings — both already in place at 13:43.
+      **The `/plugin ... update` + install steps were done from the CLI instead**, which is not
+      user-only: `claude plugin marketplace update local-marketplace` (which also *validated* the
+      manifest — the `owner`-field check this note warns about) then
+      `claude plugin install ui-mcp@local-marketplace`. Cache now holds
+      `.../local-marketplace/ui-mcp/0.1.0/` including `bundle/UiMcp.exe` (29,799,584 bytes).
+      **Verified against the DEPLOYED artifact, not the dev build:** the exe in the plugin cache
+      answered a real MCP `initialize` with `{"name":"ui-mcp","version":"0.1.0"}` and advertised
+      all four tools — `ui_open`, `ui_render`, `ui_status`, `ui_close`.
+
+- [ ] 🟢 **READY — the in-session bind is the only part left, and it IS user-only.**
+      `/reload-plugins` in a live session, then confirm `mcp__plugin_ui-mcp_ui-mcp__ui_open`
+      exists and CALL it. Installed is not serving: this session was checked and the tools are
+      absent, because the plugin was registered at 13:43 and the last reload ran at ~11:25.
 
 ## Deferred
 

@@ -8,6 +8,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Installed as a plugin, and the deployed artifact is verified serving.** Registered in the
+  local marketplace as `./ui-mcp` — a symlink to this repo, matching the `episodic-memory`
+  precedent, because this repo has no git remote and a `url` source would have nothing to fetch.
+  - **The last two steps did not need the user-only slash commands.** `todo.md` recorded them as
+    `/plugin marketplace update` + `/reload-plugins`, both user-invoked. The equivalent CLI exists
+    and is not gated: `claude plugin marketplace update local-marketplace` followed by
+    `claude plugin install ui-mcp@local-marketplace`. The update step also *validates* the
+    manifest, which is the "re-run the consumer that parses it" check that note asks for.
+  - **Verified against the DEPLOYED exe, not the dev build.** The binary in
+    `~/.claude/plugins/cache/local-marketplace/ui-mcp/0.1.0/bundle/UiMcp.exe` (29,799,584 bytes)
+    answered a real MCP `initialize` with `{"name":"ui-mcp","version":"0.1.0"}` and advertised
+    `ui_open`, `ui_render`, `ui_status`, `ui_close`.
+  - **Still not serving in a live session, and that distinction is the point.** The tools are
+    absent from the current session: the plugin was registered at 13:43 while the last reload ran
+    at ~11:25. Binding needs `/reload-plugins`, which genuinely is user-only. Installed is not
+    serving.
+  - README gained Build and Install sections; the Build heading no longer says "once implemented".
+
 - **Plugin packaging** — `bundle/UiMcp.exe` (28.42 MB, single file), `.claude-plugin/plugin.json`,
   `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`.
   - **Deployment model decided by measurement, not preference** (SPEC 10.2). Both were built:

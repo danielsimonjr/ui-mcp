@@ -38,12 +38,38 @@ spot displayed as a green zero reads as health.
 | `AdminLTE/JSON-UI/` | The same catalog and renderer in vanilla JS, rendering to HTML |
 | `~/.claude/scripts/starship-console.ps1` | Reference implementation of this renderer against WPF |
 
-## Build (once implemented)
+## Build
 
 ```powershell
 dotnet build
 dotnet test
 dotnet publish src/UiMcp -c Release -o bundle
+```
+
+`bundle/UiMcp.exe` is committed — it is the artifact the plugin runs, and it is
+framework-dependent (28.42 MB) rather than self-contained (153.7 MB) because
+`WindowsDesktop.App 9.0.x` is present on both target machines. Re-publish after any change to
+`src/`, or the plugin keeps serving the previous build.
+
+## Install as a plugin
+
+Registered in `~/Github/skills/.claude-plugin/marketplace.json` as a local source
+(`./ui-mcp`, a symlink to this repo) and enabled in `~/.claude/settings.json`.
+
+```powershell
+claude plugin marketplace update local-marketplace
+claude plugin install ui-mcp@local-marketplace
+```
+
+Then `/reload-plugins` in the session that should use it. **Installed is not serving** — the
+tools only appear once the session binds the MCP server. Confirm by looking for
+`mcp__plugin_ui-mcp_ui-mcp__ui_open` and calling it, not by seeing the plugin listed.
+
+To check the deployed artifact directly, drive it over stdio:
+
+```powershell
+# answers {"name":"ui-mcp","version":"0.1.0"} and advertises ui_open/ui_render/ui_status/ui_close
+& "$env:USERPROFILE\.claude\plugins\cache\local-marketplace\ui-mcp\0.1.0\bundle\UiMcp.exe"
 ```
 
 ## License
