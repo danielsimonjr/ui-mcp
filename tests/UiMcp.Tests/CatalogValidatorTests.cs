@@ -125,6 +125,42 @@ public class CatalogValidatorTests
         => Validate($$$"""{"type":"Field","props":{"label":"L","valuePath":"{{{path}}}"}}""")
             .Props["valuePath"].Should().Be(path);
 
+    // ---- $item scope: the validator must accept what the resolver implements --------------------
+    //
+    // FOUND BY RUNNING IT, 2026-08-15. The JS original has the SAME latent bug: catalog.js refuses
+    // "$" via its charset while render.js implements a "$item" scope prefix, so every $item path is
+    // rejected before the resolver ever sees it. AdminLTE/JSON-UI/view.json line 332 uses
+    // "valuePath": "$item", which means the HTML console refuses its own view tree. Two components
+    // agreed on a feature and disagreed on its syntax, and nothing tested the seam between them.
+    // Only "$item" is special. "$" is NOT added to the general charset.
+
+    [Theory]
+    [InlineData("$item")]
+    [InlineData("$item.drive")]
+    [InlineData("$item.disk[0].freeGb")]
+    public void PathProp_AcceptsItemScope(string path)
+        => Validate($$$"""{"type":"Field","props":{"label":"L","valuePath":"{{{path}}}"}}""")
+            .Props["valuePath"].Should().Be(path);
+
+    [Theory]
+    [InlineData("$other")]
+    [InlineData("$")]
+    [InlineData("a$b")]
+    [InlineData("$items.x")]
+    public void PathProp_StillRefusesAnyOtherDollarUse(string path)
+        => Validating($$$"""{"type":"Field","props":{"label":"L","valuePath":"{{{path}}}"}}""")
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters*");
+
+    [Fact]
+    public void PathProp_ItemScope_DoesNotBypassThePrototypeGuard()
+        => Validating("""{"type":"Field","props":{"label":"L","valuePath":"$item.__proto__"}}""")
+            .Should().Throw<UiValidationException>().WithMessage("*prototype access refused*");
+
+    [Fact]
+    public void TableColumns_AcceptItemScopedPaths()
+        => Validate("""{"type":"Table","props":{"fromPath":"rows","columns":[{"header":"D","valuePath":"$item.drive"}]}}""")
+            .Props.Should().ContainKey("columns");
+
     // ---- children -----------------------------------------------------------------------------
 
     [Fact]

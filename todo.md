@@ -92,7 +92,24 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       JSON, malformed data JSON, and a partially-invalid tree that must render NOTHING.
       Caveat carried forward: `UiSurface.Render` currently draws a labelled PLACEHOLDER, not the
       catalog visual tree. That is the next item and the placeholder says so in the window itself.
-- [ ] (2026-08-14) **Renderer** for the nine components; validated tree in, WPF visual tree out.
+- [x] (2026-08-15) **Renderer** for the nine components. **129 tests, 0 warnings.**
+      Split deliberately: every JUDGEMENT lives in `RenderRules` (Abstractions, no WPF, unit-tested
+      without a window) - unit suppression on a missing value, delta only when numeric, gauge
+      clamping, empty text, the 64/200 caps. `TreeRenderer` is assembly only, thin enough to check
+      by reading. Security posture carried over intact: element types come from the renderer only,
+      text reaches the UI through `TextBlock.Text` (inert - WPF parses no markup from it), colours
+      come from the closed tone enum, lookups go through the guarded resolver.
+      **PROVEN AGAINST LIVE DATA:** `examples/starship-view.json` rendered with real
+      `briefing.ps1 -Json` output over MCP - 19 nodes, window observed by an independent process.
+      **TWO REAL DEFECTS FOUND BY RUNNING IT, neither visible to any unit test:**
+      (1) `$item` scope paths were REFUSED by the validator while the resolver implemented them.
+          Each component was correct alone; nobody tested the seam. Fixed by accepting `$item` as a
+          literal prefix - NOT by adding `$` to the charset, which would have legalised every other
+          use of it. **The JS original still has this bug** (see the C:\ tracker entry).
+      (2) `ui_render` and `ui_status` reported DIFFERENT `treeHash` values for one render
+          (`7d4ef2048c4b` vs `febd32fc836e`) - the tool hashed raw JSON, the surface hashed
+          structure. Same name, two functions. Fixed by deleting the duplicate and reading the
+          value back from the surface, so they cannot disagree. Now verified equal live.
 - [ ] (2026-08-14) **Publish + wire:** `bundle/UiMcp.exe`, `.claude-plugin/plugin.json`,
       `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`, marketplace entry.
       **Confirm it SERVES TOOLS in a live session** — installed is not serving.

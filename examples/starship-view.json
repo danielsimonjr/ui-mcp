@@ -1,0 +1,68 @@
+{
+  "type": "Panel",
+  "props": { "title": "ZBOOK - STARSHIP CONSOLE", "tone": "info" },
+  "children": [
+    {
+      "type": "StatusBanner",
+      "props": { "label": "MACHINE NOMINAL", "tone": "nominal", "detail": "rendered from live briefing.ps1 -Json" }
+    },
+    {
+      "type": "Row",
+      "props": { "cols": 3 },
+      "children": [
+        { "type": "Metric", "props": { "label": "SESSIONS LIVE", "valuePath": "sections.roster.live", "tone": "nominal" } },
+        { "type": "Metric", "props": { "label": "TRACKER OPEN", "valuePath": "sections.tracker.open", "deltaPath": "sections.tracker.previousOpen", "tone": "attention" } },
+        { "type": "Metric", "props": { "label": "C: FREE", "valuePath": "sections.disk.drives[0].freeGB", "unit": "GB", "deltaPath": "sections.disk.drives[0].deltaGB", "tone": "info" } }
+      ]
+    },
+    {
+      "type": "Panel",
+      "props": { "title": "DISK", "tone": "info" },
+      "children": [
+        {
+          "type": "Table",
+          "props": {
+            "fromPath": "sections.disk.drives",
+            "emptyText": "no drives reported",
+            "columns": [
+              { "header": "DRIVE", "valuePath": "$item.drive" },
+              { "header": "FREE GB", "valuePath": "$item.freeGB" },
+              { "header": "DELTA", "valuePath": "$item.deltaGB" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "Panel",
+      "props": { "title": "ROSTER", "tone": "nominal" },
+      "children": [
+        {
+          "type": "Repeat",
+          "props": { "fromPath": "sections.roster.sessions", "emptyText": "no sessions live" },
+          "children": [
+            { "type": "Field", "props": { "label": "session", "valuePath": "$item.name", "tone": "nominal" } },
+            { "type": "Field", "props": { "label": "up hours", "valuePath": "$item.upHours", "tone": "muted" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Panel",
+      "props": { "title": "QUARANTINE", "tone": "degraded" },
+      "children": [
+        { "type": "Gauge", "props": { "label": "due soon of total", "valuePath": "sections.quarantine.soon", "maxPath": "sections.quarantine.total", "tone": "degraded" } },
+        { "type": "Field", "props": { "label": "due now", "valuePath": "sections.quarantine.due", "tone": "critical" } }
+      ]
+    },
+    {
+      "type": "Panel",
+      "props": { "title": "BLIND-SPOT PROOF", "tone": "critical" },
+      "children": [
+        { "type": "Field", "props": { "label": "deliberately unbound path", "valuePath": "sections.nope.notMeasured" } },
+        { "type": "Gauge", "props": { "label": "unmeasured gauge", "valuePath": "sections.nope.alsoMissing", "tone": "critical" } },
+        { "type": "Note", "props": { "text": "The two rows above bind to paths that do not exist. They MUST read UNKNOWN in salmon, never 0. A blind spot shown as a green zero reads as health - this panel exists so that regression is visible on screen rather than only in a test.", "tone": "muted" } }
+      ]
+    }
+  ]
+}

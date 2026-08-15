@@ -66,11 +66,16 @@ public sealed class UiTools
         // Only past this line does anything reach the UI.
         _surface.Render(validated, dataEl);
 
+        // Read the hash BACK from the surface rather than computing a second one here. The first
+        // version hashed the raw JSON string while the surface hashed the structure, so ui_render
+        // and ui_status reported different values under the same name - caught by running both in
+        // one session. Two functions for one fact is the drift defect; deleting one beats syncing
+        // them, because syncing re-arms it.
         return Json(new
         {
             ok = true,
             nodeCount = Count(validated),
-            treeHash = Hash(tree)
+            treeHash = _surface.Status.TreeHash ?? PathResolver.Unknown
         });
     }
 
@@ -105,11 +110,4 @@ public sealed class UiTools
     private static string Json(object o) => JsonSerializer.Serialize(o, Pretty);
 
     private static int Count(ValidatedNode n) => 1 + n.Children.Sum(Count);
-
-    /// <summary>
-    /// Identifies WHAT was rendered, so two agents drawing to one surface can tell whose tree is up.
-    /// Not a security boundary - the validator is. Short because it is for human comparison.
-    /// </summary>
-    private static string Hash(string tree) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(tree)))[..12].ToLowerInvariant();
 }

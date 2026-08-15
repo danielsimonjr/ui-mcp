@@ -50,19 +50,43 @@ public static class PropTypes
         _ => throw new UiValidationException("expected boolean")
     };
 
+    /// <summary>
+    /// The scope prefix the resolver implements. Handled as a literal prefix rather than by adding
+    /// '$' to the charset, so "$item.drive" is legal while "$other", "$" and "a$b" stay refused.
+    /// Widening the charset would have been one character of diff and would have legalised every
+    /// other use of '$' at the same time.
+    /// </summary>
+    private const string ItemScopePrefix = "$item";
+
     public static object Path(JsonElement v)
     {
         if (v.ValueKind != JsonValueKind.String) throw new UiValidationException("expected string path");
         var s = v.GetString()!;
 
-        // Prototype check FIRST. "__proto__" is legal under the charset rule, so checking the
-        // charset first would let a valid-looking prototype path through on a future regex edit.
-        // Ordering the stricter, security-bearing rule first makes that class of regression harder.
+        // Prototype check FIRST, and against the WHOLE string including any scope prefix. "__proto__"
+        // is legal under the charset rule, so checking the charset first would let a valid-looking
+        // prototype path through on a future regex edit. Ordering the security-bearing rule first
+        // makes that class of regression harder, and doing it before the prefix is stripped means
+        // "$item.__proto__" cannot smuggle one past.
         foreach (var bad in ForbiddenPathTokens)
             if (s.Contains(bad, StringComparison.Ordinal))
                 throw new UiValidationException("prototype access refused");
 
-        if (!LegalPath.IsMatch(s)) throw new UiValidationException("illegal characters in path");
+        // The validator must accept exactly what the resolver implements. It did not, and the
+        // mismatch was invisible to both unit suites because each component was correct on its own
+        // terms - the seam between them was what nobody tested. The JS original still carries this
+        // bug: AdminLTE/JSON-UI/view.json line 332 uses "$item", which its own catalog.js refuses.
+        var rest = s;
+        if (rest.StartsWith(ItemScopePrefix, StringComparison.Ordinal))
+        {
+            rest = rest[ItemScopePrefix.Length..];
+            if (rest.Length == 0) return s;          // bare "$item" is the item itself
+            if (rest[0] != '.') throw new UiValidationException("illegal characters in path");
+            rest = rest[1..];
+            if (rest.Length == 0) throw new UiValidationException("illegal characters in path");
+        }
+
+        if (!LegalPath.IsMatch(rest)) throw new UiValidationException("illegal characters in path");
         return s;
     }
 

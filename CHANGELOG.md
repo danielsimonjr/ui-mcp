@@ -8,6 +8,44 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **The renderer** — `RenderRules` (Abstractions) + `TreeRenderer` (WPF), all nine components.
+  **129 tests, 0 warnings.** Rendered live: `examples/starship-view.json` bound to real
+  `briefing.ps1 -Json` output, 19 nodes, window confirmed by an independent process.
+  - **Judgement and drawing are separated on purpose.** Unit suppression on a missing value, delta
+    only when numeric, gauge clamping, empty text, the 64/200 caps — all in `RenderRules`, testable
+    with no window. `TreeRenderer` is assembly only, thin enough to verify by reading.
+  - `MetricText` omits the unit when the value is missing: *"UNKNOWN live"* implies a measured
+    quantity in some unit when there is no quantity at all.
+  - `DeltaText` returns **null** for a missing or non-numeric delta rather than `0` — "unchanged"
+    and "not measured" are different claims.
+  - A missing gauge reads 0% because a bar must have some length, so the **label** carries UNKNOWN.
+    A zero-length bar with no UNKNOWN beside it is the green-zero failure again.
+  - Security posture carried over intact: element types come from the renderer only, text reaches
+    the UI via `TextBlock.Text` (inert — WPF parses no markup from it, the structural equivalent of
+    "textContent, never innerHTML"), colours come from the closed tone enum, lookups go through the
+    guarded resolver.
+
+### Fixed
+
+- **`$item` scope paths were refused by the validator while the resolver implemented them.**
+  `PropTypes.Path`'s charset excluded `$`; `PathResolver` documented and implemented a `$item`
+  prefix. Each component was correct in isolation and no unit test covered the seam between them —
+  it surfaced only on the first real end-to-end render. Fixed by accepting `$item` as a **literal
+  prefix**, not by adding `$` to the charset, which would have legalised every other use of it in
+  one character of diff. `$other`, `$`, `a$b` and `$items.x` stay refused, and `$item.__proto__`
+  still hits the prototype guard because that check runs against the whole string first.
+  **The JS original carries the identical bug:** `AdminLTE/JSON-UI/catalog.js` refuses `$` while
+  `render.js` implements `$item`, and `view.json:332` uses `"valuePath": "$item"` — so the HTML
+  console refuses its own view tree. Tracked separately; not fixed here.
+
+- **`ui_render` and `ui_status` reported different `treeHash` values for the same render**
+  (`7d4ef2048c4b` vs `febd32fc836e`): the tool hashed the raw JSON text, the surface hashed the
+  structure. One field name, two functions, two answers — the second-source-of-truth defect.
+  `ui_render` now reads the hash **back from the surface**, so they cannot disagree. Deleting the
+  duplicate rather than syncing it, because syncing re-arms the drift. Verified equal live.
+
+### Added
+
 - **The four MCP tools** — `ui_open`, `ui_render`, `ui_status`, `ui_close` — plus `IUiSurface` and
   the WPF `UiSurface`. **98 tests, all passing, 0 warnings on a full rebuild.**
   - **`ui_render` validates the WHOLE tree before anything touches the window.** A partially

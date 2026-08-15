@@ -34,7 +34,13 @@ public class UiToolsTests
         { OpenCalls++; LastTitle = title; }
 
         public void Render(ValidatedNode tree, JsonElement data)
-        { RenderCalls++; LastTree = tree; }
+        {
+            RenderCalls++;
+            LastTree = tree;
+            // A real surface records the hash of what it drew. Modelling that here is what lets the
+            // one-source-of-truth test below mean something.
+            Status = Status with { TreeHash = "surface-computed-hash", NodeCount = 1 };
+        }
 
         public void Close() => CloseCalls++;
     }
@@ -114,6 +120,27 @@ public class UiToolsTests
 
         tools.Render(ValidTree, "{ not json either").Should().Contain("rejected");
         spy.RenderCalls.Should().Be(0);
+    }
+
+    /// <summary>
+    /// ONE SOURCE OF TRUTH FOR THE TREE HASH. Found by running both tools in one live session:
+    /// ui_render reported 7d4ef2048c4b while ui_status reported febd32fc836e for the same render,
+    /// because the tool hashed the raw JSON text and the surface hashed the structure. Same field
+    /// name, two functions, two answers. ui_render now reads the value BACK from the surface, so
+    /// they cannot disagree - deleting the duplicate rather than syncing it, because syncing
+    /// re-arms the drift.
+    /// </summary>
+    [Fact]
+    public void RenderAndStatus_ReportTheSameTreeHash()
+    {
+        var spy = new SpySurface();
+        var tools = new UiTools(spy);
+
+        var rendered = tools.Render(ValidTree);
+        var status = tools.Status();
+
+        rendered.Should().Contain("surface-computed-hash");
+        status.Should().Contain("surface-computed-hash");
     }
 
     // ---- ui_status: UNKNOWN, never a fabricated zero --------------------------------------------

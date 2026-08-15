@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using UiMcp.Abstractions;
+using UiMcp.Rendering;
 
 namespace UiMcp.Hosting;
 
@@ -104,17 +105,14 @@ public sealed class UiSurface : IUiSurface, IDisposable
         {
             if (_content is null) return;
 
-            // PLACEHOLDER RENDER - deliberately labelled as such rather than dressed up.
-            // The catalog-driven visual tree is the NEXT task; this draws enough to prove the
-            // marshal and the window lifecycle end to end. It is not the renderer, and calling it
-            // one in a comment would be the sort of quiet overclaim this project keeps auditing out.
-            _content.Content = new TextBlock
+            // Scrollable: a dashboard outgrows the window, and content silently clipped off the
+            // bottom is a blind spot wearing a layout.
+            _content.Content = new ScrollViewer
             {
-                Text = $"{tree.Type} tree accepted\n{CountNodes(tree)} nodes\nrenderer pending",
-                Foreground = new SolidColorBrush(Color.FromRgb(0xff, 0x99, 0x00)),
-                FontFamily = new FontFamily("Consolas"),
-                FontSize = 16,
-                Margin = new Thickness(24)
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                Padding = new Thickness(18),
+                Content = TreeRenderer.Render(tree, data)
             };
         }).GetAwaiter().GetResult();
 
