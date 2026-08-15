@@ -49,8 +49,19 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       (`__proto__` is charset-legal, so a future regex edit could otherwise let it through), and
       `ValidatedNode` is a distinct type from raw JSON so "was this validated?" is a compiler
       question, not a call-site reading exercise.
-- [ ] (2026-08-14) **Path resolver, TDD.** Port from `render.js`: nested objects, array indices,
-      `$item` scope, prototype-access refusal. Missing path returns **null**, never 0 or "".
+- [x] (2026-08-15) **Path resolver, TDD.** Ported from `render.js`. Nested keys, array indices,
+      consecutive indices (`grid[1][0]`), `$item` scope, prototype refusal. **74 tests total, all
+      passing.** Never throws - one bad binding degrades to UNKNOWN in place rather than taking the
+      render down.
+      **The missing-vs-zero invariant is tested as a PAIR**, because each half alone is worthless:
+      a real `0` must display as `"0"`, and a missing value must never display as `"0"`.
+      **Mutation-proven:** making a blind spot render as `"0"` failed exactly 2 tests, then restored
+      byte-identical (SHA256). I predicted 3 and got 2 — the third (`JsonNull_DisplaysAsUnknown`)
+      resolves to a real `JsonElement` of kind `Null` and takes a different switch arm than the
+      `v is null` branch I mutated, so 2 is correct. The count corroborated the reading of the code.
+      Extra over the JS: the prototype guard is repeated in the resolver even though the catalog
+      already refuses those paths - the resolver is reachable from the renderer's own bindings, and
+      a guard present at only one of two entry points is a door left open.
 - [ ] (2026-08-15) **Re-check the desktop assumption IF the host ever moves to an S4U trigger.**
       Not currently reachable - every task that starts `claude.exe` is `InteractiveToken` today.
       `tools/probe-desktop.ps1` answers it in one run. See SPEC 10.1.

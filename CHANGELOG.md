@@ -8,6 +8,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Path resolver and display formatter** (`UiMcp.Abstractions.PathResolver`), ported from
+  `AdminLTE/JSON-UI/render.js`. Nested keys, array indices, consecutive indices (`grid[1][0]`),
+  `$item` scope, prototype refusal. **74 tests total, all passing, 0 warnings.**
+  - **An unresolvable path returns missing and formats as `UNKNOWN` — never `0`, never `""`.**
+    SPEC section 6 names this the most expensive recurring failure on this machine: a section that
+    could not be measured, shown as a green zero, reads as health. The tests assert it as a **pair**
+    (a real `0` displays as `"0"`; a missing value never displays as `"0"`) because either half
+    alone is satisfiable by a broken implementation.
+  - **Mutation-proven.** Making a blind spot render as `"0"` failed exactly 2 tests; the file was
+    then restored byte-identical (SHA256). The prediction was 3 — the third case resolves to a real
+    `JsonElement` of kind `Null` and takes a different branch than the mutated one, so 2 is the
+    correct number and the count corroborated the reading of the code rather than contradicting it.
+  - **Never throws.** A missing value is a display problem, not a crash; one bad binding in a
+    sixty-node tree degrades to `UNKNOWN` in place instead of taking the console down.
+  - JSON `null` also formats as `UNKNOWN`: a key present but null carries no more information than
+    an absent key, and treating them differently puts a confident-looking blank on a status board.
+  - Numbers format with `"R"` under `InvariantCulture` — a comma decimal separator on a
+    differently-configured machine would silently change every number on the display.
+  - The prototype guard is repeated here even though the catalog already refuses such paths: the
+    resolver is reachable from the renderer's own bindings, and a guard present at only one of two
+    entry points is a door left open.
+
 - **Catalog and validator** (`UiMcp.Abstractions`): all nine components ported from
   `AdminLTE/JSON-UI/catalog.js` — `StatusBanner` · `Panel` · `Row` · `Metric` · `Field` · `Gauge` ·
   `Repeat` · `Table` · `Note`. Enforces the SPEC section 6 invariants: unknown component and unknown
