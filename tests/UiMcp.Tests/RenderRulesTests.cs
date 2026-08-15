@@ -122,4 +122,35 @@ public class RenderRulesTests
     [Fact]
     public void IsUnknown_FalseForARealZero_PositiveControl()
         => RenderRules.IsUnknown(V("0")).Should().BeFalse("zero is a measurement, not a blind spot");
+
+    // ---- Gauge: a REQUESTED max that did not resolve is not a max of 100 -------------------------
+    //
+    // The JS original is explicit about this (render.js):
+    //     const max = p.maxPath ? resolve(data, p.maxPath, scope) : 100;
+    //     if (typeof v === 'number' && typeof max === 'number' && max > 0) { ... }
+    // An unresolvable maxPath yields undefined, fails the typeof test, and the bar stays at 0.
+    //
+    // "No maxPath supplied" and "a maxPath was supplied and could not be resolved" are different
+    // claims that both arrive here as a null max. Collapsing them defaults the second to 100 and
+    // draws a CONFIDENT bar against a scale nobody supplied - a value of 50 against an unreadable
+    // maximum shows as half full. That is the green-zero failure wearing a progress bar, and it is
+    // the exact class of defect this codebase exists to prevent.
+
+    [Fact]
+    public void GaugePercent_IsZero_WhenAMaxWasRequestedButDidNotResolve()
+        => RenderRules.GaugePercent(V("50"), null, maxWasRequested: true).Should().Be(0,
+            "an unreadable maximum is not a maximum of 100");
+
+    [Fact]
+    public void GaugePercent_IsZero_WhenARequestedMaxResolvedToSomethingNonNumeric()
+        => RenderRules.GaugePercent(V("50"), V("\"lots\""), maxWasRequested: true).Should().Be(0);
+
+    [Fact]
+    public void GaugePercent_UsesTheMax_WhenARequestedMaxDidResolve()
+        => RenderRules.GaugePercent(V("50"), V("200"), maxWasRequested: true).Should().Be(25);
+
+    [Fact]
+    public void GaugePercent_StillDefaultsTo100_WhenNoMaxWasRequested()
+        // The regression guard for the fix: the existing two-argument behaviour is unchanged.
+        => RenderRules.GaugePercent(V("42"), null).Should().Be(42);
 }

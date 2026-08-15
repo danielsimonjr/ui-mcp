@@ -173,26 +173,43 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       Also corrected a stale README banner that still read *"specification only, no
       implementation yet"* on a released, installed v0.1.1.
 
-## 🟢 READY — found by writing the docs
+## Done 2026-08-15 (v0.1.2) — the gaps the docs surfaced, closed
 
-- [ ] 🟢 **`TreeRenderer` has no unit tests — 248 lines, the largest source file.** The design
-      pushed all judgement into `RenderRules` (well tested) leaving the renderer "thin enough to
-      check by reading"; at 248 lines it is not. Unverified automatically: the nine-way switch,
-      the `Repeat` 64 / `Table` 200 truncation caps (the constants are tested, nothing asserts
-      the renderer applies them), `$item` scope propagation, per-row column resolution, the
-      tone→brush map. **Both defects ever found by running this system lived in exactly this
-      gap** — the `$item` validator/resolver seam and the double `treeHash`. Start with the
-      caps and `$item` scoping.
-- [ ] **A seam test walking every catalog component through validate → render.** The `$item`
-      bug was two components each correct alone with nobody testing the join.
+- [x] **`TreeRenderer` tested — 26 Fact + 3 Theory.** Pins what reading cannot settle: the
+      nine-way switch, the 64/200 caps **applied** (not just declared), `$item` scope reaching a
+      `Repeat`'s children and a `Table`'s cells, the tone→brush map, and that a missing value is
+      *visually* distinct. **Two real defects found by writing them**, both confirmed against
+      `AdminLTE/JSON-UI/render.js` (the stated source of truth):
+      (1) a `Gauge` whose `maxPath` did not resolve drew its bar against a **default max of 100**,
+          so 50 against an unreadable maximum showed **half full** — a confident measurement
+          against a scale nobody supplied. Root cause: "no max asked for" and "max asked for and
+          unresolvable" both arrived at `GaugePercent` as `null`, and only the caller could tell
+          them apart. Now takes `maxWasRequested` (defaulted `false`, so every existing call is
+          unchanged).
+      (2) a tone **outside** the closed set rendered as Amber — the *attention* colour —
+          contradicting `Tone()`'s own summary and the JS. It manufactures alarm out of a value
+          the renderer failed to understand. Absent tone and unknown tone are now distinct cases,
+          and the absent case is pinned separately so the fix cannot be over-applied.
+- [x] **Seam test — `CatalogRendererSeamTests`**, exhaustive over the catalog rather than sampled.
+      `EveryCatalogComponentIsCovered` fails if a tenth component is added without a case, so the
+      suite cannot quietly stop being comprehensive.
+- [x] **`ComponentSpec` and `PropRule` are `internal`.** All 15 occurrences were in
+      `CatalogValidator.cs`. `unusedExportsCount` 2 → 0; 0 warnings, 0 errors.
+- [x] **`UiSurface` tested — 12 Fact**, split into a no-window group that runs anywhere and
+      `UiSurfaceWindowTests` that briefly shows real windows (~5.6 s of the ~7 s run). The split
+      is deliberate: logic failures and environment failures must be distinguishable.
+- [x] **`bundle/*.pdb` now gitignored.** `!bundle/` un-ignored the whole directory, so publish's
+      symbol files sat untracked-but-unignored — invisible until a `git add -A` committed them.
+
+**132 → 217 tests.** Every new guard mutation-proven, each mutation reverted to a SHA-256-identical
+file. One mutation deliberately **survived** and is recorded in TEST_COVERAGE.md: dropping the type
+name from `Describe` broke nothing because the compared trees still differ by child count — a weak
+*mutation*, not a weak test. Telling those two apart is the whole discipline.
+
+## 🟢 READY
+
 - [ ] **Add `dotnet test` to CI.** The workflow builds and gates bundle freshness plus an MCP
-      `initialize` handshake, but never runs the 132 tests — so they are a local habit, not a
-      gate.
-- [ ] **Make `ComponentSpec` and `PropRule` `internal`.** Both are `public` while every use is
-      inside `CatalogValidator.cs` (confirmed by grep). Narrows the public surface of
-      `UiMcp.Abstractions` at no cost to any caller. Surfaced by `unused-analysis.md`.
-- [ ] `UiSurface` has no unit tests (124 lines) — needs an STA-gated fixture. Lowest priority:
-      `UiThreadHost` underneath it is thoroughly tested, so the gap is WPF-object handling, not
-      the threading model.
+      `initialize` handshake, but never runs the 217 tests — so they are a local habit, not a
+      gate. Deliberately left out of the v0.1.2 sweep at the owner's direction.
 
 ## Blocked

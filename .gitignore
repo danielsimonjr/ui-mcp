@@ -16,3 +16,9 @@ node_modules/
 
 # The published server is committed - the plugin is served from this path, not built on the fly.
 !bundle/
+
+# ...but ONLY the executable. `dotnet publish` also drops .pdb symbol files into bundle/, and
+# because `!bundle/` un-ignores the whole directory they were untracked-but-unignored: invisible
+# until someone runs `git add -A`, at which point two build artifacts land in the repo and stay.
+# Excluding them here is structural; remembering not to stage them is not.
+bundle/*.pdb

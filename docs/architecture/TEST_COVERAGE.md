@@ -1,120 +1,119 @@
 # ui-mcp — Test Coverage
 
-**132 tests, 0 failures, 0 skipped** (`dotnet test`, 267 ms). 5 test files, 984 lines —
-41% of the repository's source lines are tests.
+**217 tests, 0 failures, 0 skipped** (`dotnet test`, ~6 s). 9 test files, 1,840 lines — 56% of
+the repository's source lines are tests.
 
-No line-coverage instrumentation is configured, so this file reports coverage **by component
-and by behaviour**, which is the honest thing to report. It does not report a percentage,
-because none was measured.
+No line-coverage instrumentation is configured, so this file reports coverage **by component and
+by behaviour**, which is the honest thing to report. It does not report a percentage, because
+none was measured.
 
 ## By component
 
 | Component | LOC | Test file | Tests | Assessment |
 |---|---|---|---|---|
-| `CatalogValidator` + `PropTypes` | 259 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
+| `CatalogValidator` + `PropTypes` | 266 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
 | `PathResolver` | 110 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
-| `RenderRules` | 71 | `RenderRulesTests.cs` | 21 Fact | Thorough |
+| `RenderRules` | 90 | `RenderRulesTests.cs` | 25 Fact | Thorough |
 | `UiThreadHost` | 130 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
 | `UiTools` | 140 | `UiToolsTests.cs` | 15 Fact | Thorough |
-| **`TreeRenderer`** | **248** | **none** | **0** | ⚠ **gap — see below** |
-| **`UiSurface`** | **124** | **none** | **0** | ⚠ **gap — see below** |
-| `Program` | 46 | none | 0 | Composition root; exercised by every e2e run |
+| `TreeRenderer` | 268 | `TreeRendererTests.cs` | 26 Fact + 3 Theory | Thorough |
+| `UiSurface` | 124 | `UiSurfaceTests.cs` | 12 Fact | Good; window paths need a desktop |
+| *validator ↔ renderer seam* | — | `CatalogRendererSeamTests.cs` | 3 Fact + 3 Theory | Exhaustive over the catalog |
+| `Program` | 46 | none | 0 | Composition root; exercised by every end-to-end run |
+
+`StaFixture.cs` (26 lines) is shared infrastructure, not a test: one STA thread, built from the
+same `UiThreadHost` production uses.
 
 ## What is tested well
 
 **Every rejection path is paired with a positive control**, and boundaries are tested on both
-sides — 500/501 characters, 64/65 children, depth 11/13, 8/9 table columns. A rejection test
-that never proves the accepting case still works is only half a test.
+sides — 500/501 characters, 64/65 children, depth 11/13, 8/9 table columns. A rejection test that
+never proves the accepting case still works is only half a test.
 
-**The missing-vs-zero invariant is tested as a pair**, because each half alone is worthless: a
-real `0` must display as `"0"`, *and* a missing value must never display as `"0"`.
+**The missing-vs-zero invariant is tested as a pair** at every layer it appears: a real `0` must
+display as `"0"`, a missing value must never display as `"0"`, and a surface that has never
+rendered must report `null` — not `0` — for its node count.
 
-**The most important test needs no desktop.** `UiToolsTests` uses a `SpySurface` implementing
-`IUiSurface` to assert the negative — that `Render` was *never called* when a tree is invalid.
-No screenshot can prove that. Covered: unknown component, unknown prop, malformed tree JSON,
-malformed data JSON, and a partially-invalid tree that must render **nothing**.
+**The most important tool test needs no desktop.** `UiToolsTests` uses a `SpySurface` to assert
+the negative — that `Render` was *never called* when a tree is invalid. No screenshot can prove
+that.
 
-**The suites have been mutation-proven, not merely observed passing.** A green suite that has
-never been shown to fail is not evidence. Three deliberate mutations, each reverted
-byte-identical (SHA-256 verified):
+**The renderer's truncation caps are asserted as APPLIED, not merely declared.** `RenderRules`
+tests the constants; `TreeRendererTests` supplies 70 `Repeat` items and 250 `Table` rows and
+counts what actually came out. Those are different claims, and only the second can regress
+silently.
+
+**The validator↔renderer seam is covered exhaustively over the catalog**, not sampled.
+`EveryCatalogComponentIsCovered` fails if a tenth component is ever added without a seam case —
+without it, a "comprehensive" suite quietly stops being one.
+
+### Everything here has been mutation-proven
+
+A green suite that has never been shown to fail is not evidence. Every mutation below was
+reverted and the file verified **byte-identical by SHA-256**.
 
 | Mutation | Result |
 |---|---|
-| `ForbiddenPathTokens` emptied | exactly 5 failures — 4 prototype-path cases plus the nested table-column case |
+| `ForbiddenPathTokens` emptied | exactly 5 failures — 4 prototype-path cases + the nested table-column case |
 | Blind spot made to render `"0"` | exactly 2 failures |
 | `e.Handled = false` in the supervisor | **the test host process crashed mid-run** |
+| Gauge `maxWasRequested` reverted to `false` | exactly 1 — `AGaugeWhoseRequestedMaxDidNotResolveShowsAnEmptyBar` |
+| Unknown tone reverted to Amber | exactly 1 — `AToneOutsideTheClosedSetIsMutedRatherThanAlarming` |
+| `Repeat`'s `.Take(MaxRepeatItems)` removed | exactly 1 — `RepeatRendersAtMost64Items` |
+| `Repeat` stops passing the item as scope | 2 — the targeted renderer test **and** the seam test, from different angles |
+| `NodeCount` defaulted to `0` instead of `null` | exactly 1 — `ASurfaceThatHasNeverRenderedReportsNulls_NotZeros` |
+| `Describe` returns a constant | exactly 1 — `ADifferentTreeStructureHashesDifferently` |
 
-The second is worth keeping for the reasoning, not the number: 3 failures were predicted and 2
-occurred. The third case (`JsonNull_DisplaysAsUnknown`) resolves to a real `JsonElement` of kind
-`Null` and takes a different switch arm from the `v is null` branch that was mutated — so 2 was
-correct, and the count *corroborated* the reading of the code rather than contradicting it.
+One mutation is worth recording because it **survived**: dropping the type name from `Describe`
+(`n.Type + "("` → `"" + "("`) broke nothing, because the two trees compared still differ by child
+count. That is a weak *mutation*, not a weak test — the property under assertion was never
+broken by it. Replacing it with a constant `Describe` killed the test immediately. Distinguishing
+those two cases is the whole discipline; "the mutation survived" is not automatically a finding.
 
-**The supervisor test nearly passed for the wrong reason.** The first two fault tests passed on
-a framework guarantee — `Dispatcher.InvokeAsync` captures exceptions into the returned `Task`,
-so awaited work was never going to kill anything. `Post()` was added to model the case the spec
-actually means: a window event handler throwing with nobody awaiting it.
+## Two defects were found by writing these tests
 
-## The gaps that matter
+Both were confirmed against `AdminLTE/JSON-UI/render.js`, which every ported file names as the
+source of truth: *"where the two disagree, the JS is right."*
 
-### 1. `TreeRenderer` has no unit tests — 248 lines, the largest source file
+1. **A `Gauge` whose `maxPath` did not resolve drew a bar against a default maximum of 100.** A
+   value of 50 against an unreadable maximum showed as **half full** — a confident measurement
+   against a scale nobody supplied. The JS returns 0 for this case. Root cause: "no max
+   requested" and "a max was requested and could not be resolved" both arrived at
+   `GaugePercent` as a `null`, and only the caller could tell them apart.
 
-The design intent was that all *judgement* lives in `RenderRules` (thoroughly tested with no
-WPF), leaving `TreeRenderer` "thin enough to check by reading". At 248 lines across nine
-component builders, it is no longer thin.
+2. **A tone outside the closed set rendered as Amber — the *attention* colour.** It
+   contradicted the method's own summary ("a tone the renderer does not know is muted") and the
+   JS (`TONE_CLASS[t] || 'stx-muted'`), and it manufactures urgency out of a value the renderer
+   simply failed to understand. Unreachable from a validated tree, but `Render` is public — and
+   an unreachable branch that behaves wrongly is a trap for whoever makes it reachable.
 
-What is consequently unverified by any automated test:
+Both are fixed, and each fix is pinned by a mutation-proven test. Note that the *absent* tone
+case is pinned separately, so the muted fix cannot later be over-applied and repaint every
+untoned panel grey.
 
-- The `switch` dispatches each of the nine component names to the right builder.
-- `Repeat` truncates at 64 and `Table` at 200 — `RenderRules.MaxRepeatItems`/`MaxTableRows`
-  are tested as *constants*, but nothing asserts the renderer applies them.
-- `Repeat` passes the correct `$item` scope to each child.
-- `Table` resolves each column path against the row rather than the root.
-- The `tone` → brush mapping, and that unresolved values get the distinct `UNKNOWN` brush.
-- `Row` distributes children across `cols` columns.
+## The gaps that remain
 
-**What does cover it:** manual end-to-end renders, most substantially
-`examples/starship-view.json` driven with real `briefing.ps1 -Json` output — 19 nodes, window
-observed by an independent process. That is real evidence, but it is a *manual* run, it is not
-in CI, and it asserts nothing automatically.
+### 1. `dotnet test` does not run in CI
 
-This gap is also where the two defects found by running the system lived — neither was visible
-to any unit test:
+`.github/workflows/ci.yml` builds on `windows-latest` and gates bundle freshness plus an MCP
+`initialize` handshake against the shipped artifact, but never runs the 217 tests. They are a
+local habit, not a gate. Recorded in `todo.md`.
 
-1. **`$item` paths were refused by the validator while the resolver implemented them.** Each
-   component was correct in isolation; nobody tested the seam.
-2. **`ui_render` and `ui_status` reported different `treeHash` values** for one render — the
-   tool hashed raw JSON, the surface hashed structure.
+### 2. The window-showing tests need an interactive desktop
 
-Both are now fixed and pinned, but the lesson stands: **the seams between correct components
-are where the untested defects were**, and `TreeRenderer` is the largest remaining untested
-seam.
+`UiSurfaceWindowTests` briefly opens and closes real windows, and accounts for ~5.6 s of the ~6 s
+run. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
+informative** failure, not something to paper over with a skip. See SPEC 10.1: the desktop
+assumption is retired for the interactive path and explicitly *not* for S4U.
 
-### 2. `UiSurface` has no unit tests — 124 lines
+The split between `UiSurfaceTests` (no window, runs anywhere) and `UiSurfaceWindowTests` is
+deliberate: the two groups fail for different reasons — logic versus environment — and a suite
+that cannot tell those apart teaches you to ignore it.
 
-Needs a real window and an STA pump, so it is genuinely harder. Unverified automatically:
-`Open` idempotency (focus rather than a second window), the `Window.Closed` handler clearing
-the references, `Render`'s auto-open, the `ScrollViewer` wrapping, and `Status` reading live
-window state rather than a cached flag.
+### 3. `Program.cs` has no direct test
 
-`UiThreadHost` — the hard concurrency part underneath it — **is** thoroughly tested, including
-50 concurrent marshals without deadlock. So the gap is the WPF-object handling on top, not the
-threading model.
-
-### 3. No CI runs the tests
-
-`.github/workflows/ci.yml` builds on `windows-latest` and gates the bundle's freshness plus an
-MCP `initialize` handshake against the shipped artifact. Adding `dotnet test` to it would make
-the 132 tests a gate rather than a local habit.
-
-## Recommended next tests, in priority order
-
-1. **`TreeRendererTests`** for the truncation caps and `$item` scoping — the two behaviours
-   with real data-dependent limits and the ones a reader cannot verify by inspection.
-2. **A seam test** that walks every catalog component through validate → render, which is the
-   class of defect that has actually occurred here twice.
-3. **`dotnet test` in CI.**
-4. `UiSurface` tests behind an STA-gated fixture, lowest priority — `UiThreadHost` already
-   covers the part most likely to break.
+46 lines of composition root. Covered transitively by every end-to-end run of the shipped
+binary, which is the only place its wiring is observable at all.
 
 ## Verification
 
@@ -123,15 +122,13 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 17 | dependency-graph.json |
-| totalLinesOfCode | 2376 | dependency-graph.json |
+| totalSourceFiles | 21 | dependency-graph.json |
+| totalLinesOfCode | 3279 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the **132 tests / 0 failures / 267 ms** figure is `dotnet test`
-output. Per-file `[Fact]`/`[Theory]` counts were obtained by counting those attributes in each
-test file — note 99 `Fact` + 8 `Theory` attributes expand to 132 executed cases, because a
-`Theory` runs once per `InlineData`. The **absence** of `TreeRenderer` and `UiSurface` tests was
-verified by two methods: no `TreeRendererTests.cs`/`UiSurfaceTests.cs` exists, and a grep for
-`TreeRenderer|UiSurface` across `tests/` returns exactly one hit — `SpySurface : IUiSurface`,
-which is a stand-in for the surface, not a test of it. The mutation-testing results are recorded
-in the repository `todo.md` from the sessions that performed them.
+**Claims the gate cannot hold:** the **217 tests / 0 failures / ~6 s** figure is `dotnet test`
+output. Per-file `Fact`/`Theory` counts were obtained by counting those attributes in each test
+file — note that attribute counts and executed-test counts differ, because a `Theory` runs once
+per `InlineData`/`MemberData` row. The 1,840 test lines and the per-component LOC come from
+`file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
+applying that mutation, running the suite, and restoring the file to a verified identical hash.

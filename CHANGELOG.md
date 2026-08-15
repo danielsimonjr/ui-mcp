@@ -4,6 +4,65 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-08-15
+
+### Fixed
+
+- **A `Gauge` whose `maxPath` did not resolve drew a bar against a default maximum of 100.** A
+  value of 50 against an unreadable maximum showed as **half full** — a confident measurement
+  against a scale nobody supplied, which is the green-zero failure wearing a progress bar and
+  precisely the class of defect this server exists to prevent.
+  - Root cause: *"no maximum was asked for"* (default 100, correct) and *"a maximum **was** asked
+    for and could not be resolved"* (there is no scale, and nothing honest to draw) both arrived at
+    `RenderRules.GaugePercent` as a `null` max, and only the caller could tell them apart. It now
+    takes `maxWasRequested`, defaulted to `false` so every existing two-argument call is unchanged.
+  - Confirmed against `AdminLTE/JSON-UI/render.js`, which every ported file names as the source of
+    truth: an unresolvable `maxPath` there yields `undefined`, fails the
+    `typeof max === 'number'` test, and the bar stays at 0.
+
+- **A tone outside the closed set rendered as Amber — the *attention* colour.** It contradicted
+  `Tone()`'s own summary (*"a tone the renderer does not know is muted"*) and the JS
+  (`TONE_CLASS[t] || 'stx-muted'`), and it manufactures urgency out of a value the renderer had
+  simply failed to understand. The two fallthrough cases are now distinct: **no tone supplied**
+  keeps the default accent, a tone **outside the set** is muted. Unreachable from a validated tree
+  — the catalog's `tone` is a closed enum — but `Render` is public and `ValidatedNode` is
+  constructible in-process, so it is reachable, and an unreachable branch that behaves wrongly is
+  a trap for whoever makes it reachable.
+
+### Changed
+
+- **`ComponentSpec` and `PropRule` are now `internal`.** Both describe how the catalog is *built*,
+  and all 15 occurrences of either are inside `CatalogValidator.cs`; a consumer handed a
+  `ComponentSpec` could do nothing with it, because `Validate()` is the only entry point and takes
+  JSON. Surfaced by `unused-analysis.md`, which classified both as "referenced only within their
+  own file" — correctly, and that is what a needlessly public type looks like from outside.
+
+### Added
+
+- **`TreeRendererTests` — 26 Fact + 3 Theory over the previously untested renderer** (268 lines,
+  the largest source file). Pins specifically what reading cannot settle: that the nine-way switch
+  reaches the right builder, that the 64/200 truncation caps are **applied** rather than merely
+  declared as constants, that `$item` scope actually reaches a `Repeat`'s children and a `Table`'s
+  cells, and that a missing value is *visually* distinct and not only textually.
+- **`CatalogRendererSeamTests` — the validator↔renderer seam**, exhaustive over the catalog rather
+  than sampled. Both defects ever found by running this system lived in a seam, and a suite
+  organised per component tests each side of every seam and none of the seams themselves.
+  `EveryCatalogComponentIsCovered` fails if a tenth component is added without a case, so the
+  suite cannot quietly stop being comprehensive.
+- **`UiSurfaceTests` — 12 Fact over the previously untested WPF surface**, split into a group
+  needing no window (runs anywhere) and `UiSurfaceWindowTests` which briefly shows real ones. The
+  two fail for different reasons — logic versus environment — and a suite that cannot tell those
+  apart teaches you to ignore it.
+- **`StaFixture`** — a shared STA thread built from the same `UiThreadHost` production uses, not a
+  bespoke test thread. WPF objects have thread affinity, so every query runs *inside* the STA call
+  and returns plain values; the first version of the renderer suite ignored that and failed all 34
+  tests for one reason that looked like 34.
+
+**132 → 217 tests.** Every new guard is mutation-proven, each mutation reverted to a
+SHA-256-identical file: reverting the gauge fix, the tone fix, the `Repeat` cap, `$item` scope
+propagation, `NodeCount`'s null, and the structural hash each killed exactly the intended test —
+and `$item` scope killed two, from different angles.
+
 ## [Unreleased]
 
 ### Added

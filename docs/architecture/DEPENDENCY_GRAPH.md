@@ -41,7 +41,7 @@ architectural boundary, enforced by its `net9.0` target framework.
 | `Microsoft.Extensions.Hosting` | `Program.cs` | Generic host |
 | `Microsoft.Extensions.DependencyInjection` | `Program.cs` | `AddSingleton<IUiSurface, UiSurface>` |
 | `Microsoft.Extensions.Logging` | `Program.cs` | Logging, pinned to stderr |
-| `FluentAssertions` | all 5 test files | Assertions |
+| `FluentAssertions` | all 8 test classes | Assertions |
 
 Only **one** external package reaches beyond the composition root: `ModelContextProtocol.Server`,
 in `UiTools.cs`, for the tool attributes. Nothing in `UiMcp.Abstractions` has any external
@@ -96,6 +96,10 @@ invisible to the graph, so this project's internal structure must be read from
 | `RenderRulesTests.cs` | 6 × Abstractions |
 | `UiThreadHostTests.cs` | `IUiSurface.cs`, `UiSurface.cs`, `UiThreadHost.cs` |
 | `UiToolsTests.cs` | 6 × Abstractions + 3 × Hosting + `UiTools.cs` |
+| `TreeRendererTests.cs` | 6 × Abstractions + `TreeRenderer.cs` + `StaFixture.cs` |
+| `CatalogRendererSeamTests.cs` | 6 × Abstractions + `TreeRenderer.cs` + `StaFixture.cs` |
+| `UiSurfaceTests.cs` | 6 × Abstractions + 3 × Hosting |
+| `StaFixture.cs` | `UiThreadHost.cs` (shared infrastructure, not a test) |
 
 ## Entry point and reachability
 
@@ -144,7 +148,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 17 | dependency-graph.json |
+| totalSourceFiles | 21 | dependency-graph.json |
 | totalModules | 2 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | reachableFiles | 11 | dependency-graph.json |

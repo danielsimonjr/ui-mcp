@@ -32,9 +32,9 @@ Three projects. The split is a compiler-enforced boundary, not a convention.
 
 | Project | TFM | Holds | Files / LOC |
 |---|---|---|---|
-| `src/UiMcp.Abstractions` | `net9.0` | The catalog, validator, path resolver, render *rules*. **No WPF.** | 6 / 551 |
-| `src/UiMcp` | `net9.0-windows10.0.19041.0` | MCP host, tool surface, STA thread host, WPF renderer | 6 / 841 |
-| `tests/UiMcp.Tests` | `net9.0-windows10.0.19041.0` | xunit + FluentAssertions + Moq | 5 / 984 |
+| `src/UiMcp.Abstractions` | `net9.0` | The catalog, validator, path resolver, render *rules*. **No WPF.** | 6 / 578 |
+| `src/UiMcp` | `net9.0-windows10.0.19041.0` | MCP host, tool surface, STA thread host, WPF renderer | 6 / 861 |
+| `tests/UiMcp.Tests` | `net9.0-windows10.0.19041.0` | xunit + FluentAssertions + Moq | 9 / 1840 |
 
 **`Abstractions` targets plain `net9.0` deliberately.** The spec requires it not to reference
 WPF; a non-Windows target framework makes that a compiler guarantee rather than a habit. It is
@@ -50,11 +50,11 @@ Program.cs ──▶ UiTools ──▶ IUiSurface ──▶ UiSurface ──▶ 
 
 ## The numbers
 
-17 source files, 2,376 lines, 20 exported types, 1 entry root, **0 circular dependencies**,
-**0 duplicate symbols**, **0 orphaned files**. 132 tests, all passing.
+21 source files, 3,279 lines, 23 exported types, 1 entry root, **0 circular dependencies**,
+**0 duplicate symbols**, **0 orphaned files**, **0 unused exports**. 217 tests, all passing.
 
 Note that `.cs` file counts here **exclude `obj/` and `bin/`**. Counting the whole tree gives
-35 `.cs` files; 18 of those are compiler-generated build output (`*.AssemblyInfo.cs`,
+39 `.cs` files; 18 of those are compiler-generated build output (`*.AssemblyInfo.cs`,
 `*.GlobalUsings.g.cs`). A count taken by hand will not match this table, and this table is the
 one that is right.
 
@@ -81,9 +81,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 17 | dependency-graph.json |
-| totalLinesOfCode | 2376 | dependency-graph.json |
-| totalExports | 20 | dependency-graph.json |
+| totalSourceFiles | 21 | dependency-graph.json |
+| totalLinesOfCode | 3279 | dependency-graph.json |
+| totalExports | 23 | dependency-graph.json |
 | totalModules | 2 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
@@ -94,5 +94,5 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 **Claims the gate cannot hold**, stated with their basis: the **four MCP tools** and **nine
 catalog components** are confirmed by direct source reading of `UiTools.cs` and
 `CatalogValidator.cs`, not by a repo_map metric — repo_map counts exported *types*, and a tool
-is a method. The **132 tests** figure is `dotnet test` output, not a graph metric. The
-**35 vs 17** `.cs` file split was measured by enumerating the working tree.
+is a method. The **217 tests** figure is `dotnet test` output, not a graph metric. The
+**39 vs 21** `.cs` file split was measured by enumerating the working tree.

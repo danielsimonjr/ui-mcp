@@ -56,12 +56,31 @@ public static class RenderRules
     /// choice. The distinction between "empty bar" and "no reading" is carried by the LABEL, which
     /// shows UNKNOWN - a zero-length bar with no UNKNOWN beside it is the green-zero failure again.
     /// </summary>
-    public static double GaugePercent(JsonElement? value, JsonElement? max)
+    /// <param name="maxWasRequested">
+    /// Whether the tree supplied a <c>maxPath</c> at all.
+    ///
+    /// THIS PARAMETER EXISTS BECAUSE TWO DIFFERENT CLAIMS ARRIVE HERE AS THE SAME NULL. "No maximum
+    /// was asked for" (default 100, correct) and "a maximum WAS asked for and could not be
+    /// resolved" (there is no scale, and nothing honest to draw) are not the same thing, and the
+    /// caller is the only one that can tell them apart.
+    ///
+    /// Without it, an unresolvable maxPath silently defaulted to 100, so a value of 50 against an
+    /// unreadable maximum drew a half-full bar - a confident measurement against a scale nobody
+    /// supplied. That is the green-zero failure wearing a progress bar. The JS original gets this
+    /// right and is explicit about it (render.js): an unresolvable maxPath yields undefined, fails
+    /// the `typeof max === 'number'` test, and the bar stays at 0.
+    ///
+    /// Defaults to false so every existing two-argument call keeps its exact previous behaviour.
+    /// </param>
+    public static double GaugePercent(JsonElement? value, JsonElement? max, bool maxWasRequested = false)
     {
         if (!TryNumber(value, out var v)) return 0;
 
         var m = 100d;
-        if (max is not null && !TryNumber(max, out m)) return 0;
+        if (maxWasRequested || max is not null)
+        {
+            if (!TryNumber(max, out m)) return 0;
+        }
         if (m <= 0) return 0;
 
         return Math.Clamp(v / m * 100d, 0d, 100d);

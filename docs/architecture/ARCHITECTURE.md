@@ -24,6 +24,13 @@ schema-valid or **refused** — nothing in between.
 - **Element types come from the renderer only.** The tree names a *component*; `TreeRenderer`
   chooses the WPF type. Text reaches the UI through `TextBlock.Text`, which parses no markup.
   Colours come from a closed `tone` enum — the tree never supplies a colour.
+- **`Tone()` has two distinct fallthrough cases**, and collapsing them was a real defect. No tone
+  supplied gets the default accent (the JS emits no tone class at all there); a tone *outside* the
+  closed set gets **muted**. Both used to return Amber — the *attention* colour — so an
+  unrecognised tone rendered as alarm, manufacturing urgency out of a value the renderer had
+  simply failed to understand. The closed enum makes the second case unreachable from a validated
+  tree, but `Render` is public and `ValidatedNode` is constructible in-process, so it *is*
+  reachable; an unreachable branch that behaves wrongly is a trap for whoever makes it reachable.
 
 **`ValidatedNode` is a distinct type from raw JSON.** This is the whole safety model in one
 signature: "has this been validated?" is a question the *compiler* answers, not one you answer
@@ -63,6 +70,22 @@ keeps "no value" and "the value zero" in visibly different shapes at every layer
 
 `PathResolver` **never throws**. One bad binding in a sixty-node tree degrades to `UNKNOWN` in
 place rather than taking the console down.
+
+### The gauge is where this principle was actually being broken
+
+`GaugePercent` takes a `maxWasRequested` flag, which looks like clutter until you see what it
+prevents. "No maximum was asked for" (default to 100 — correct) and "a maximum **was** asked for
+and could not be resolved" (there is no scale, and nothing honest to draw) both arrived as a
+`null` max, and only the caller could tell them apart.
+
+Collapsed together, a `Gauge` whose `maxPath` did not resolve drew its bar against a default of
+100 — so a value of 50 against an unreadable maximum showed as **half full**. That is a confident
+measurement against a scale nobody supplied: the green-zero failure wearing a progress bar. The
+JS original gets this right and is explicit about it; an unresolvable `maxPath` there yields
+`undefined`, fails the `typeof max === 'number'` test, and the bar stays at 0.
+
+The bar is now empty in that case, and the label still carries `UNKNOWN` — which is what
+distinguishes "empty bar" from "no reading".
 
 ## Key decisions
 
@@ -171,7 +194,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 17 | dependency-graph.json |
+| totalSourceFiles | 21 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 

@@ -8,8 +8,8 @@ Every scanned file, its project, area and disposition.
 
 ## Scope — what is counted
 
-**17 files.** `obj/` and `bin/` are excluded as build output. The whole working tree contains
-**35** `.cs` files; the other 18 are compiler-generated (`*.AssemblyInfo.cs`,
+**21 files.** `obj/` and `bin/` are excluded as build output. The whole working tree contains
+**39** `.cs` files; the other 18 are compiler-generated (`*.AssemblyInfo.cs`,
 `*.GlobalUsings.g.cs`, and copies under `bin/`). Counting them would credit more than half the
 repository to the compiler and add namespaces no developer declared.
 
@@ -17,10 +17,10 @@ repository to the compiler and add namespaces no developer declared.
 
 | Project | Files | LOC |
 |---|---|---|
-| `UiMcp` | 6 | 841 |
-| `UiMcp.Abstractions` | 6 | 551 |
-| `UiMcp.Tests` | 5 | 984 |
-| **Total** | **17** | **2376** |
+| `UiMcp` | 6 | 861 |
+| `UiMcp.Abstractions` | 6 | 578 |
+| `UiMcp.Tests` | 9 | 1840 |
+| **Total** | **21** | **3279** |
 
 Attribution is by owning `.csproj` — for a .NET repo the project file is what a `package.json`
 is elsewhere: the unit declaring one compilation, its target framework and its dependencies.
@@ -30,7 +30,7 @@ is elsewhere: the unit declaring one compilation, its target framework and its d
 | Area | Files |
 |---|---|
 | `src` | 12 |
-| `tests` | 5 |
+| `tests` | 9 |
 
 | Disposition | Files |
 |---|---|
@@ -38,26 +38,26 @@ is elsewhere: the unit declaring one compilation, its target framework and its d
 | `build-entry` | 1 |
 | `test-only` | 1 |
 | `orphan` | **0** |
-| `test` | 5 |
+| `test` | 9 |
 
 ## Every file
 
-### `UiMcp.Abstractions` — 6 files, 551 LOC
+### `UiMcp.Abstractions` — 6 files, 578 LOC
 
 | File | LOC | Disposition | Holds |
 |---|---|---|---|
-| `src/UiMcp.Abstractions/CatalogValidator.cs` | 147 | reachable | The nine-component catalog and `Validate` |
+| `src/UiMcp.Abstractions/CatalogValidator.cs` | 154 | reachable | The nine-component catalog and `Validate` |
 | `src/UiMcp.Abstractions/PropTypes.cs` | 112 | reachable | Prop validators; charset and prototype guards |
 | `src/UiMcp.Abstractions/PathResolver.cs` | 110 | reachable | Path binding and `Display`; the UNKNOWN rule |
-| `src/UiMcp.Abstractions/RenderRules.cs` | 71 | reachable | Render judgement with no WPF |
+| `src/UiMcp.Abstractions/RenderRules.cs` | 90 | reachable | Render judgement with no WPF |
 | `src/UiMcp.Abstractions/ValidatedNode.cs` | 21 | reachable | `ValidatedNode`, `ValidatedColumn` |
 | `src/UiMcp.Abstractions/UiValidationException.cs` | 13 | reachable | The refusal type |
 
-### `UiMcp` — 6 files, 841 LOC
+### `UiMcp` — 6 files, 861 LOC
 
 | File | LOC | Disposition | Holds |
 |---|---|---|---|
-| `src/UiMcp/Rendering/TreeRenderer.cs` | 248 | reachable | `ValidatedNode` → WPF `UIElement` |
+| `src/UiMcp/Rendering/TreeRenderer.cs` | 268 | reachable | `ValidatedNode` → WPF `UIElement` |
 | `src/UiMcp/Tools/UiTools.cs` | 140 | **test-only** ⚠ | The four MCP tools |
 | `src/UiMcp/Hosting/UiThreadHost.cs` | 130 | reachable | STA thread, dispatcher, supervisor |
 | `src/UiMcp/Hosting/UiSurface.cs` | 124 | reachable | The real WPF surface |
@@ -75,15 +75,19 @@ is elsewhere: the unit declaring one compilation, its target framework and its d
 > independent process observed. Any file reachable only through reflection or attribute
 > discovery will show this way.
 
-### `UiMcp.Tests` — 5 files, 984 LOC
+### `UiMcp.Tests` — 9 files, 1840 LOC
 
 | File | LOC | Disposition | Covers |
 |---|---|---|---|
+| `tests/UiMcp.Tests/TreeRendererTests.cs` | 349 | test | The nine-way switch, truncation caps, `$item` scope, tone map, inert text |
 | `tests/UiMcp.Tests/UiToolsTests.cs` | 214 | test | The four tools, refusal ordering |
 | `tests/UiMcp.Tests/CatalogValidatorTests.cs` | 212 | test | Catalog, props, caps, boundaries |
+| `tests/UiMcp.Tests/UiSurfaceTests.cs` | 181 | test | Window lifetime, idempotent open, structural hash, null-not-zero status |
 | `tests/UiMcp.Tests/UiThreadHostTests.cs` | 147 | test | STA, marshalling, supervisor, shutdown |
+| `tests/UiMcp.Tests/CatalogRendererSeamTests.cs` | 144 | test | Validator ↔ renderer agreement, exhaustive over the catalog |
 | `tests/UiMcp.Tests/PathResolverTests.cs` | 128 | test | Paths, indices, `$item`, UNKNOWN |
-| `tests/UiMcp.Tests/RenderRulesTests.cs` | 97 | test | Units, deltas, gauge clamp, empty text |
+| `tests/UiMcp.Tests/RenderRulesTests.cs` | 123 | test | Units, deltas, gauge clamp, empty text |
+| `tests/UiMcp.Tests/StaFixture.cs` | 26 | test | Shared STA thread — infrastructure, not a test |
 
 ## Not scanned
 
@@ -107,9 +111,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalFiles | 17 | file-inventory.json |
-| totalSourceFiles | 17 | dependency-graph.json |
-| totalLinesOfCode | 2376 | dependency-graph.json |
+| totalFiles | 21 | file-inventory.json |
+| totalSourceFiles | 21 | dependency-graph.json |
+| totalLinesOfCode | 3279 | dependency-graph.json |
 | orphanedFiles | 0 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
@@ -117,6 +121,6 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 **Claims the gate cannot hold:** per-project file/LOC splits and per-file LOC come from
 `file-inventory.json`'s `files` array (each entry carries `package` and `loc`), summed here —
-the gate checks the totals, not the breakdown. The **35 vs 17** split was measured by
+the gate checks the totals, not the breakdown. The **39 vs 21** split was measured by
 enumerating `.cs` files in the working tree with and without `obj`/`bin`. The "Holds" and
 "Covers" columns are source-read.

@@ -46,10 +46,13 @@ syncing them re-arms it.
 
 ## Scope
 
-15 distinct symbols across 17 files. The exported-type count in
-[dependency-graph.json](../../docs/architecture/API.md) is 20; the difference is that this
+13 distinct symbols across 21 files. The exported-type count is 23; the difference is that this
 analysis counts each **distinct name once**, while `totalExports` counts every export in every
 file.
+
+The distinct-symbol count went **15 → 13** when `ComponentSpec` and `PropRule` were narrowed to
+`internal` — they stopped being exported symbols. Fewer symbols here is a narrowed public surface,
+not lost code.
 
 ## Verification
 
@@ -59,8 +62,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | Claim | Value | Source |
 |---|---|---|
 | duplicateCount | 0 | duplicate-symbols.json |
-| totalSymbols | 15 | duplicate-symbols.json |
-| totalExports | 20 | dependency-graph.json |
+| totalSymbols | 13 | duplicate-symbols.json |
+| totalExports | 23 | dependency-graph.json |
 
 **Claims the gate cannot hold:** the `treeHash` incident is recorded in the repository
 `todo.md` and in `UiTools.Render`'s own source comment; it is history, not a metric. The

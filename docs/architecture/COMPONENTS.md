@@ -72,8 +72,9 @@ at the same time; `$item.drive` is legal while `$other`, `$` and `a$b` stay refu
 ### `CatalogValidator.cs` — the vocabulary and the boundary
 
 ```csharp
-public sealed record PropRule(Func<JsonElement, object> Validate, bool Optional = false);
-public sealed record ComponentSpec(IReadOnlyDictionary<string, PropRule> Props, bool AcceptsChildren);
+// INTERNAL: both describe how the catalog is BUILT, and every use is inside this file.
+internal sealed record PropRule(Func<JsonElement, object> Validate, bool Optional = false);
+internal sealed record ComponentSpec(IReadOnlyDictionary<string, PropRule> Props, bool AcceptsChildren);
 
 public const int MaxDepth    = 12;
 public const int MaxChildren = 64;
@@ -286,11 +287,11 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 17 | dependency-graph.json |
-| totalExports | 20 | dependency-graph.json |
-| totalSymbols | 15 | duplicate-symbols.json |
+| totalSourceFiles | 21 | dependency-graph.json |
+| totalExports | 23 | dependency-graph.json |
+| totalSymbols | 13 | duplicate-symbols.json |
 
 **Claims the gate cannot hold:** every signature above was copied from the named source file.
-`totalExports` (20) counts exported *types* across all 17 files including tests;
-`totalSymbols` (15) is the distinct-symbol count duplicate-symbols.json analyses. Neither is a
+`totalExports` (23) counts exported *types* across all 21 files including tests;
+`totalSymbols` (13) is the distinct-symbol count duplicate-symbols.json analyses. Neither is a
 count of methods, so the per-method signatures here are source-read, not gate-enforced.

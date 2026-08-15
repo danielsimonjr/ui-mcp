@@ -1,6 +1,6 @@
 {
   "name": "ui-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Hosts a native Windows window and renders catalog-constrained JSON UI trees. Any agent connected to the host can draw to one shared surface; anything outside the catalog is refused.",
   "author": {
     "name": "danielsimonjr"

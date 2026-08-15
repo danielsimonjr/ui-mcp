@@ -142,7 +142,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 |---|---|---|
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| totalSourceFiles | 17 | dependency-graph.json |
+| totalSourceFiles | 21 | dependency-graph.json |
 
 **Claims the gate cannot hold:** the sequences above are traced by reading `UiTools.Render`,
 `UiSurface.Render`, `TreeRenderer.Render` and `UiThreadHost`. A dependency graph shows *that*

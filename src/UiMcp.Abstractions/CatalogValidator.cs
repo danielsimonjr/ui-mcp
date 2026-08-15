@@ -2,11 +2,19 @@ using System.Text.Json;
 
 namespace UiMcp.Abstractions;
 
+// INTERNAL, not public. Both describe how the catalog is BUILT, and every use of either is inside
+// this file - the catalog is a private static dictionary and nothing outside constructs one.
+// Publishing them widened UiMcp.Abstractions' surface with two types no caller can act on: a
+// consumer given a ComponentSpec cannot validate anything with it, because Validate() is the only
+// entry point and it takes JSON. Surfaced by unused-analysis.md, which classified both as
+// "referenced only within their own file" - correctly, and that is what a needlessly public type
+// looks like from the outside.
+
 /// <summary>A prop rule: how to validate it, and whether it may be omitted.</summary>
-public sealed record PropRule(Func<JsonElement, object> Validate, bool Optional = false);
+internal sealed record PropRule(Func<JsonElement, object> Validate, bool Optional = false);
 
 /// <summary>What one catalog component accepts.</summary>
-public sealed record ComponentSpec(IReadOnlyDictionary<string, PropRule> Props, bool AcceptsChildren);
+internal sealed record ComponentSpec(IReadOnlyDictionary<string, PropRule> Props, bool AcceptsChildren);
 
 /// <summary>
 /// The constrained component vocabulary, and the boundary that enforces it.

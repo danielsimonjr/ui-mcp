@@ -46,16 +46,34 @@ public static class TreeRenderer
 
     private static readonly FontFamily Mono = new("Consolas, Cascadia Mono, monospace");
 
-    /// <summary>The ONLY place a tone becomes a colour. A tone the renderer does not know is muted.</summary>
+    /// <summary>
+    /// The ONLY place a tone becomes a colour.
+    ///
+    /// The two fallthrough cases are DIFFERENT and were previously collapsed into one:
+    ///   - NO tone supplied (the prop is optional) -> the default accent. The JS emits no tone
+    ///     class at all here (`toneCls` returns ''), leaving the element's own styling.
+    ///   - A tone OUTSIDE the closed set -> muted, matching the JS's `TONE_CLASS[t] || 'stx-muted'`.
+    ///
+    /// Both returned Amber, which is the ATTENTION colour - so an unrecognised tone rendered as
+    /// alarm. That contradicted this method's own summary and the JS it is ported from, and it
+    /// manufactures urgency out of a value the renderer simply did not understand. Muted is the
+    /// right answer for "I do not know what this means".
+    ///
+    /// The validator's closed enum makes the unknown case unreachable from a validated tree, but
+    /// <see cref="Render"/> is public and <see cref="ValidatedNode"/> is constructible in-process,
+    /// so it is reachable - and an unreachable branch that behaves wrongly is a trap for whoever
+    /// makes it reachable later.
+    /// </summary>
     private static SolidColorBrush Tone(string? tone) => tone switch
     {
+        null => Amber,
         "nominal" => Green,
         "attention" => Amber,
         "critical" => Salmon,
         "degraded" => Lilac,
         "info" => Sky,
         "muted" => Grey,
-        _ => Amber
+        _ => Grey
     };
 
     /// <summary>Missing values are visually distinct, not just textually. UNKNOWN must LOOK wrong.</summary>
@@ -182,7 +200,9 @@ public static class TreeRenderer
         var value = PathResolver.Resolve(data, Str(n, "valuePath"), scope);
         var maxPath = StrOrNull(n, "maxPath");
         var max = maxPath is null ? null : PathResolver.Resolve(data, maxPath, scope);
-        var pct = RenderRules.GaugePercent(value, max);
+        // Pass whether a max was ASKED FOR, not just what came back. A maxPath that did not
+        // resolve is not a maximum of 100 - see RenderRules.GaugePercent.
+        var pct = RenderRules.GaugePercent(value, max, maxWasRequested: maxPath is not null);
         var unknown = RenderRules.IsUnknown(value);
 
         var stack = new StackPanel { Margin = new Thickness(0, 4, 0, 8) };

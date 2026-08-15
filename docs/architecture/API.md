@@ -158,8 +158,6 @@ executable.
 | `ValidatedNode` | record | A node that passed validation. The renderer accepts only this. |
 | `ValidatedColumn` | record | A validated table column. |
 | `UiValidationException` | exception | A deliberate refusal, distinguishable from a fault. |
-| `PropRule` | record | How to validate one prop, and whether it may be omitted. |
-| `ComponentSpec` | record | What one catalog component accepts. |
 | `CatalogValidator` | static | `Validate`, `ComponentNames`, `MaxDepth`, `MaxChildren`. |
 | `PropTypes` | static | The prop validators, `Tones`, `RowColumnCounts`, caps. |
 | `PathResolver` | static | `Resolve`, `Display`, `Unknown`. |
@@ -185,13 +183,15 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalExports | 20 | dependency-graph.json |
-| totalSourceFiles | 17 | dependency-graph.json |
+| totalExports | 23 | dependency-graph.json |
+| totalSourceFiles | 21 | dependency-graph.json |
 | duplicateCount | 0 | duplicate-symbols.json |
 
 **Claims the gate cannot hold:** the **four tools**, their parameters, defaults and response
 shapes come from reading `UiTools.cs`; the **nine components** and every prop rule come from
 `CatalogValidator.cs` and `PropTypes.cs`. repo_map counts exported *types*, so `totalExports`
-(20) covers the 15 types listed above **plus the 5 test classes** — it is not a count of tools,
-components or props. The tool list was additionally confirmed over the wire: a real `tools/list`
+(23) covers the 13 types listed above **plus the test classes and fixtures** — it is not a count
+of tools, components or props. `ComponentSpec` and `PropRule` are deliberately absent from that
+table: both were narrowed to `internal`, because every use of either is inside
+`CatalogValidator.cs`. The tool list was additionally confirmed over the wire: a real `tools/list`
 against the shipped binary returned exactly `ui_open`, `ui_render`, `ui_status`, `ui_close`.
