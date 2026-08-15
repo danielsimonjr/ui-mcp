@@ -8,6 +8,36 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **The four MCP tools** — `ui_open`, `ui_render`, `ui_status`, `ui_close` — plus `IUiSurface` and
+  the WPF `UiSurface`. **98 tests, all passing, 0 warnings on a full rebuild.**
+  - **`ui_render` validates the WHOLE tree before anything touches the window.** A partially
+    rendered invalid tree is worse than none: it looks like a working display while silently
+    omitting what failed. Tested with a partially-invalid tree that must render **nothing at all**.
+  - **`IUiSurface` exists so the most important test is a negative that needs no desktop.** A spy
+    can assert "Render was never called"; a screenshot cannot. Covers unknown component, unknown
+    prop, malformed tree JSON, and malformed data JSON — all refusals, never thrown faults.
+  - **`ui_status` reports UNKNOWN for anything unmeasured**, never a fabricated zero, and surfaces
+    an absorbed UI fault rather than hiding it. It reads the LIVE window state instead of a cached
+    flag, because the user can close the window at any moment and a status reporting our last
+    *intention* would be confidently wrong.
+  - **Verified over the wire, not inferred from the attribute compiling:** `tools/list` returns all
+    four with exactly the spec names and `ui_render`'s schema exposes `tree` + `data`. An end-to-end
+    drive over stdio produced a real window an **independent process** observed
+    (`MainWindowTitle: "ui-mcp e2e"`), with `ui_status` reporting `windowAlive: true, nodeCount: 3,
+    treeHash: 105e2c486c52, lastFault: none`.
+  - `UiSurface` starts the UI thread **lazily on first open**, so a host with no desktop fails where
+    a window was actually requested and can say so, rather than at launch.
+  - **Known and labelled:** `UiSurface.Render` currently draws a placeholder that says
+    "renderer pending" in the window itself. The catalog visual tree is the next task; the
+    placeholder announces what it is rather than implying a finished renderer.
+
+- **Fixed 7 `xUnit1031` warnings** (blocking task operations in tests) by making the host tests
+  async throughout. Not cosmetic: that suite exists to prove a marshalling boundary does not
+  deadlock, so a test that blocks a thread waiting on that boundary is the one place the shortcut
+  could manufacture the failure it claims to rule out. **These had been reported as "0 warnings"
+  earlier — incorrectly.** Incremental builds were not recompiling the test project;
+  `--no-incremental` surfaced them.
+
 - **`UiMcp.Hosting.UiThreadHost`** — the single STA thread WPF requires, and the only route from a
   tool handler to the UI. **87 tests, all passing, 0 warnings.** SPEC section 3's "two threads, one
   direction": handlers marshal and get a Task; the UI thread never waits on MCP.

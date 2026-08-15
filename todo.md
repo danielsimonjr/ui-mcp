@@ -79,7 +79,19 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       CRASHED mid-run (`Unhandled exception ... window handler blew up`). Restored byte-identical.
       The fault is recorded rather than swallowed so `ui_status` can report a degraded display -
       a supervisor that hides what it absorbed is a silent failure with extra steps.
-- [ ] (2026-08-14) **Tools:** `ui_open`, `ui_render`, `ui_status`, `ui_close`.
+- [x] (2026-08-15) **Tools:** `ui_open`, `ui_render`, `ui_status`, `ui_close`. **98 tests, all
+      passing, 0 warnings on a FULL rebuild.**
+      **Verified over the wire, not assumed from the attribute compiling:** `tools/list` returns all
+      four with exactly the spec names, and `ui_render`'s schema exposes `tree` + `data`.
+      **End-to-end proven:** `ui_open` -> `ui_render` -> `ui_status` driven over stdio produced a
+      real window that an INDEPENDENT process observed (`MainWindowTitle: "ui-mcp e2e"`), with
+      `ui_status` reporting `windowAlive: true, nodeCount: 3, treeHash: 105e2c486c52, lastFault: none`.
+      The most important test is a NEGATIVE and needs no desktop: an invalid tree must be refused
+      BEFORE anything touches the window. `IUiSurface` exists so a spy can assert "Render was never
+      called", which no screenshot can. Covered: unknown component, unknown prop, malformed tree
+      JSON, malformed data JSON, and a partially-invalid tree that must render NOTHING.
+      Caveat carried forward: `UiSurface.Render` currently draws a labelled PLACEHOLDER, not the
+      catalog visual tree. That is the next item and the placeholder says so in the window itself.
 - [ ] (2026-08-14) **Renderer** for the nine components; validated tree in, WPF visual tree out.
 - [ ] (2026-08-14) **Publish + wire:** `bundle/UiMcp.exe`, `.claude-plugin/plugin.json`,
       `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`, marketplace entry.

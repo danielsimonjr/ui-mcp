@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
+using UiMcp.Hosting;
 
 namespace UiMcp;
 
@@ -30,6 +31,10 @@ internal static class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace);
         builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+        // Singleton: there is ONE shared surface. The whole point is that Starship, the Github agent
+        // and EVO all draw to the same window rather than each getting a private one.
+        builder.Services.AddSingleton<IUiSurface, UiSurface>();
 
         builder.Services
             .AddMcpServer(o =>
