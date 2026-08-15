@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    # net9.0-windows10.0.19041.0 with UseWPF requires a Windows runner. This is
+    # not a preference: the target framework will not restore on ubuntu.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          global-json-file: global.json
+
+      # Build the solution explicitly rather than the directory, so the build
+      # graph is exactly the three projects in UiMcp.sln.
+      - run: dotnet restore UiMcp.sln
+      - run: dotnet build UiMcp.sln --no-restore -c Release
+      - run: dotnet test UiMcp.sln --no-build -c Release --verbosity normal
+
+      # The committed bundle IS the artifact the plugin runs, so a stale one
+      # ships silently: nothing else in this repo would notice. Rebuild it here
+      # and fail if it differs from what is committed.
+      #
+      # The flags are load-bearing - a bare `dotnet publish` emits a 156 KB
+      # launcher plus ~45 loose DLLs instead of the single-file exe that
+      # .mcp.json points at. See README "Build".
+      - name: Bundle is not stale
+        shell: pwsh
+        run: |
+          dotnet publish src/UiMcp -c Release -o ${{ runner.temp }}/bundlecheck `
+            -r win-x64 --self-contained false -p:PublishSingleFile=true
+          $built    = Get-Item "${{ runner.temp }}/bundlecheck/UiMcp.exe"
+          $committed = Get-Item "bundle/UiMcp.exe"
+          Write-Host "committed: $($committed.Length) bytes"
+          Write-Host "rebuilt  : $($built.Length) bytes"
+          if ($built.Length -ne $committed.Length) {
+            Write-Error @"
+          bundle/UiMcp.exe is STALE - a rebuild produces a different artifact.
+          Re-publish and commit it, or the plugin keeps serving the previous build:
+            dotnet publish src/UiMcp -c Release -o bundle -r win-x64 --self-contained false -p:PublishSingleFile=true
+          "@
+            exit 1
+          }
+
+      # Installed is not serving, and a bundle that starts is not a bundle that
+      # works. Drive the artifact over stdio and assert it answers a real MCP
+      # handshake with the version from Directory.Build.props - the single
+      # version source. Catches both a dead binary and a version that did not
+      # propagate.
+      - name: Artifact answers an MCP initialize
+        shell: pwsh
+        run: |
+          $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
+          Write-Host "expected version: $expected"
+          $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [Diagnostics.Process]::Start($psi)
+          $req = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}'
+          $p.StandardInput.WriteLine($req)
+          $p.StandardInput.Flush()
+          $line = $p.StandardOutput.ReadLine()
+          $p.Kill()
+          Write-Host "reply: $line"
+          if ($line -notmatch '"name"\s*:\s*"ui-mcp"') { Write-Error "no ui-mcp serverInfo in the handshake reply"; exit 1 }
+          if ($line -notmatch [regex]::Escape($expected)) { Write-Error "artifact did not report version $expected"; exit 1 }
