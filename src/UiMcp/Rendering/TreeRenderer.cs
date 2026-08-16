@@ -274,9 +274,10 @@ public static class TreeRenderer
         {
             for (var ci = 0; ci < cols.Count; ci++)
             {
-                // Scope is the ROW, matching the proven renderer: a column path reaches the row via
-                // "$item.field".
-                var v = PathResolver.Resolve(data, cols[ci].ValuePath, rows[ri]);
+                // Column paths are ROW-relative by definition; RenderRules.ColumnPath applies that
+                // default so a bare "name" reaches the row rather than the data root. An explicit
+                // "$item." prefix is preserved and means the same thing.
+                var v = PathResolver.Resolve(data, RenderRules.ColumnPath(cols[ci].ValuePath), rows[ri]);
                 var cell = Text(PathResolver.Display(v), RenderRules.IsUnknown(v) ? UnknownBrush : Sky, 12);
                 cell.Margin = new Thickness(0, 0, 10, 2);
                 Grid.SetRow(cell, ri + 1);

@@ -81,6 +81,20 @@ public sealed class UiSurface : IUiSurface, IDisposable
                     // reads as "alive". Clearing here keeps ui_status honest without polling.
                     _window.Closed += (_, _) => { _window = null; _content = null; };
                     _window.Show();
+
+                    // Activate on CREATION too, not only on the idempotent re-open path below.
+                    // Show() alone puts the window into the z-order wherever it lands, which for a
+                    // process spawned in the background is UNDERNEATH the terminal the user is
+                    // looking at. Reported 2026-08-16 as "no window is displayed" while ui_status
+                    // correctly said windowAlive:true - the window existed with a real HWND the
+                    // whole time. The status was honest; the FIRST open was the one least likely to
+                    // be seen, which is exactly backwards.
+                    //
+                    // Activate() is best-effort by design: Windows refuses foreground to a process
+                    // that does not own the current foreground window, and there is no polite way
+                    // around that. `topmost:true` remains the only guarantee, which is why the tool
+                    // description now says so instead of leaving the caller to discover it.
+                    _window.Activate();
                 }
                 else
                 {

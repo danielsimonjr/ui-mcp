@@ -123,6 +123,65 @@ public class RenderRulesTests
     public void IsUnknown_FalseForARealZero_PositiveControl()
         => RenderRules.IsUnknown(V("0")).Should().BeFalse("zero is a measurement, not a blind spot");
 
+    // ---- Table column paths are ROW-relative by definition ---------------------------------------
+    //
+    // Found 2026-08-16 on the HTML console, which shares this renderer's semantics. Every row of
+    // every table read UNKNOWN while the row COUNTS were correct - fromPath resolved, the column
+    // paths did not. Cause: a column path was resolved against the DATA ROOT unless it began with
+    // "$item", so the natural path "name" looked for a top-level "name" and found nothing.
+    //
+    // A column in a table over an array IS row-relative; that is what a column means. The evidence
+    // that the default was wrong rather than the view: of the ten column paths written for that
+    // console, NINE were bare and one carried the prefix. When the author reaches for the
+    // "incorrect" form nine times out of ten, the surprising form is the defect.
+    //
+    // Scoped to Table columns ONLY. Inside a Repeat, a bare path resolving against the root is
+    // meaningful - a global value shown beside each row - so that behaviour is unchanged.
+
+    [Fact]
+    public void ColumnPath_BarePathBecomesItemRelative()
+        => RenderRules.ColumnPath("name").Should().Be("$item.name");
+
+    [Fact]
+    public void ColumnPath_NestedBarePathBecomesItemRelative()
+        => RenderRules.ColumnPath("disk.freeGb").Should().Be("$item.disk.freeGb");
+
+    [Fact]
+    public void ColumnPath_ExplicitItemPrefixIsLeftAlone_PositiveControl()
+        => RenderRules.ColumnPath("$item.name").Should().Be("$item.name",
+            "an explicit prefix already means row-relative; double-prefixing would break it");
+
+    [Fact]
+    public void ColumnPath_BareItemIsLeftAlone()
+        => RenderRules.ColumnPath("$item").Should().Be("$item");
+
+    /// <summary>
+    /// The end-to-end claim, not just the string rewrite: a BARE column path must actually resolve
+    /// against the row. Asserting only the rewrite would pass even if the resolver ignored it.
+    /// </summary>
+    [Fact]
+    public void ColumnPath_BarePath_ActuallyResolvesAgainstTheRow()
+    {
+        var data = JsonDocument.Parse("""{"name":"ROOT-VALUE","rows":[{"name":"ROW-VALUE"}]}""").RootElement;
+        var row = data.GetProperty("rows")[0];
+
+        var resolved = PathResolver.Resolve(data, RenderRules.ColumnPath("name"), row);
+
+        PathResolver.Display(resolved).Should().Be("ROW-VALUE",
+            "the row wins; resolving against the root is what produced UNKNOWN everywhere");
+    }
+
+    [Fact]
+    public void WithoutTheFix_ABareColumnPathWouldHitTheRoot_RegressionWitness()
+    {
+        // Pins the OLD behaviour so the bug is documented as a behaviour, not just as a comment.
+        // If someone "simplifies" ColumnPath away, this shows exactly what returns.
+        var data = JsonDocument.Parse("""{"name":"ROOT-VALUE","rows":[{"name":"ROW-VALUE"}]}""").RootElement;
+        var row = data.GetProperty("rows")[0];
+
+        PathResolver.Display(PathResolver.Resolve(data, "name", row)).Should().Be("ROOT-VALUE");
+    }
+
     // ---- Gauge: a REQUESTED max that did not resolve is not a max of 100 -------------------------
     //
     // The JS original is explicit about this (render.js):

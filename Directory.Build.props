@@ -7,7 +7,7 @@
     deploy invisible - the deploy looks fine because the thing you ask is the thing that is wrong.
   -->
   <PropertyGroup>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Authors>danielsimonjr</Authors>
     <Company>danielsimonjr</Company>
     <Product>ui-mcp</Product>

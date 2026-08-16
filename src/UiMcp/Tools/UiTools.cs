@@ -27,7 +27,9 @@ public sealed class UiTools
 
     [McpServerTool(Name = "ui_open"), Description(
         "Open the shared UI window, or focus it if already open. Idempotent - a second call does not " +
-        "create a second window.")]
+        "create a second window. NOTE: the window is raised on a best-effort basis; Windows refuses " +
+        "foreground to a background process, so a newly opened window can land BEHIND the terminal. " +
+        "Pass topmost:true if the caller needs to be certain the user actually sees it.")]
     public string Open(
         [Description("Window title")] string title = "Starship Console",
         [Description("Keep the window above others")] bool topmost = false,

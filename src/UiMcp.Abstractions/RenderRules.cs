@@ -90,6 +90,26 @@ public static class RenderRules
     public static string EmptyText(string? supplied)
         => string.IsNullOrWhiteSpace(supplied) ? "none" : supplied;
 
+    /// <summary>
+    /// Normalises a Table COLUMN path to be row-relative, which is what a column means.
+    ///
+    /// Without this, a column path was resolved against the data ROOT unless it began with "$item",
+    /// so the natural path "name" looked for a top-level "name", found nothing, and rendered
+    /// UNKNOWN. Observed 2026-08-16 on the HTML console that shares these semantics: every row of
+    /// every table read UNKNOWN while the row COUNTS were correct, because fromPath resolved and the
+    /// column paths did not. That combination is the tell.
+    ///
+    /// The default was the defect, not the views. Of the ten column paths written for that console,
+    /// NINE were bare and one carried the prefix - when the author reaches for the "wrong" form nine
+    /// times in ten, the surprising form is what needs changing. An explicit "$item." prefix still
+    /// works and means the same thing, so no existing view breaks.
+    ///
+    /// TABLE COLUMNS ONLY. Inside a Repeat, a bare path resolving against the root is meaningful - a
+    /// global value displayed beside each row - and is left alone.
+    /// </summary>
+    public static string ColumnPath(string valuePath)
+        => valuePath.StartsWith("$item", StringComparison.Ordinal) ? valuePath : "$item." + valuePath;
+
     private static bool TryNumber(JsonElement? e, out double value)
     {
         value = 0;
