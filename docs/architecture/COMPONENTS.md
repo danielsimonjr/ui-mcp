@@ -206,7 +206,7 @@ tree → *only then* `_surface.Render(...)`. Every failure returns `{ok: false, 
 with the reason, rather than throwing.
 
 `TryUnwrap` accepts a JSON value in two shapes: the payload itself, or a JSON string that holds
-the payload. It returns `false` with a reason instead of throwing, so the caller gets a
+the payload. The method returns `false` with a reason instead of throwing, so the caller gets a
 rejection that it can read.
 
 ### `Hosting/IUiSurface.cs` — the testability seam
@@ -270,7 +270,7 @@ reference never later reads as alive.
 still meant to display something. A failure on a ceremony step would be pedantry, not safety. A `ScrollViewer` wraps the content, because a dashboard grows past the window.
 Content that the layout quietly cuts off the bottom is a blind spot.
 
-`Close` uses `Post`, so it is **fire-and-forget**. A close must not block a tool call, and the
+`Close` uses `Post`, so the call is **fire-and-forget**. A close must not block a tool call, and the
 window may already be gone.
 
 `TreeHash` is SHA-256 over a **structural** description (`Type(propKeys…)` recursively), first

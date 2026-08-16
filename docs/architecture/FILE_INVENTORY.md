@@ -17,10 +17,10 @@ repository to the compiler and add namespaces no developer declared.
 
 | Project | Files | LOC |
 |---|---|---|
-| `UiMcp` | 6 | 861 |
-| `UiMcp.Abstractions` | 6 | 578 |
-| `UiMcp.Tests` | 9 | 1840 |
-| **Total** | **21** | **3279** |
+| `UiMcp` | 6 | 878 |
+| `UiMcp.Abstractions` | 6 | 598 |
+| `UiMcp.Tests` | 9 | 1899 |
+| **Total** | **21** | **3375** |
 
 The owning `.csproj` gives the attribution. In a .NET repository, the project file does the
 work that a `package.json` does elsewhere. It declares one compilation, its target framework
@@ -43,27 +43,27 @@ and its dependencies.
 
 ## Every file
 
-### `UiMcp.Abstractions` — 6 files, 578 LOC
+### `UiMcp.Abstractions` — 6 files, 598 LOC
 
 | File | LOC | Disposition | Holds |
 |---|---|---|---|
-| `src/UiMcp.Abstractions/CatalogValidator.cs` | 154 | reachable | The nine-component catalog and `Validate` |
-| `src/UiMcp.Abstractions/PropTypes.cs` | 112 | reachable | Prop validators; charset and prototype guards |
-| `src/UiMcp.Abstractions/PathResolver.cs` | 110 | reachable | Path binding and `Display`; the UNKNOWN rule |
-| `src/UiMcp.Abstractions/RenderRules.cs` | 90 | reachable | Render judgement with no WPF |
-| `src/UiMcp.Abstractions/ValidatedNode.cs` | 21 | reachable | `ValidatedNode`, `ValidatedColumn` |
-| `src/UiMcp.Abstractions/UiValidationException.cs` | 13 | reachable | The refusal type |
+| `src/UiMcp.Abstractions/CatalogValidator.cs` | 182 | reachable | The nine-component catalog and `Validate` |
+| `src/UiMcp.Abstractions/PropTypes.cs` | 130 | reachable | Prop validators; charset and prototype guards |
+| `src/UiMcp.Abstractions/PathResolver.cs` | 127 | reachable | Path binding and `Display`; the UNKNOWN rule |
+| `src/UiMcp.Abstractions/RenderRules.cs` | 121 | reachable | Render judgement with no WPF |
+| `src/UiMcp.Abstractions/ValidatedNode.cs` | 23 | reachable | `ValidatedNode`, `ValidatedColumn` |
+| `src/UiMcp.Abstractions/UiValidationException.cs` | 15 | reachable | The refusal type |
 
-### `UiMcp` — 6 files, 861 LOC
+### `UiMcp` — 6 files, 878 LOC
 
 | File | LOC | Disposition | Holds |
 |---|---|---|---|
-| `src/UiMcp/Rendering/TreeRenderer.cs` | 268 | reachable | `ValidatedNode` → WPF `UIElement` |
-| `src/UiMcp/Tools/UiTools.cs` | 140 | **test-only** ⚠ | The four MCP tools |
-| `src/UiMcp/Hosting/UiThreadHost.cs` | 130 | reachable | STA thread, dispatcher, supervisor |
-| `src/UiMcp/Hosting/UiSurface.cs` | 124 | reachable | The real WPF surface |
-| `src/UiMcp/Program.cs` | 46 | **build-entry** | Composition root, `Main` |
-| `src/UiMcp/Hosting/IUiSurface.cs` | 37 | reachable | `IUiSurface`, `UiSurfaceStatus` |
+| `src/UiMcp/Rendering/TreeRenderer.cs` | 314 | reachable | `ValidatedNode` → WPF `UIElement` |
+| `src/UiMcp/Tools/UiTools.cs` | 159 | **test-only** ⚠ | The four MCP tools |
+| `src/UiMcp/Hosting/UiSurface.cs` | 158 | reachable | The real WPF surface |
+| `src/UiMcp/Hosting/UiThreadHost.cs` | 150 | reachable | STA thread, dispatcher, supervisor |
+| `src/UiMcp/Program.cs` | 54 | **build-entry** | Composition root, `Main` |
+| `src/UiMcp/Hosting/IUiSurface.cs` | 43 | reachable | `IUiSurface`, `UiSurfaceStatus` |
 
 > ⚠ **`UiTools.cs` is NOT dead code.** Its `test-only` disposition is an artifact of static
 > analysis, and the docs would be lying if they repeated it without saying so. `Program.cs`
@@ -76,19 +76,19 @@ and its dependencies.
 > independent process observed. Any file reachable only through reflection or attribute
 > discovery will show this way.
 
-### `UiMcp.Tests` — 9 files, 1840 LOC
+### `UiMcp.Tests` — 9 files, 1899 LOC
 
 | File | LOC | Disposition | Covers |
 |---|---|---|---|
-| `tests/UiMcp.Tests/TreeRendererTests.cs` | 349 | test | The nine-way switch, truncation caps, `$item` scope, tone map, inert text |
-| `tests/UiMcp.Tests/UiToolsTests.cs` | 214 | test | The four tools, refusal ordering |
-| `tests/UiMcp.Tests/CatalogValidatorTests.cs` | 212 | test | Catalog, props, caps, boundaries |
-| `tests/UiMcp.Tests/UiSurfaceTests.cs` | 181 | test | Window lifetime, idempotent open, structural hash, null-not-zero status |
-| `tests/UiMcp.Tests/UiThreadHostTests.cs` | 147 | test | STA, marshalling, supervisor, shutdown |
-| `tests/UiMcp.Tests/CatalogRendererSeamTests.cs` | 144 | test | Validator ↔ renderer agreement, exhaustive over the catalog |
-| `tests/UiMcp.Tests/PathResolverTests.cs` | 128 | test | Paths, indices, `$item`, UNKNOWN |
-| `tests/UiMcp.Tests/RenderRulesTests.cs` | 123 | test | Units, deltas, gauge clamp, empty text |
-| `tests/UiMcp.Tests/StaFixture.cs` | 26 | test | Shared STA thread — infrastructure, not a test |
+| `tests/UiMcp.Tests/TreeRendererTests.cs` | 419 | test | The nine-way switch, truncation caps, `$item` scope, tone map, inert text |
+| `tests/UiMcp.Tests/UiToolsTests.cs` | 261 | test | The four tools, refusal ordering |
+| `tests/UiMcp.Tests/CatalogValidatorTests.cs` | 259 | test | Catalog, props, caps, boundaries |
+| `tests/UiMcp.Tests/RenderRulesTests.cs` | 215 | test | Units, deltas, gauge clamp, empty text |
+| `tests/UiMcp.Tests/UiSurfaceTests.cs` | 213 | test | Window lifetime, idempotent open, structural hash, null-not-zero status |
+| `tests/UiMcp.Tests/UiThreadHostTests.cs` | 173 | test | STA, marshalling, supervisor, shutdown |
+| `tests/UiMcp.Tests/PathResolverTests.cs` | 166 | test | Paths, indices, `$item`, UNKNOWN |
+| `tests/UiMcp.Tests/CatalogRendererSeamTests.cs` | 162 | test | Validator ↔ renderer agreement, exhaustive over the catalog |
+| `tests/UiMcp.Tests/StaFixture.cs` | 31 | test | Shared STA thread — infrastructure, not a test |
 
 ## Not scanned
 
@@ -102,8 +102,9 @@ and its dependencies.
 | `examples/starship-view.json` | Sample tree |
 | `docs/` | This documentation |
 
-`Directory.Build.props` is worth naming despite not being scanned: it is the **single source**
-of the version, which `Program.ServerVersion` reads off the assembly rather than duplicating.
+`Directory.Build.props` is worth naming despite not being scanned. The file is the **single
+source** of the version, which `Program.ServerVersion` reads off the assembly rather than
+duplicating.
 
 ## Verification
 
@@ -114,7 +115,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 |---|---|---|
 | totalFiles | 21 | file-inventory.json |
 | totalSourceFiles | 21 | dependency-graph.json |
-| totalLinesOfCode | 3279 | dependency-graph.json |
+| totalLinesOfCode | 3375 | dependency-graph.json |
 | orphanedFiles | 0 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |

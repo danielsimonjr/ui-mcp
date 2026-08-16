@@ -22,13 +22,13 @@ The previous run flagged **2** exports: `ComponentSpec` and `PropRule`, both in
 `CatalogValidator.cs`, both classified `referencedInModule` — used, but only inside the file that
 declares them.
 
-That classification was correct, and it was a **real finding**: both were `public` while every
+That classification was correct, and the result was a **real finding**: both were `public` while every
 one of their 15 occurrences was in one file. A consumer handed a `ComponentSpec` could do nothing
 with it, because `Validate()` is the only entry point and it takes JSON. They described how the
 catalog is *built*, which is not a fact `UiMcp.Abstractions` needs to publish.
 
 **Both are now `internal`.** The count went 2 → 0 because the surface actually narrowed, not
-because the analysis was relaxed. `dotnet build` reports 0 warnings and 0 errors, and all 217
+because the analysis was relaxed. `dotnet build` reports 0 warnings and 0 errors, and all 223
 tests pass — nothing outside the file was relying on them, exactly as the analysis said.
 
 That change is the intended use of this artifact. A `referencedInModule` entry is not a bug
@@ -49,8 +49,8 @@ That search is the same class of text-level heuristic that splits `referencedInM
 reader has to discover them later.
 
 - **The search can over-count.** A name in another file's comment or string literal counts as
-  a use. The analysis therefore **reports less dead code than the truth, and never more**. That
-  is the safe direction for a list whose entries read as deletion candidates.
+  a use. The analysis therefore **reports less dead code than the truth, and never more**. Under-
+  reporting is the safe direction for a list whose entries read as deletion candidates.
 - **Reflection is invisible.** Neither method sees a type that only `Activator.CreateInstance`,
   DI-by-convention, or attribute discovery reaches. `UiTools` is such a type. A source
   generator finds it from `[McpServerToolType]`, so it appears `test-only` in the graph while
@@ -63,7 +63,7 @@ symbols. That assumption holds for TypeScript and Python. It fails for C#. Under
 assumption the analysis flagged **15 of 20 exports in this repository, and called 9 of them
 genuine deletion candidates**. The 9 included `IUiSurface`, `PathResolver` and `TreeRenderer`,
 which are three of the most-used types here. Every count was internally consistent and every
-gate passed, and that is what made the report dangerous.
+gate passed, and the agreement is what made the report dangerous.
 
 ## Files with no in-repo importer
 

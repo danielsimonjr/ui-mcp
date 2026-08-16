@@ -4,6 +4,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Every per-file LOC figure in the architecture documents was wrong, and had been from the
+  start.** `FILE_INVENTORY.md` states that its per-file numbers come from `file-inventory.json`'s
+  `loc` field. Not one of the 21 matched it, and all were low, so the per-file tables never
+  summed to their own project totals — 2,769 against a stated 3,279. The tables and the totals
+  were two sources of truth for the same fact, presented identically, and the gate reads only
+  the totals. Every figure is now taken from `file-inventory.json`, and the three per-project
+  tables now sum to 3,375 exactly. `TEST_COVERAGE.md`'s per-component LOC column carried the
+  same stale numbers and is corrected with them.
+- **Stale counts after `64b7008` changed the renderer.** `totalLinesOfCode` 3,279 → **3,375**
+  (the drift gate caught this one), and with it the prose the gate cannot read: **217 → 223
+  tests**, `~6 s` → `~10 s`, test lines 1,840 → 1,899, `Program.cs` 46 → 54 lines, and the
+  window-test share re-measured as ~8 s of the ~10 s run rather than ~5.6 s of ~6 s. Test count
+  and duration verified by running `dotnet test`, not by inference.
+- **Seven ambiguous references across four documents**, found when the STE checker gained a
+  merged clause-anchored rule that sees mid-sentence demonstratives. Each is fixed by naming the
+  referent. No measurement changed.
+
 ## [0.1.2] - 2026-08-15
 
 ### Fixed

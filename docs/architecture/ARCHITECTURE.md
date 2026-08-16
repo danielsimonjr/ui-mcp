@@ -173,7 +173,7 @@ deployed plugin found this defect. No unit test found it.
 
 ### `UiValidationException` carries its own type
 
-The MCP layer must tell a **deliberate refusal** from an internal fault. It must then report
+The MCP layer must tell a **deliberate refusal** from an internal fault. The layer must then report
 the refusal word for word. Without its own type, the SDK turns every non-MCP exception into
 "An error occurred invoking '&lt;tool&gt;'". That message replaces an actionable
 `Note: unknown prop "onclick"` with nothing useful, and it hides the guard that just did its

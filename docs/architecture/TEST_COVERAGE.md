@@ -1,6 +1,6 @@
 # ui-mcp — Test Coverage
 
-**217 tests, 0 failures, 0 skipped** (`dotnet test`, ~6 s). 9 test files, 1,840 lines — 56% of
+**223 tests, 0 failures, 0 skipped** (`dotnet test`, ~10 s). 9 test files, 1,899 lines — 56% of
 the repository's source lines are tests.
 
 No line-coverage instrumentation is configured, so this file reports coverage **by component and
@@ -11,17 +11,17 @@ nobody measured one.
 
 | Component | LOC | Test file | Tests | Assessment |
 |---|---|---|---|---|
-| `CatalogValidator` + `PropTypes` | 266 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
-| `PathResolver` | 110 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
-| `RenderRules` | 90 | `RenderRulesTests.cs` | 25 Fact | Thorough |
-| `UiThreadHost` | 130 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
-| `UiTools` | 140 | `UiToolsTests.cs` | 15 Fact | Thorough |
-| `TreeRenderer` | 268 | `TreeRendererTests.cs` | 26 Fact + 3 Theory | Thorough |
-| `UiSurface` | 124 | `UiSurfaceTests.cs` | 12 Fact | Good; window paths need a desktop |
+| `CatalogValidator` + `PropTypes` | 312 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
+| `PathResolver` | 127 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
+| `RenderRules` | 121 | `RenderRulesTests.cs` | 25 Fact | Thorough |
+| `UiThreadHost` | 150 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
+| `UiTools` | 159 | `UiToolsTests.cs` | 15 Fact | Thorough |
+| `TreeRenderer` | 314 | `TreeRendererTests.cs` | 26 Fact + 3 Theory | Thorough |
+| `UiSurface` | 158 | `UiSurfaceTests.cs` | 12 Fact | Good; window paths need a desktop |
 | *validator ↔ renderer seam* | — | `CatalogRendererSeamTests.cs` | 3 Fact + 3 Theory | Exhaustive over the catalog |
-| `Program` | 46 | none | 0 | Composition root; exercised by every end-to-end run |
+| `Program` | 54 | none | 0 | Composition root; exercised by every end-to-end run |
 
-`StaFixture.cs` (26 lines) is shared infrastructure, not a test: one STA thread, built from the
+`StaFixture.cs` (31 lines) is shared infrastructure, not a test: one STA thread, built from the
 same `UiThreadHost` production uses.
 
 ## What is tested well
@@ -98,13 +98,13 @@ untoned panel grey.
 ### 1. `dotnet test` does not run in CI
 
 `.github/workflows/ci.yml` builds on `windows-latest` and gates bundle freshness plus an MCP
-`initialize` handshake against the shipped artifact, but never runs the 217 tests. They are a
+`initialize` handshake against the shipped artifact, but never runs the 223 tests. They are a
 local habit, not a gate. Recorded in `todo.md`.
 
 ### 2. The window-showing tests need an interactive desktop
 
-`UiSurfaceWindowTests` briefly opens and closes real windows, and accounts for ~5.6 s of the ~6 s
-run. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
+`UiSurfaceWindowTests` briefly opens and closes real windows. Its 8 tests account for ~8 s of the
+~10 s run. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
 informative** failure, not something to paper over with a skip. See SPEC 10.1: the desktop
 assumption is retired for the interactive path and explicitly *not* for S4U.
 
@@ -115,7 +115,7 @@ it.
 
 ### 3. `Program.cs` has no direct test
 
-46 lines of composition root. Covered transitively by every end-to-end run of the shipped
+54 lines of composition root. Covered transitively by every end-to-end run of the shipped
 binary, which is the only place its wiring is observable at all.
 
 ## Verification
@@ -126,12 +126,12 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 21 | dependency-graph.json |
-| totalLinesOfCode | 3279 | dependency-graph.json |
+| totalLinesOfCode | 3375 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the **217 tests / 0 failures / ~6 s** figure is `dotnet test`
+**Claims the gate cannot hold:** the **223 tests / 0 failures / ~10 s** figure is `dotnet test`
 output. A count of the `Fact` and `Theory` attributes in each test file gives the per-file
 numbers. Note that the attribute count and the executed-test count differ, because a `Theory`
-runs one time for each `InlineData` row or `MemberData` row. The 1,840 test lines and the per-component LOC come from
+runs one time for each `InlineData` row or `MemberData` row. The 1,899 test lines and the per-component LOC come from
 `file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
 applying that mutation, running the suite, and restoring the file to a verified identical hash.
