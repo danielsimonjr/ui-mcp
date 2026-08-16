@@ -4,8 +4,8 @@
 the repository's source lines are tests.
 
 No line-coverage instrumentation is configured, so this file reports coverage **by component and
-by behaviour**, which is the honest thing to report. It does not report a percentage, because
-none was measured.
+by behaviour**, which is the honest thing to report. This document gives no percentage, because
+nobody measured one.
 
 ## By component
 
@@ -30,9 +30,9 @@ same `UiThreadHost` production uses.
 sides — 500/501 characters, 64/65 children, depth 11/13, 8/9 table columns. A rejection test that
 never proves the accepting case still works is only half a test.
 
-**The missing-vs-zero invariant is tested as a pair** at every layer it appears: a real `0` must
-display as `"0"`, a missing value must never display as `"0"`, and a surface that has never
-rendered must report `null` — not `0` — for its node count.
+**The tests treat the missing-against-zero rule as a pair**, at every layer where it appears.
+A real `0` must display as `"0"`. A missing value must never display as `"0"`. A surface that
+has never rendered must report `null` for its node count, and never `0`.
 
 **The most important tool test needs no desktop.** `UiToolsTests` uses a `SpySurface` to assert
 the negative — that `Render` was *never called* when a tree is invalid. No screenshot can prove
@@ -40,8 +40,8 @@ that.
 
 **The renderer's truncation caps are asserted as APPLIED, not merely declared.** `RenderRules`
 tests the constants; `TreeRendererTests` supplies 70 `Repeat` items and 250 `Table` rows and
-counts what actually came out. Those are different claims, and only the second can regress
-silently.
+counts what actually came out. The two are different claims, and only the second can fail
+without a warning.
 
 **The validator↔renderer seam is covered exhaustively over the catalog**, not sampled.
 `EveryCatalogComponentIsCovered` fails if a tenth component is ever added without a seam case —
@@ -64,11 +64,12 @@ reverted and the file verified **byte-identical by SHA-256**.
 | `NodeCount` defaulted to `0` instead of `null` | exactly 1 — `ASurfaceThatHasNeverRenderedReportsNulls_NotZeros` |
 | `Describe` returns a constant | exactly 1 — `ADifferentTreeStructureHashesDifferently` |
 
-One mutation is worth recording because it **survived**: dropping the type name from `Describe`
-(`n.Type + "("` → `"" + "("`) broke nothing, because the two trees compared still differ by child
-count. That is a weak *mutation*, not a weak test — the property under assertion was never
-broken by it. Replacing it with a constant `Describe` killed the test immediately. Distinguishing
-those two cases is the whole discipline; "the mutation survived" is not automatically a finding.
+One mutation **survived**, and that result is worth a record. The mutation dropped the type
+name from `Describe`, and changed `n.Type + "("` to `"" + "("`. It broke nothing, because the
+two trees under comparison still differ by their child count. The mutation is weak, and the
+test is not: the mutation never broke the property under assertion. A constant `Describe`
+killed the test immediately. To tell those two cases apart is the whole discipline. A mutation
+that survives is not automatically a finding.
 
 ## Two defects were found by writing these tests
 
@@ -76,16 +77,17 @@ Both were confirmed against `AdminLTE/JSON-UI/render.js`, which every ported fil
 source of truth: *"where the two disagree, the JS is right."*
 
 1. **A `Gauge` whose `maxPath` did not resolve drew a bar against a default maximum of 100.** A
-   value of 50 against an unreadable maximum showed as **half full** — a confident measurement
-   against a scale nobody supplied. The JS returns 0 for this case. Root cause: "no max
-   requested" and "a max was requested and could not be resolved" both arrived at
-   `GaugePercent` as a `null`, and only the caller could tell them apart.
+   value of 50 against an unreadable maximum showed as **half full**. That bar is a confident
+   measurement against a scale that nobody supplied. The JS returns 0 for this case. The root
+   cause is a lost difference. "No max requested" and "a max was requested and could not be
+   resolved" both arrived at `GaugePercent` as a `null`. Only the caller could tell them apart.
 
-2. **A tone outside the closed set rendered as Amber — the *attention* colour.** It
-   contradicted the method's own summary ("a tone the renderer does not know is muted") and the
-   JS (`TONE_CLASS[t] || 'stx-muted'`), and it manufactures urgency out of a value the renderer
-   simply failed to understand. Unreachable from a validated tree, but `Render` is public — and
-   an unreachable branch that behaves wrongly is a trap for whoever makes it reachable.
+2. **A tone outside the closed set rendered as Amber, the *attention* colour.** That result
+   contradicted the method's own summary, which says that an unknown tone is muted. It also
+   contradicted the JS (`TONE_CLASS[t] || 'stx-muted'`). The colour manufactures urgency from a
+   value that the renderer simply failed to understand. A validated tree cannot reach the case,
+   but `Render` is public. An unreachable branch that behaves wrongly is a trap for whoever
+   makes it reachable.
 
 Both are fixed, and each fix is pinned by a mutation-proven test. Note that the *absent* tone
 case is pinned separately, so the muted fix cannot later be over-applied and repaint every
@@ -106,9 +108,10 @@ run. On a host with no desktop they fail at `UiSurface.Open` — which is the **
 informative** failure, not something to paper over with a skip. See SPEC 10.1: the desktop
 assumption is retired for the interactive path and explicitly *not* for S4U.
 
-The split between `UiSurfaceTests` (no window, runs anywhere) and `UiSurfaceWindowTests` is
-deliberate: the two groups fail for different reasons — logic versus environment — and a suite
-that cannot tell those apart teaches you to ignore it.
+The split between `UiSurfaceTests` and `UiSurfaceWindowTests` is deliberate. `UiSurfaceTests`
+needs no window and runs anywhere. The two groups fail for different reasons: one for logic,
+the other for the environment. A suite that cannot tell those two apart teaches you to ignore
+it.
 
 ### 3. `Program.cs` has no direct test
 
@@ -127,8 +130,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | testOnlyFiles | 1 | dependency-graph.json |
 
 **Claims the gate cannot hold:** the **217 tests / 0 failures / ~6 s** figure is `dotnet test`
-output. Per-file `Fact`/`Theory` counts were obtained by counting those attributes in each test
-file — note that attribute counts and executed-test counts differ, because a `Theory` runs once
-per `InlineData`/`MemberData` row. The 1,840 test lines and the per-component LOC come from
+output. A count of the `Fact` and `Theory` attributes in each test file gives the per-file
+numbers. Note that the attribute count and the executed-test count differ, because a `Theory`
+runs one time for each `InlineData` row or `MemberData` row. The 1,840 test lines and the per-component LOC come from
 `file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
 applying that mutation, running the suite, and restoring the file to a verified identical hash.

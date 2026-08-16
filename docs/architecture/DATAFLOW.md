@@ -19,9 +19,9 @@ launch UiMcp.exe
   └─ RunAsync()  → serving on stdio
 ```
 
-**No UI thread exists yet.** `UiThreadHost` is constructed as a field of `UiSurface`, but the
-STA thread does not start until the first `Open`. A host with no desktop therefore fails at the
-moment a window is requested — where the error can name what went wrong — rather than at launch.
+**No UI thread exists yet.** `UiSurface` constructs `UiThreadHost` as a field. The STA thread
+does not start until the first `Open` call. A host with no desktop therefore fails when a
+caller asks for a window, and not at launch. The error can then name what went wrong.
 
 ## `ui_render` — the path that matters
 
@@ -58,9 +58,10 @@ agent ──JSON-RPC──▶ stdio ──▶ MCP SDK ──▶ UiTools.Render(t
                        {ok:true, nodeCount, treeHash} ──▶ agent
 ```
 
-**Step 3 completes before step 4 begins.** Validation is never interleaved with drawing. A
-partially rendered invalid tree looks like a working display while silently omitting whatever
-failed — which is the same "silence reads as health" defect `UNKNOWN` exists to prevent.
+**Step 3 completes before step 4 begins.** The system never mixes validation with drawing. A
+part-rendered invalid tree looks like a working display, and it quietly leaves out whatever
+failed. That result is the same "silence reads as health" defect that `UNKNOWN` prevents
+elsewhere.
 
 **Step 5 re-reads rather than recomputing.** An earlier version hashed the raw JSON here while
 the surface hashed the structure, so `ui_render` and `ui_status` reported different values under
@@ -100,9 +101,9 @@ ValidatedNode ──▶ switch (node.Type)
                      └─ container (Panel / Row) → recurse over Children
 ```
 
-Two things never cross this boundary: **the tree never supplies a colour** (only a `tone` name,
-mapped to a brush by the renderer), and **the tree never supplies an element type** (only a
-component name, mapped to a WPF type by the `switch`).
+Two things never cross this boundary. **The tree never supplies a colour.** It supplies a
+`tone` name, and the renderer maps that name to a brush. **The tree never supplies an element
+type.** It supplies a component name, and the `switch` maps that name to a WPF type.
 
 ## `ui_status`
 
@@ -144,7 +145,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | totalSourceFiles | 21 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the sequences above are traced by reading `UiTools.Render`,
-`UiSurface.Render`, `TreeRenderer.Render` and `UiThreadHost`. A dependency graph shows *that*
-these files depend on each other, never *in what order* their calls run — the ordering is the
-part that carries the safety property, and it is source-read.
+**Claims that the gate cannot hold.** A reading of `UiTools.Render`, `UiSurface.Render`,
+`TreeRenderer.Render` and `UiThreadHost` gives every sequence above. A dependency graph shows
+*that* these files depend on each other. It never shows *the order* of their calls. The order
+carries the safety property, and a reading of the source gives it.

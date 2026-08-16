@@ -47,9 +47,9 @@ On refusal — and the UI is **not** touched:
 { "ok": false, "rejected": "Note: unknown prop \"onclick\"" }
 ```
 
-Both parameter shapes are accepted deliberately. When these were typed `string`, an
-object-shaped call failed inside SDK parameter binding *before the method ran*, making every
-refusal path unreachable; the caller saw only "An error occurred invoking 'ui_render'".
+The tool accepts both parameter shapes on purpose. While the parameters were `string`, an
+object-shaped call failed inside SDK parameter binding *before the method ran*. No refusal path
+could run, so the caller saw only "An error occurred invoking 'ui_render'".
 
 ### `ui_status`
 
@@ -67,9 +67,9 @@ measured is `UNKNOWN`, never `0`.**
 }
 ```
 
-`windowAlive` is read live from the window, not from a cached flag. `lastFault` is `"none"`
-when nothing was absorbed; otherwise it is the message of the last unawaited UI-thread fault,
-and the display should be treated as degraded.
+`windowAlive` comes live from the window, and not from a cached flag. `lastFault` is `"none"`
+when the supervisor absorbed nothing. Any other value is the message of the last unawaited
+fault on the UI thread. Treat the display as degraded when that happens.
 
 ### `ui_close`
 
@@ -122,10 +122,17 @@ Dotted, with array indices: `sections.roster.live`, `sections.disk.drives[0].fre
 `grid[1][0]`, bare `[2]`. Inside a `Repeat` or `Table`, `$item` addresses the current element
 (`$item` alone is the item itself; `$item.name` is a key on it).
 
-**An unresolvable path renders `UNKNOWN`, never `0`.** That covers an absent key, an index out
-of range, indexing a non-array, a key on a scalar, a refused path, and `$item` with no scope.
-JSON `null` also renders `UNKNOWN` — a key present but null carries no more information than an
-absent one.
+**An unresolvable path renders `UNKNOWN`, never `0`.** The rule covers six cases:
+
+- an absent key,
+- an index out of range,
+- an index on a value that is not an array,
+- a key on a scalar,
+- a refused path,
+- `$item` with no scope.
+
+JSON `null` also renders `UNKNOWN`. A key that is present but null carries no more information
+than an absent key.
 
 Value formatting: numbers round-trip in `InvariantCulture`; `true`/`false` become `YES`/`NO`;
 an array becomes its length; an object becomes `OBJ`.
@@ -141,8 +148,8 @@ an array becomes its length; an object becomes `OBJ`.
 | `Repeat` items rendered | 64 | **truncated**, not refused |
 | `Table` rows rendered | 200 | **truncated**, not refused |
 
-The last two truncate because they are bounded by the *data*, which the agent may not control;
-the rest are properties of the tree, which it does.
+The last two caps truncate because the *data* bounds them, and the agent may not control the
+data. The other caps are properties of the tree, which the agent does control.
 
 ---
 
@@ -187,11 +194,11 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | totalSourceFiles | 21 | dependency-graph.json |
 | duplicateCount | 0 | duplicate-symbols.json |
 
-**Claims the gate cannot hold:** the **four tools**, their parameters, defaults and response
-shapes come from reading `UiTools.cs`; the **nine components** and every prop rule come from
-`CatalogValidator.cs` and `PropTypes.cs`. repo_map counts exported *types*, so `totalExports`
-(23) covers the 13 types listed above **plus the test classes and fixtures** — it is not a count
-of tools, components or props. `ComponentSpec` and `PropRule` are deliberately absent from that
+**Claims that the gate cannot hold.** A reading of `UiTools.cs` gives the **four tools**, their
+parameters, their defaults and their response shapes. A reading of `CatalogValidator.cs` and
+`PropTypes.cs` gives the **nine components** and every prop rule. repo_map counts exported
+*types*. `totalExports` (23) therefore covers the 13 types listed above **and the test classes
+and fixtures**. The number is not a count of tools, components or props. `ComponentSpec` and `PropRule` are deliberately absent from that
 table: both were narrowed to `internal`, because every use of either is inside
 `CatalogValidator.cs`. The tool list was additionally confirmed over the wire: a real `tools/list`
 against the shipped binary returned exactly `ui_open`, `ui_render`, `ui_status`, `ui_close`.

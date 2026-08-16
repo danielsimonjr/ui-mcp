@@ -10,10 +10,10 @@ A C# `using` names a **namespace**, not a file. `using UiMcp.Abstractions;` ther
 an edge to **every one of the six files declaring that namespace**, whether or not the importing
 file uses anything from each.
 
-This is not a defect in the analysis; it is what the language expresses. But it means the raw
-edge counts below **over-state coupling at file granularity**, and a reader must not conclude
-from the table that, say, `IUiSurface.cs` depends on `PathResolver.cs` — it does not, it merely
-imports the namespace they share.
+The behaviour is not a defect in the analysis. The behaviour is what the language expresses.
+The raw edge counts below therefore **over-state the coupling between files**. A reader must
+not conclude from the table that `IUiSurface.cs` depends on `PathResolver.cs`. No such
+dependency exists. `IUiSurface.cs` only imports the namespace that the two files share.
 
 Consequences visible in this graph:
 
@@ -30,8 +30,8 @@ UiMcp.Tests ──▶ UiMcp ──▶ UiMcp.Abstractions
      └──────────────────────────┘
 ```
 
-`UiMcp.Abstractions` depends on **nothing in this repo** and on no WPF assembly. That is the
-architectural boundary, enforced by its `net9.0` target framework.
+`UiMcp.Abstractions` depends on **nothing in this repository** and on no WPF assembly. That
+independence is the architectural boundary. The `net9.0` target framework enforces it.
 
 ## External dependencies
 
@@ -64,9 +64,10 @@ packages.
 | `Hosting/UiThreadHost.cs` | **none** | — | `System.Windows.Threading` |
 | `Rendering/TreeRenderer.cs` | 6 × Abstractions | — | `System.Text.Json`, `System.Windows{,.Controls,.Controls.Primitives,.Media}` |
 
-`UiThreadHost.cs` having **zero** internal dependencies is worth noting: the concurrency
-primitive knows nothing about the catalog, the renderer or MCP. It is the most reusable file in
-the repository and the easiest to reason about in isolation.
+`UiThreadHost.cs` has **zero** internal dependencies, and that fact is worth note. The
+concurrency primitive knows nothing about the catalog, the renderer or MCP. `UiThreadHost.cs`
+is therefore the most reusable file in the repository, and also the easiest file to
+understand alone.
 
 ### `UiMcp.Abstractions` project
 
@@ -83,9 +84,9 @@ Every file has **zero internal dependencies** and **zero external dependencies**
 
 The intra-project references (`CatalogValidator` → `PropTypes` → `ValidatedNode`) do not appear
 as edges because they share the single `UiMcp.Abstractions` namespace and need no `using`.
-**This is the namespace-granularity caveat in its other direction:** same-namespace coupling is
-invisible to the graph, so this project's internal structure must be read from
-[COMPONENTS.md](COMPONENTS.md), not inferred from zero edges.
+**The namespace granularity works in the other direction here.** Coupling inside one namespace
+is invisible to the graph. Read the internal structure of this project from
+[COMPONENTS.md](COMPONENTS.md). Do not read it from the zero edges.
 
 ### Tests
 
@@ -116,13 +117,14 @@ then the file in that project declaring `Main`.
 
 ### `UiTools.cs` is test-only in the graph and live in production
 
-`Program.cs` registers tools via `.WithToolsFromAssembly()`, which discovers `[McpServerTool]`
-methods with a **source generator**. There is no `using UiMcp.Tools;` anywhere in `UiMcp`, so
+`Program.cs` registers the tools with `.WithToolsFromAssembly()`. That call finds each
+`[McpServerTool]` method with a **source generator**. There is no `using UiMcp.Tools;` anywhere in `UiMcp`, so
 no static edge exists for the analysis to follow, and the only in-repo importer is
 `UiToolsTests.cs`.
 
-Verified live rather than assumed: `tools/list` against the shipped binary returns all four
-tools, and an end-to-end session drove a real window that an independent process observed.
+A live test confirms this, and no part of it is an assumption. A `tools/list` call against the
+shipped binary returns all four tools. An end-to-end session then drew a real window, and an
+independent process observed that window.
 
 **Any file reached only through reflection, attribute discovery or DI-by-convention will look
 this way.** Treat a `test-only` or `orphan` disposition on such a file as a question, not a

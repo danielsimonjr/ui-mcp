@@ -22,8 +22,9 @@ repository to the compiler and add namespaces no developer declared.
 | `UiMcp.Tests` | 9 | 1840 |
 | **Total** | **21** | **3279** |
 
-Attribution is by owning `.csproj` — for a .NET repo the project file is what a `package.json`
-is elsewhere: the unit declaring one compilation, its target framework and its dependencies.
+The owning `.csproj` gives the attribution. In a .NET repository, the project file does the
+work that a `package.json` does elsewhere. It declares one compilation, its target framework
+and its dependencies.
 
 ## By area and disposition
 
@@ -119,8 +120,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | entryRoots | 1 | dependency-graph.json |
 | noImporterFileCount | 0 | unused-analysis.json |
 
-**Claims the gate cannot hold:** per-project file/LOC splits and per-file LOC come from
-`file-inventory.json`'s `files` array (each entry carries `package` and `loc`), summed here —
-the gate checks the totals, not the breakdown. The **39 vs 21** split was measured by
-enumerating `.cs` files in the working tree with and without `obj`/`bin`. The "Holds" and
-"Covers" columns are source-read.
+**Claims that the gate cannot hold.** The split of files and lines for each project comes from
+the `files` array in `file-inventory.json`. Each entry there carries a `package` value and a
+`loc` value, and this document adds them. The gate checks the totals. The gate does not check
+the breakdown. A count of the `.cs` files in the working tree, with and without `obj` and
+`bin`, gave the **39 against 21** split. A reading of the source gave the "Holds" column and
+the "Covers" column.

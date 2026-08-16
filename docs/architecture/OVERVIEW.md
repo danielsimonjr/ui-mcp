@@ -36,9 +36,10 @@ Three projects. The split is a compiler-enforced boundary, not a convention.
 | `src/UiMcp` | `net9.0-windows10.0.19041.0` | MCP host, tool surface, STA thread host, WPF renderer | 6 / 861 |
 | `tests/UiMcp.Tests` | `net9.0-windows10.0.19041.0` | xunit + FluentAssertions + Moq | 9 / 1840 |
 
-**`Abstractions` targets plain `net9.0` deliberately.** The spec requires it not to reference
-WPF; a non-Windows target framework makes that a compiler guarantee rather than a habit. It is
-also what lets every judgement in the system be tested on a runner with no desktop.
+**`Abstractions` targets plain `net9.0` deliberately.** The spec requires that the project
+does not reference WPF. A non-Windows target framework makes that requirement a compiler
+guarantee instead of a habit. The same choice lets a runner with no desktop test every
+judgement in the system.
 
 ```
 Program.cs ──▶ UiTools ──▶ IUiSurface ──▶ UiSurface ──▶ UiThreadHost (STA)
@@ -91,8 +92,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | orphanedFiles | 0 | dependency-graph.json |
 | duplicateCount | 0 | duplicate-symbols.json |
 
-**Claims the gate cannot hold**, stated with their basis: the **four MCP tools** and **nine
-catalog components** are confirmed by direct source reading of `UiTools.cs` and
-`CatalogValidator.cs`, not by a repo_map metric — repo_map counts exported *types*, and a tool
-is a method. The **217 tests** figure is `dotnet test` output, not a graph metric. The
-**39 vs 21** `.cs` file split was measured by enumerating the working tree.
+**Claims that the gate cannot hold.** Each claim below gives its basis. A direct reading of
+`UiTools.cs` and `CatalogValidator.cs` confirms the **four MCP tools** and the **nine catalog
+components**. No repo_map metric gives them: repo_map counts exported *types*, and a tool is a
+method. The **217 tests** figure comes from `dotnet test` output, and not from a graph metric. A
+count of the files in the working tree gave the **39 against 21** split.

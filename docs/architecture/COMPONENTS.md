@@ -62,12 +62,14 @@ public static object Columns(JsonElement v);  // ≤8 ValidatedColumn, each path
 The path charset is `^[A-Za-z0-9_.\[\]]+$` — anchored and deliberately narrow. Quotes, slashes,
 semicolons and whitespace are absent **by construction**, not blocked by a denylist.
 
-`$item` is handled as a **literal prefix**, not by adding `$` to the charset. Widening the
-charset would have been one character of diff and would have legalised every other use of `$`
-at the same time; `$item.drive` is legal while `$other`, `$` and `a$b` stay refused.
+`PropTypes.Path` handles `$item` as a **literal prefix**, and does not add `$` to the charset.
+A wider charset would have been one character of difference, and it would have made every
+other use of `$` legal at the same time. `$item.drive` is legal. `$other`, `$` and `a$b` stay
+refused.
 
-`Columns` routes each column's `valuePath` through `Path`, so the prototype guard reaches
-*inside* the array — a nested path is exactly where a boundary check tends to be forgotten.
+`Columns` sends each column's `valuePath` through `Path`. The prototype guard therefore
+reaches *inside* the array. A nested path is where a writer most often forgets a boundary
+check.
 
 ### `CatalogValidator.cs` — the vocabulary and the boundary
 
@@ -97,11 +99,20 @@ The nine components and their props:
 | `Table` | `fromPath`, `columns` | `emptyText` | no |
 | `Note` | `text` | `tone` | no |
 
-Rejection paths, each throwing with the component and prop named: depth > 12, non-object node,
-missing/non-string `type`, unknown component, **unknown prop**, missing required prop, children
-on a component that accepts none, non-array children, > 64 children. A failing prop validator
-is re-wrapped as `"{type}.{key}: {message}"` — `"expected string"` alone is unactionable in a
-60-node tree.
+The validator throws on each rejection path below, and names the component and the prop:
+
+- a depth greater than 12,
+- a node that is not an object,
+- a `type` that is missing or is not a string,
+- an unknown component,
+- an **unknown prop**,
+- a missing required prop,
+- children on a component that accepts none,
+- children that are not an array,
+- more than 64 children.
+
+A failing prop validator becomes `"{type}.{key}: {message}"`. The message `"expected string"`
+alone tells a reader nothing useful in a tree of 60 nodes.
 
 ### `PathResolver.cs` — binding, and the UNKNOWN rule
 
@@ -143,9 +154,9 @@ public static double  GaugePercent(JsonElement? value, JsonElement? max);  // 0�
 public static string  EmptyText(string? supplied);            // "none" when blank
 ```
 
-`GaugePercent` returns `0` for a missing value because a bar must have *some* length. The
-distinction between "empty bar" and "no reading" is carried by the **label**, which shows
-`UNKNOWN` — a zero-length bar with no `UNKNOWN` beside it is the green-zero failure again.
+`GaugePercent` returns `0` for a missing value, because a bar must have *some* length. The
+**label** carries the difference between "empty bar" and "no reading", and it shows `UNKNOWN`.
+A bar of zero length with no `UNKNOWN` beside it is the green-zero failure again.
 
 ---
 
@@ -194,8 +205,9 @@ public sealed class UiTools
 tree → *only then* `_surface.Render(...)`. Every failure returns `{ok: false, rejected: …}`
 with the reason, rather than throwing.
 
-`TryUnwrap` accepts a JSON value that is either the payload itself or a JSON string containing
-it, returning `false` with a reason instead of throwing so the caller gets a readable rejection.
+`TryUnwrap` accepts a JSON value in two shapes: the payload itself, or a JSON string that holds
+the payload. It returns `false` with a reason instead of throwing, so the caller gets a
+rejection that it can read.
 
 ### `Hosting/IUiSurface.cs` — the testability seam
 
@@ -235,9 +247,9 @@ The thread is `IsBackground = true` and `ApartmentState.STA`. Foreground would k
 alive after MCP shutdown, turning a clean exit into a hang that looks like the server ignoring
 SIGTERM.
 
-`InvokeAsync` and `Post` **fail fast** when the host is down rather than queueing onto a
-dispatcher that will never run again — a hang there would present as "the tool call never
-returns", the least diagnosable failure this server could have.
+`InvokeAsync` and `Post` **fail fast** when the host is down. Neither queues work onto a
+dispatcher that will never run again. A hang there would show as "the tool call never returns",
+which is the hardest failure to diagnose that this server could have.
 
 ### `Hosting/UiSurface.cs` — the real WPF surface
 
@@ -248,19 +260,18 @@ public sealed class UiSurface : IUiSurface, IDisposable
 Every member marshals through `UiThreadHost`; no caller ever touches a WPF object on its own
 thread. The UI thread starts **lazily** on first `Open`.
 
-`Status` reads the **live** window state (`_window.IsVisible` on the UI thread) rather than a
-cached flag — the user can close the window with the X at any moment, and a status reporting
-our last *intention* instead of current reality is exactly the confident-wrong answer this
-server must not give. `Window.Closed` clears `_window`/`_content` so a dangling reference never
-later reads as alive.
+`Status` reads the **live** window state with `_window.IsVisible` on the UI thread, and never
+reads a cached flag. The user can close the window with the X at any moment. A status that
+reports the last *intention* instead of the current reality is the confident wrong answer that
+this server must never give. `Window.Closed` clears `_window` and `_content`, so a stale
+reference never later reads as alive.
 
-`Render` **auto-opens** if there is no window: an agent that renders without opening meant to
-display something, and failing on a ceremony step would be pedantry, not safety. Content is
-wrapped in a `ScrollViewer` — a dashboard outgrows the window, and content silently clipped off
-the bottom is a blind spot wearing a layout.
+`Render` **opens a window** when none exists. An agent that renders without an open window
+still meant to display something. A failure on a ceremony step would be pedantry, not safety. A `ScrollViewer` wraps the content, because a dashboard grows past the window.
+Content that the layout quietly cuts off the bottom is a blind spot.
 
-`Close` is **fire-and-forget** via `Post`: closing must not block a tool call, and the window
-may already be gone.
+`Close` uses `Post`, so it is **fire-and-forget**. A close must not block a tool call, and the
+window may already be gone.
 
 `TreeHash` is SHA-256 over a **structural** description (`Type(propKeys…)` recursively), first
 12 hex chars — not over the raw JSON.

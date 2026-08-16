@@ -15,10 +15,10 @@ No exported type name is declared in more than one file.
 
 ## Why this is worth checking here
 
-A duplicate name is rarely a compile error in C# — two types with the same name in **different
-namespaces** coexist happily, and the compiler is satisfied. The cost lands on readers and on
-`using` statements: an ambiguous reference forces an alias or a fully-qualified name at every
-call site, and reviewers start reading the wrong type's source.
+A duplicate name is rarely a compile error in C#. Two types with the same name can live in
+**different namespaces**, and the compiler accepts them. The cost falls on the readers and on
+the `using` statements. An ambiguous reference makes each call site use an alias or a full
+name. A reviewer then starts to read the source of the wrong type.
 
 The near-miss worth naming is that this repository deliberately keeps **two** vocabularies that
 could easily have collided:
@@ -26,19 +26,19 @@ could easily have collided:
 - `UiMcp.Abstractions` holds the validated, WPF-free model (`ValidatedNode`, `ValidatedColumn`).
 - `UiMcp.Rendering` turns those into WPF objects.
 
-Had the renderer introduced its own `Node` or `Column` type, this report would show it. It does
-not, because `TreeRenderer` consumes `ValidatedNode` directly and produces `UIElement` — there
-is no intermediate model, and therefore no second name for the same idea.
+This report would show a `Node` type or a `Column` type if the renderer declared one. The
+report shows neither. `TreeRenderer` takes `ValidatedNode` directly and returns `UIElement`.
+No intermediate model exists, so no second name for one idea exists.
 
 ## The related defect this does not catch
 
-Duplicate *symbols* are clean. The equivalent defect that **did** occur here was a duplicate
-**function** under one name: `ui_render` and `ui_status` each computed a `treeHash`, one over
-raw JSON and one over structure, so the two tools reported different values for the same render.
+Duplicate *symbols* are clean. A duplicate **function** did occur here, under one name.
+`ui_render` and `ui_status` each computed a `treeHash`. One hashed the raw JSON. The other
+hashed the structure. The two tools therefore reported different values for one render.
 
-That is invisible to this analysis — both were private methods, not exported symbols, and they
-had different names in different classes. It was caught by running both tools in one session
-and comparing the output.
+This analysis cannot see that defect. Both methods were private, so neither was an exported
+symbol. The two methods also had different names in different classes. A writer found the
+defect by running both tools in one session and comparing the output.
 
 The fix was to **delete** one and read the value back from the surface, rather than to sync
 them. Two sources of truth for one fact is the recurring defect across this workspace, and
@@ -65,7 +65,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | totalSymbols | 13 | duplicate-symbols.json |
 | totalExports | 23 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the `treeHash` incident is recorded in the repository
-`todo.md` and in `UiTools.Render`'s own source comment; it is history, not a metric. The
-observation about `UiMcp.Rendering` introducing no parallel model is read from
-`TreeRenderer.cs`'s signature — it takes `ValidatedNode` and returns `UIElement`.
+**Claims that the gate cannot hold.** The repository `todo.md` records the `treeHash`
+incident, and so does the source comment in `UiTools.Render`. The incident is history, and not
+a metric. The signature in `TreeRenderer.cs` gives the second claim: the method takes
+`ValidatedNode` and returns `UIElement`, so `UiMcp.Rendering` declares no parallel model.
