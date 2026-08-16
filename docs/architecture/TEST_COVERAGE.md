@@ -89,7 +89,7 @@ source of truth: *"where the two disagree, the JS is right."*
    but `Render` is public. An unreachable branch that behaves wrongly is a trap for whoever
    makes it reachable.
 
-Both are fixed, and each fix is pinned by a mutation-proven test. Note that the *absent* tone
+Both are fixed. A mutation-proven test pins each fix. Note that the *absent* tone
 case is pinned separately, so the muted fix cannot later be over-applied and repaint every
 untoned panel grey.
 
