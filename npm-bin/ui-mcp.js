@@ -22,7 +22,6 @@ child.on("exit", (code, signal) => {
   if (signal) {
     try {
       process.kill(process.pid, signal);
-      setTimeout(() => process.exit(1), 0);
       return;
     } catch {
       process.exit(1);
