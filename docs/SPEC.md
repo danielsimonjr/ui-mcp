@@ -151,7 +151,7 @@ ui-mcp/
 resolver testable on any runner, and it is the seam a future headless or terminal renderer would
 use.
 
-Packages: `ModelContextProtocol` 1.0.* · `Microsoft.Extensions.Hosting` 9.* ·
+Packages: `ModelContextProtocol` 2.2.0 (MCP `2026-07-28`) · `Microsoft.Extensions.Hosting` 9.* ·
 `Microsoft.Extensions.Logging.Console` 9.*.
 
 ---

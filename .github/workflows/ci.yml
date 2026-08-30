@@ -84,6 +84,35 @@ jobs:
           if ($serverInfo.name -ne 'ui-mcp') { Write-Error "no ui-mcp serverInfo in the discover reply"; exit 1 }
           if ($serverInfo.version -ne $expected) { Write-Error "artifact did not report version $expected"; exit 1 }
 
+      - name: Artifact lists tools with MCP 2.0 metadata
+        shell: pwsh
+        run: |
+          $meta = '{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"ci","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}'
+          $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [Diagnostics.Process]::Start($psi)
+          $req = '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":' + $meta + '}}'
+          $p.StandardInput.WriteLine($req)
+          $p.StandardInput.Flush()
+          $line = $p.StandardOutput.ReadLine()
+          $p.Kill()
+          Write-Host "reply: $line"
+          $reply = $line | ConvertFrom-Json -Depth 20
+          $tools = $reply.result.tools
+          if (-not $tools) { Write-Error "tools/list returned no tools"; exit 1 }
+          $names = $tools | ForEach-Object { $_.name }
+          foreach ($name in @('ui_open','ui_render','ui_status','ui_close')) {
+            if ($names -notcontains $name) { Write-Error "tools/list missing $name"; exit 1 }
+          }
+          $status = $tools | Where-Object { $_.name -eq 'ui_status' } | Select-Object -First 1
+          if (-not $status.title) { Write-Error "ui_status missing title"; exit 1 }
+          if (-not $status.annotations.readOnlyHint) { Write-Error "ui_status missing readOnlyHint"; exit 1 }
+          if ($status.annotations.idempotentHint -ne $true) { Write-Error "ui_status idempotentHint not true"; exit 1 }
+          $render = $tools | Where-Object { $_.name -eq 'ui_render' } | Select-Object -First 1
+          if ($render.annotations.idempotentHint -ne $false) { Write-Error "ui_render idempotentHint should be false"; exit 1 }
+
       - name: Artifact still answers legacy initialize
         shell: pwsh
         run: |
