@@ -5,7 +5,7 @@ using UiMcp.Abstractions;
 namespace UiMcp.Tests;
 
 /// <summary>
-/// Ported from AdminLTE/JSON-UI/catalog.js, which is the proven implementation. Where this suite
+/// Ported from danielsimonjr/JSON-UI/catalog.js, which is the proven implementation. Where this suite
 /// and that file disagree, the JS is right and this is a transcription error.
 ///
 /// EVERY REJECTION TEST IS PAIRED WITH A POSITIVE CONTROL (SPEC section 7). A validator that
@@ -129,7 +129,7 @@ public class CatalogValidatorTests
     //
     // FOUND BY RUNNING IT, 2026-08-15. The JS original has the SAME latent bug: catalog.js refuses
     // "$" via its charset while render.js implements a "$item" scope prefix, so every $item path is
-    // rejected before the resolver ever sees it. AdminLTE/JSON-UI/view.json line 332 uses
+    // rejected before the resolver ever sees it. danielsimonjr/JSON-UI/view.json line 332 uses
     // "valuePath": "$item", which means the HTML console refuses its own view tree. Two components
     // agreed on a feature and disagreed on its syntax, and nothing tested the seam between them.
     // Only "$item" is special. "$" is NOT added to the general charset.

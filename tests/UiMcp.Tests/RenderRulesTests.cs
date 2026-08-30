@@ -10,7 +10,7 @@ namespace UiMcp.Tests;
 /// empty list say something - and none of it needs a window. The WPF layer that consumes these is
 /// then thin enough to be obviously correct by reading it.
 ///
-/// Ported from AdminLTE/JSON-UI/render.js. Where they disagree, the JS is right.
+/// Ported from danielsimonjr/JSON-UI/render.js. Where they disagree, the JS is right.
 /// </summary>
 public class RenderRulesTests
 {

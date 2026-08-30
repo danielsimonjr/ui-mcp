@@ -56,7 +56,7 @@ that exits non-zero when the code moves
 |---|---|
 | `Windows-mcp` | Structural template: C#, bundled exe, plugin + `.mcp.json` wiring |
 | `json-render` | Source of the constrained-catalog idea. No shared code — that is React/Next; this is WPF |
-| `AdminLTE/JSON-UI/` | The same catalog and renderer in vanilla JS, rendering to HTML |
+| `danielsimonjr/JSON-UI/` | The same component catalog as a TypeScript library (React renderer + headless renderer). The source of truth for component props, visibility conditions, and path resolution semantics. |
 | `~/.claude/scripts/starship-console.ps1` | Reference implementation of this renderer against WPF |
 
 ## Build

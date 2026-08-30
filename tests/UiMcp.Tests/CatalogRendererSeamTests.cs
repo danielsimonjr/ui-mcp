@@ -109,7 +109,7 @@ public class CatalogRendererSeamTests : IClassFixture<StaFixture>
     public void ItemScopeIsAcceptedByTheValidatorAndImplementedByTheResolver()
     {
         // The exact defect, pinned from both sides at once. The JS original still carries it:
-        // AdminLTE/JSON-UI/view.json line 332 uses "$item", which its own catalog.js refuses.
+        // danielsimonjr/JSON-UI/view.json line 332 uses "$item", which its own catalog.js refuses.
         var accepted = () => PropTypes.Path(JsonDocument.Parse("\"$item.freeGb\"").RootElement);
         accepted.Should().NotThrow("the validator must accept what the resolver implements");
 

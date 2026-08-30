@@ -11,7 +11,7 @@ namespace UiMcp.Abstractions;
 /// is what lets the interesting half be tested on any runner, and leaves the WPF layer thin enough
 /// to be checked by reading it.
 ///
-/// Ported from AdminLTE/JSON-UI/render.js. Where they disagree, the JS is right.
+/// Ported from danielsimonjr/JSON-UI/render.js. Where they disagree, the JS is right.
 /// </summary>
 public static class RenderRules
 {

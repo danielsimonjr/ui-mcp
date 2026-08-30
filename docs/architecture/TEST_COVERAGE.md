@@ -73,7 +73,7 @@ that survives is not automatically a finding.
 
 ## Two defects were found by writing these tests
 
-Both were confirmed against `AdminLTE/JSON-UI/render.js`, which every ported file names as the
+Both were confirmed against `danielsimonjr/JSON-UI/render.js`, which every ported file names as the
 source of truth: *"where the two disagree, the JS is right."*
 
 1. **A `Gauge` whose `maxPath` did not resolve drew a bar against a default maximum of 100.** A

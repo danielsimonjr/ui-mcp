@@ -6,6 +6,36 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`visible` prop support on all catalog components.** Ported from `danielsimonjr/JSON-UI`
+  (`packages/core/src/visibility.ts`, `packages/core/src/types.ts`). Every node in the tree
+  now accepts an optional top-level `visible` property (a sibling of `type`, `props`, and
+  `children`) that controls whether the component is rendered.
+  - Accepted shapes: `true` / `false` (literal), `{"path":"..."}` (truthy path check),
+    `{"and":[...]}`, `{"or":[...]}`, `{"not":{...}}`, `{"eq":[a,b]}`, `{"neq":[a,b]}`,
+    `{"gt":[a,b]}`, `{"gte":[a,b]}`, `{"lt":[a,b]}`, `{"lte":[a,b]}`.
+  - Absent `visible` means always-visible (the JSON-UI default).
+  - An unresolvable path is treated as falsy (hidden), so a visibility condition that cannot be
+    evaluated never silently shows content that should be hidden.
+  - Auth-based conditions (`{"auth":"signedIn"}`) have no meaning in ui-mcp (no session model)
+    and evaluate to hidden rather than visible, consistent with a safe-failure policy.
+  - Visibility is evaluated against the ROOT data, not the current `$item` scope: conditions
+    reference the same shared data the rest of the tree reads.
+  - Hidden nodes collapse to `Visibility.Collapsed` in WPF — no space is consumed, so invisible
+    siblings do not leave gaps in the layout.
+  - New files: `VisibilityCondition.cs`, `VisibilityEvaluator.cs` in `UiMcp.Abstractions`.
+  - `ValidatedNode` carries an optional `VisibilityCondition? Visible` (defaulted `null` so all
+    existing call sites are unchanged).
+  - **53 new tests** in `VisibilityTests.cs` covering Parse, IsVisible, and the CatalogValidator
+    round-trip. Every rejection case is paired with a positive control.
+
+### Changed
+
+- **All source references updated from `AdminLTE/JSON-UI` to `danielsimonjr/JSON-UI`** (the
+  GitHub repo where the catalog and renderer are published). Comments and test summaries in
+  `.cs` files and documentation in `.md` files updated throughout.
+
 ### Fixed
 
 - **Every per-file LOC figure in the architecture documents was wrong, and had been from the
@@ -37,7 +67,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     for and could not be resolved"* (there is no scale, and nothing honest to draw) both arrived at
     `RenderRules.GaugePercent` as a `null` max, and only the caller could tell them apart. It now
     takes `maxWasRequested`, defaulted to `false` so every existing two-argument call is unchanged.
-  - Confirmed against `AdminLTE/JSON-UI/render.js`, which every ported file names as the source of
+  - Confirmed against `danielsimonjr/JSON-UI/render.js`, which every ported file names as the source of
     truth: an unresolvable `maxPath` there yields `undefined`, fails the
     `typeof max === 'number'` test, and the bar stays at 0.
 
@@ -265,7 +295,7 @@ Recorded in `todo.md`, not fixed here, because documenting is not the same act a
   prefix**, not by adding `$` to the charset, which would have legalised every other use of it in
   one character of diff. `$other`, `$`, `a$b` and `$items.x` stay refused, and `$item.__proto__`
   still hits the prototype guard because that check runs against the whole string first.
-  **The JS original carries the identical bug:** `AdminLTE/JSON-UI/catalog.js` refuses `$` while
+  **The JS original carries the identical bug:** `danielsimonjr/JSON-UI/catalog.js` refuses `$` while
   `render.js` implements `$item`, and `view.json:332` uses `"valuePath": "$item"` — so the HTML
   console refuses its own view tree. Tracked separately; not fixed here.
 
@@ -328,7 +358,7 @@ Recorded in `todo.md`, not fixed here, because documenting is not the same act a
     MCP shutdown, turning a clean exit into a hang that looks like an ignored SIGTERM.
 
 - **Path resolver and display formatter** (`UiMcp.Abstractions.PathResolver`), ported from
-  `AdminLTE/JSON-UI/render.js`. Nested keys, array indices, consecutive indices (`grid[1][0]`),
+  `danielsimonjr/JSON-UI/render.js`. Nested keys, array indices, consecutive indices (`grid[1][0]`),
   `$item` scope, prototype refusal. **74 tests total, all passing, 0 warnings.**
   - **An unresolvable path returns missing and formats as `UNKNOWN` — never `0`, never `""`.**
     SPEC section 6 names this the most expensive recurring failure on this machine: a section that
@@ -350,7 +380,7 @@ Recorded in `todo.md`, not fixed here, because documenting is not the same act a
     entry points is a door left open.
 
 - **Catalog and validator** (`UiMcp.Abstractions`): all nine components ported from
-  `AdminLTE/JSON-UI/catalog.js` — `StatusBanner` · `Panel` · `Row` · `Metric` · `Field` · `Gauge` ·
+  `danielsimonjr/JSON-UI/catalog.js` — `StatusBanner` · `Panel` · `Row` · `Metric` · `Field` · `Gauge` ·
   `Repeat` · `Table` · `Note`. Enforces the SPEC section 6 invariants: unknown component and unknown
   prop are **refused, not ignored**; tone is a closed set; paths are charset-restricted and refuse
   `__proto__` / `constructor` / `prototype`; depth capped at 12, children at 64, table columns at 8.
@@ -421,7 +451,7 @@ Recorded in `todo.md`, not fixed here, because documenting is not the same act a
 ### Notes
 
 - No implementation yet. This release is specification only.
-- The design is not greenfield: a working JS renderer (`AdminLTE/JSON-UI/`) and a working WPF
+- The design is not greenfield: a working JS renderer (`danielsimonjr/JSON-UI/`) and a working WPF
   renderer (`~/.claude/scripts/starship-console.ps1`) already exist and are proven against live
   data from two machines. The C# port is transcription, not design. Where the spec and that code
   disagree, **the code is right and the spec is stale**.

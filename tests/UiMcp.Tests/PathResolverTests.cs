@@ -5,7 +5,7 @@ using UiMcp.Abstractions;
 namespace UiMcp.Tests;
 
 /// <summary>
-/// Ported from AdminLTE/JSON-UI/render.js. Where the two disagree, the JS is right.
+/// Ported from danielsimonjr/JSON-UI/render.js. Where the two disagree, the JS is right.
 ///
 /// THE INVARIANT THIS FILE EXISTS TO PROTECT: an unresolvable path returns MISSING, and missing
 /// renders as UNKNOWN - never as 0, never as "". SPEC section 6 calls this the most expensive

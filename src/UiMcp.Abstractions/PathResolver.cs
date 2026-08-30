@@ -8,7 +8,7 @@ namespace UiMcp.Abstractions;
 /// Resolves a dotted path such as "sections.roster.live" or "sections.disk.drives[0].freeGb"
 /// against a data document, and formats the result for display.
 ///
-/// Ported from AdminLTE/JSON-UI/render.js. Where the two disagree, the JS is right.
+/// Ported from danielsimonjr/JSON-UI/render.js. Where the two disagree, the JS is right.
 ///
 /// THE LOAD-BEARING RULE: an unresolvable path returns MISSING (null), and missing formats as
 /// "UNKNOWN" - never 0, never "". SPEC section 6 names this the most expensive recurring failure

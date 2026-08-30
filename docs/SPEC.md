@@ -14,7 +14,7 @@ existing consoles prove the data layer works but each has a defect:
 
 | Surface | Defect |
 |---|---|
-| HTML page (`AdminLTE/JSON-UI/`) | Needs a browser. A tab gets closed and buried. |
+| HTML page (`danielsimonjr/JSON-UI/`) | Needs a browser. A tab gets closed and buried. |
 | WPF script (`starship-console.ps1`) | One blocking `ShowDialog()`. **No agent can drive it.** |
 
 ui-mcp fixes the second. The window becomes a **shared surface** addressable by tools, so the
@@ -251,9 +251,9 @@ two-sources-of-truth failure.
 This is not a greenfield design. The following are working and proven against live data from two
 machines, and port to C# as transcription rather than design:
 
-- `AdminLTE/JSON-UI/catalog.js` — the nine components and their prop types
-- `AdminLTE/JSON-UI/render.js` — tree walk, path resolver, UNKNOWN handling
-- `AdminLTE/JSON-UI/view.json` — a real tree, 20 bound paths, all resolving
+- `danielsimonjr/JSON-UI/catalog.js` — the nine components and their prop types
+- `danielsimonjr/JSON-UI/render.js` — tree walk, path resolver, UNKNOWN handling
+- `danielsimonjr/JSON-UI/view.json` — a real tree, 20 bound paths, all resolving
 - `~/.claude/scripts/starship-console.ps1` — the same renderer against WPF primitives
 - `~/.claude/scripts/starship-dashboard.ps1` — the data producer, both machines
 
