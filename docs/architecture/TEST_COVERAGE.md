@@ -116,7 +116,9 @@ it.
 
 ### 3. `Program.cs` has no direct test
 
-54 lines of composition root. Covered transitively by every end-to-end run of the shipped
+54 lines of composition root. `ProgramMetadataTests` pins `ServerVersion` and
+`ServerInstructions`; wire-level `server/discover` is gated in CI against the shipped binary.
+Full host wiring is otherwise covered transitively by every end-to-end run of the shipped
 binary, which is the only place its wiring is observable at all.
 
 ## Verification
