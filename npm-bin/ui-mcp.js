@@ -20,12 +20,8 @@ child.on("error", (error) => {
 
 child.on("exit", (code, signal) => {
   if (signal) {
-    try {
-      process.kill(process.pid, signal);
-      return;
-    } catch {
-      process.exit(1);
-    }
+    console.error(`ui-mcp exited due to signal ${signal}.`);
+    process.exit(1);
   }
 
   process.exit(code ?? 1);
