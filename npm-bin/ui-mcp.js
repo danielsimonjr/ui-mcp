@@ -25,7 +25,6 @@ child.on("exit", (code, signal) => {
       return;
     } catch {
       process.exit(1);
-      return;
     }
   }
 
