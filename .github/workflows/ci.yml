@@ -55,15 +55,39 @@ jobs:
           }
 
       # Installed is not serving, and a bundle that starts is not a bundle that
-      # works. Drive the artifact over stdio and assert it answers a real MCP
-      # handshake with the version from Directory.Build.props - the single
+      # works. Drive the artifact over stdio and assert it answers MCP 2.0
+      # discovery with the version from Directory.Build.props - the single
       # version source. Catches both a dead binary and a version that did not
       # propagate.
-      - name: Artifact answers an MCP initialize
+      - name: Artifact answers MCP 2.0 discover
         shell: pwsh
         run: |
           $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
           Write-Host "expected version: $expected"
+          $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
+          $psi.RedirectStandardInput = $true
+          $psi.RedirectStandardOutput = $true
+          $psi.UseShellExecute = $false
+          $p = [Diagnostics.Process]::Start($psi)
+          $req = '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"ci","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+          $p.StandardInput.WriteLine($req)
+          $p.StandardInput.Flush()
+          $line = $p.StandardOutput.ReadLine()
+          $p.Kill()
+          Write-Host "reply: $line"
+          $reply = $line | ConvertFrom-Json -Depth 20
+          $serverInfo = $reply.result._meta.'io.modelcontextprotocol/serverInfo'
+          if ($reply.result.supportedVersions -notcontains '2026-07-28') { Write-Error "server/discover did not advertise MCP 2.0"; exit 1 }
+          if (-not $reply.result.capabilities.tools) { Write-Error "server/discover did not advertise tool capability"; exit 1 }
+          if (-not $reply.result.instructions) { Write-Error "server/discover did not include server instructions"; exit 1 }
+          if (-not $serverInfo) { Write-Error "server/discover did not include serverInfo metadata"; exit 1 }
+          if ($serverInfo.name -ne 'ui-mcp') { Write-Error "no ui-mcp serverInfo in the discover reply"; exit 1 }
+          if ($serverInfo.version -ne $expected) { Write-Error "artifact did not report version $expected"; exit 1 }
+
+      - name: Artifact still answers legacy initialize
+        shell: pwsh
+        run: |
+          $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
           $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
           $psi.RedirectStandardInput = $true
           $psi.RedirectStandardOutput = $true
@@ -75,5 +99,5 @@ jobs:
           $line = $p.StandardOutput.ReadLine()
           $p.Kill()
           Write-Host "reply: $line"
-          if ($line -notmatch '"name"\s*:\s*"ui-mcp"') { Write-Error "no ui-mcp serverInfo in the handshake reply"; exit 1 }
+          if ($line -notmatch '"name"\s*:\s*"ui-mcp"') { Write-Error "no ui-mcp serverInfo in the legacy initialize reply"; exit 1 }
           if ($line -notmatch [regex]::Escape($expected)) { Write-Error "artifact did not report version $expected"; exit 1 }

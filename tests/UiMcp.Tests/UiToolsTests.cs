@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FluentAssertions;
+using ModelContextProtocol.Server;
 using UiMcp.Abstractions;
 using UiMcp.Hosting;
 using UiMcp.Tools;
@@ -257,5 +258,28 @@ public class UiToolsTests
         var spy = new SpySurface();
         new UiTools(spy).Close();
         spy.CloseCalls.Should().Be(1);
+    }
+
+    [Fact]
+    public void McpToolMetadata_DeclaresTitlesAndSafetyHints()
+    {
+        var attrs = typeof(UiTools)
+            .GetMethods()
+            .SelectMany(m => m.GetCustomAttributes(typeof(McpServerToolAttribute), false)
+                .OfType<McpServerToolAttribute>())
+            .ToDictionary(a => a.Name!, a => a);
+
+        attrs["ui_open"].Title.Should().Be("Open Shared Window");
+        attrs["ui_open"].Idempotent.Should().BeTrue();
+
+        attrs["ui_render"].Title.Should().Be("Render Shared UI");
+        attrs["ui_render"].Idempotent.Should().BeFalse();
+
+        attrs["ui_status"].Title.Should().Be("Get Window Status");
+        attrs["ui_status"].ReadOnly.Should().BeTrue();
+        attrs["ui_status"].Idempotent.Should().BeTrue();
+
+        attrs["ui_close"].Title.Should().Be("Close Shared Window");
+        attrs["ui_close"].Idempotent.Should().BeTrue();
     }
 }

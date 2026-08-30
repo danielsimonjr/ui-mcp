@@ -3,7 +3,7 @@
 An MCP server that hosts a native Windows window and renders **catalog-constrained JSON UI trees**.
 Any agent connected to the host can draw to it; nothing else can.
 
-> **Status: v0.1.1, implemented and installed.** Four tools, nine components, 132 tests
+> **Status: v0.1.1, implemented and installed.** Four tools, nine components, 133 tests
 > passing. Design intent is in [`docs/SPEC.md`](docs/SPEC.md); the as-built architecture is in
 > [`docs/architecture/`](docs/architecture/OVERVIEW.md).
 
@@ -102,7 +102,7 @@ tools only appear once the session binds the MCP server. Confirm by looking for
 To check the deployed artifact directly, drive it over stdio:
 
 ```powershell
-# answers {"name":"ui-mcp","version":"0.1.0"} and advertises ui_open/ui_render/ui_status/ui_close
+# MCP 2.0 clients should send server/discover first; legacy clients can still initialize.
 & "$env:USERPROFILE\.claude\plugins\cache\local-marketplace\ui-mcp\0.1.0\bundle\UiMcp.exe"
 ```
 

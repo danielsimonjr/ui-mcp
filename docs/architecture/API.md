@@ -7,8 +7,14 @@ The first is the real product API; the second matters only to this repo and its 
 
 ## MCP tool surface
 
-Server identity: `{"name": "ui-mcp", "version": "<Directory.Build.props>"}`, protocol
-`2024-11-05`, transport stdio. Every tool returns an indented JSON **string**.
+Server identity is published through MCP 2.0 `server/discover`: name `ui-mcp`, title
+`ui-mcp`, version from `Directory.Build.props`, the repo description, and server instructions.
+Transport is stdio. The server negotiates protocol `2026-07-28` for MCP 2.0 clients and still
+accepts the legacy `initialize` handshake for older clients. Each tool returns an indented JSON
+text payload.
+
+`tools/list` also publishes human-readable tool titles plus safety hints where they are true:
+`ui_status` is read-only; all four tools are idempotent.
 
 ### `ui_open`
 

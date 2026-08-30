@@ -25,7 +25,7 @@ public sealed class UiTools
 
     private static readonly JsonSerializerOptions Pretty = new() { WriteIndented = true };
 
-    [McpServerTool(Name = "ui_open"), Description(
+    [McpServerTool(Name = "ui_open", Title = "Open Shared Window", Idempotent = true), Description(
         "Open the shared UI window, or focus it if already open. Idempotent - a second call does not " +
         "create a second window. NOTE: the window is raised on a best-effort basis; Windows refuses " +
         "foreground to a background process, so a newly opened window can land BEHIND the terminal. " +
@@ -40,7 +40,7 @@ public sealed class UiTools
         return Json(new { ok = true, title });
     }
 
-    [McpServerTool(Name = "ui_render"), Description(
+    [McpServerTool(Name = "ui_render", Title = "Render Shared UI"), Description(
         "Render a catalog-constrained JSON UI tree, replacing whatever is displayed. The tree is " +
         "VALIDATED IN FULL FIRST and drawn only if all of it passed; anything outside the catalog is " +
         "refused rather than ignored. Components: StatusBanner, Panel, Row, Metric, Field, Gauge, " +
@@ -89,7 +89,7 @@ public sealed class UiTools
         });
     }
 
-    [McpServerTool(Name = "ui_status"), Description(
+    [McpServerTool(Name = "ui_status", Title = "Get Window Status", ReadOnly = true, Idempotent = true), Description(
         "Report the window state, the last render, and any absorbed UI fault. Anything that cannot " +
         "be measured is reported as UNKNOWN rather than as a zero.")]
     public string Status()
@@ -106,7 +106,7 @@ public sealed class UiTools
         });
     }
 
-    [McpServerTool(Name = "ui_close"), Description(
+    [McpServerTool(Name = "ui_close", Title = "Close Shared Window", Idempotent = true), Description(
         "Close the window. The SERVER stays up and keeps serving tools - a closed display is not a " +
         "stopped service.")]
     public string Close()
