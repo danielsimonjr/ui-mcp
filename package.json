@@ -1,0 +1,31 @@
+{
+  "name": "@danielsimonjr/ui-mcp",
+  "version": "0.1.3",
+  "description": "MCP server plugin artifact for hosting a native Windows window and rendering catalog-constrained JSON UI trees.",
+  "license": "MIT",
+  "author": "danielsimonjr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielsimonjr/ui-mcp.git"
+  },
+  "homepage": "https://github.com/danielsimonjr/ui-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/ui-mcp/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "bundle/UiMcp.exe",
+    ".claude-plugin/plugin.json",
+    ".mcp.json",
+    "README.md",
+    "LICENSE"
+  ]
+}
