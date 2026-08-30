@@ -273,7 +273,7 @@ public class UiToolsTests
         attrs["ui_open"].Idempotent.Should().BeTrue();
 
         attrs["ui_render"].Title.Should().Be("Render Shared UI");
-        attrs["ui_render"].Idempotent.Should().BeTrue();
+        attrs["ui_render"].Idempotent.Should().BeFalse();
 
         attrs["ui_status"].Title.Should().Be("Get Window Status");
         attrs["ui_status"].ReadOnly.Should().BeTrue();

@@ -40,7 +40,7 @@ public sealed class UiTools
         return Json(new { ok = true, title });
     }
 
-    [McpServerTool(Name = "ui_render", Title = "Render Shared UI", Idempotent = true), Description(
+    [McpServerTool(Name = "ui_render", Title = "Render Shared UI"), Description(
         "Render a catalog-constrained JSON UI tree, replacing whatever is displayed. The tree is " +
         "VALIDATED IN FULL FIRST and drawn only if all of it passed; anything outside the catalog is " +
         "refused rather than ignored. Components: StatusBanner, Panel, Row, Metric, Field, Gauge, " +
