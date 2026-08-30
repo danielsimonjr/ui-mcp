@@ -14,7 +14,9 @@ to obey**.
 
 ## Capabilities
 
-Four MCP tools, all on stdio:
+Four MCP tools on stdio, served through MCP `2026-07-28` (`server/discover`) with legacy
+`initialize` backward compatibility. Server identity, instructions, and tool safety hints are
+published at discovery; each tool carries a human-readable title.
 
 | Tool | Does |
 |---|---|

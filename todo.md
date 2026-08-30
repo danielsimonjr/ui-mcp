@@ -208,11 +208,17 @@ name from `Describe` broke nothing because the compared trees still differ by ch
 
 ## 🟢 READY
 
-- [ ] **Add `dotnet test` to CI.** The workflow builds and gates bundle freshness plus an MCP
-      `initialize` handshake, but never runs the 217 tests — so they are a local habit, not a
-      gate. Deliberately left out of the v0.1.2 sweep at the owner's direction.
+- [ ] **Add `dotnet test` to CI.** The workflow builds and gates bundle freshness plus MCP
+      `server/discover`, `tools/list`, and the legacy `initialize` handshake, but never runs the
+      225 tests — so they are a local habit, not a gate. Deliberately left out of the v0.1.2
+      sweep at the owner's direction.
 
 ## Done 2026-08-30
+
+- [x] (2026-08-30) **MCP 2.0 (`2026-07-28`) compliance.** Upgraded `ModelContextProtocol` to 2.2.0;
+      `Program` publishes `ServerInfo` + `ServerInstructions`; tool titles and safety hints on all
+      four tools; bundle rebuilt; CI asserts `server/discover`, `tools/list`, and legacy
+      `initialize` against `bundle/UiMcp.exe`; `ProgramMetadataTests` pins version/instructions.
 
 - [x] (2026-08-30) **JSON-UI alignment.** Ported `visible` prop support from
       `danielsimonjr/JSON-UI` (`packages/core/src/visibility.ts`). Every catalog node now accepts

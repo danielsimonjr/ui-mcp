@@ -1,6 +1,6 @@
 # ui-mcp — Test Coverage
 
-**223 tests, 0 failures, 0 skipped** (`dotnet test`, ~10 s). 9 test files, 1,899 lines — 56% of
+**225 tests, 0 failures, 0 skipped** (`dotnet test`, ~10 s). 10 test files, 1,899+ lines — 56% of
 the repository's source lines are tests.
 
 No line-coverage instrumentation is configured, so this file reports coverage **by component and
@@ -97,9 +97,10 @@ untoned panel grey.
 
 ### 1. `dotnet test` does not run in CI
 
-`.github/workflows/ci.yml` builds on `windows-latest` and gates bundle freshness plus an MCP
-`initialize` handshake against the shipped artifact, but never runs the 223 tests. They are a
-local habit, not a gate. Recorded in `todo.md`.
+`.github/workflows/ci.yml` builds on `windows-latest`, gates bundle freshness, and drives the
+shipped artifact over stdio for MCP `server/discover` (protocol `2026-07-28`), `tools/list`, and
+the legacy `initialize` handshake — but never runs the 225 tests. They are a local habit, not a
+gate. Recorded in `todo.md`.
 
 ### 2. The window-showing tests need an interactive desktop
 

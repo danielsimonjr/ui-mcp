@@ -8,6 +8,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **MCP 2.0 (`2026-07-28`) compliance for the stdio server.** Upgraded to
+  `ModelContextProtocol` 2.2.0, which implements the stateless protocol revision. The server now
+  publishes full `ServerInfo` (name, title, version, description, website URL) and
+  `ServerInstructions` through `server/discover`, stamps `serverInfo` into response `_meta`, and
+  still answers the legacy `initialize` handshake for older clients. Tool metadata now includes
+  human-readable titles plus safety hints (`ReadOnly`, `Idempotent`). CI drives `server/discover`
+  and `tools/list` against the shipped `bundle/UiMcp.exe` and asserts protocol
+  `2026-07-28`, instructions, capabilities, and tool annotations. `ProgramMetadataTests` pins the
+  version and instruction strings on every `dotnet test` run.
+
 - **`visible` prop support on all catalog components.** Ported from `danielsimonjr/JSON-UI`
   (`packages/core/src/visibility.ts`, `packages/core/src/types.ts`). Every node in the tree
   now accepts an optional top-level `visible` property (a sibling of `type`, `props`, and
