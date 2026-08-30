@@ -265,14 +265,9 @@ public class UiToolsTests
     {
         var attrs = typeof(UiTools)
             .GetMethods()
-            .Select(m => new
-            {
-                Attr = m.GetCustomAttributes(typeof(McpServerToolAttribute), false)
-                    .OfType<McpServerToolAttribute>()
-                    .SingleOrDefault()
-            })
-            .Where(x => x.Attr is not null)
-            .ToDictionary(x => x.Attr!.Name, x => x.Attr!);
+            .SelectMany(m => m.GetCustomAttributes(typeof(McpServerToolAttribute), false)
+                .OfType<McpServerToolAttribute>())
+            .ToDictionary(a => a.Name!, a => a);
 
         attrs["ui_open"].Title.Should().Be("Open Shared Window");
         attrs["ui_open"].Idempotent.Should().BeTrue();
