@@ -80,6 +80,7 @@ jobs:
           if ($reply.result.supportedVersions -notcontains '2026-07-28') { Write-Error "server/discover did not advertise MCP 2.0"; exit 1 }
           if (-not $reply.result.capabilities.tools) { Write-Error "server/discover did not advertise tool capability"; exit 1 }
           if (-not $reply.result.instructions) { Write-Error "server/discover did not include server instructions"; exit 1 }
+          if (-not $serverInfo) { Write-Error "server/discover did not include serverInfo metadata"; exit 1 }
           if ($serverInfo.name -ne 'ui-mcp') { Write-Error "no ui-mcp serverInfo in the discover reply"; exit 1 }
           if ($serverInfo.version -ne $expected) { Write-Error "artifact did not report version $expected"; exit 1 }
 
