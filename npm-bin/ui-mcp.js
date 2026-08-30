@@ -10,8 +10,7 @@ if (process.platform !== "win32" || process.arch !== "x64") {
 
 const exePath = path.resolve(__dirname, "..", "bundle", "UiMcp.exe");
 const child = spawn(exePath, process.argv.slice(2), {
-  stdio: "inherit",
-  windowsHide: true
+  stdio: "inherit"
 });
 
 child.on("error", (error) => {
