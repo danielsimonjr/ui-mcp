@@ -15,6 +15,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "os": [
     "win32"
   ],
@@ -22,9 +25,10 @@
     "x64"
   ],
   "bin": {
-    "ui-mcp": "bundle/UiMcp.exe"
+    "ui-mcp": "npm-bin/ui-mcp.js"
   },
   "files": [
+    "npm-bin/ui-mcp.js",
     "bundle/UiMcp.exe",
     ".claude-plugin/plugin.json",
     ".mcp.json",
