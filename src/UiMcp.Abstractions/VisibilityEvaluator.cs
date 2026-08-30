@@ -76,8 +76,8 @@ public static class VisibilityEvaluator
         var el = op switch
         {
             VisibilityOperand.Literal(var v) => v,
-            VisibilityOperand.PathRef(var p) => PathResolver.Resolve(data, p) ?? (JsonElement?)default,
-            _ => default
+            VisibilityOperand.PathRef(var p) => PathResolver.Resolve(data, p),
+            _ => null
         };
 
         if (el is null) return null;

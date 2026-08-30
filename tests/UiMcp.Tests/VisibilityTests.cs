@@ -21,7 +21,6 @@ namespace UiMcp.Tests;
 public class VisibilityTests
 {
     private static JsonElement D(string json) => JsonDocument.Parse(json).RootElement;
-    private static JsonElement J(string json) => JsonDocument.Parse(json).RootElement;
     private static ValidatedNode Validate(string json) =>
         CatalogValidator.Validate(D(json));
 
@@ -29,18 +28,18 @@ public class VisibilityTests
 
     [Fact]
     public void Parse_True_ReturnsAlways()
-        => VisibilityCondition.Parse(J("true"))
+        => VisibilityCondition.Parse(D("true"))
             .Should().BeOfType<VisibilityCondition.Always>();
 
     [Fact]
     public void Parse_False_ReturnsNever()
-        => VisibilityCondition.Parse(J("false"))
+        => VisibilityCondition.Parse(D("false"))
             .Should().BeOfType<VisibilityCondition.Never>();
 
     [Fact]
     public void Parse_PathObject_ReturnsWhenPath()
     {
-        var cond = VisibilityCondition.Parse(J("""{"path":"sections.live"}"""));
+        var cond = VisibilityCondition.Parse(D("""{"path":"sections.live"}"""));
         cond.Should().BeOfType<VisibilityCondition.WhenPath>()
             .Which.Path.Should().Be("sections.live");
     }
@@ -49,7 +48,7 @@ public class VisibilityTests
     public void Parse_AndObject_ReturnsAnd()
     {
         var cond = VisibilityCondition.Parse(
-            J("""{"and":[{"path":"a"},{"path":"b"}]}"""));
+            D("""{"and":[{"path":"a"},{"path":"b"}]}"""));
         var and = cond.Should().BeOfType<VisibilityCondition.And>().Subject;
         and.Conditions.Should().HaveCount(2);
     }
@@ -58,7 +57,7 @@ public class VisibilityTests
     public void Parse_OrObject_ReturnsOr()
     {
         var cond = VisibilityCondition.Parse(
-            J("""{"or":[true,false]}"""));
+            D("""{"or":[true,false]}"""));
         cond.Should().BeOfType<VisibilityCondition.Or>()
             .Which.Conditions.Should().HaveCount(2);
     }
@@ -66,7 +65,7 @@ public class VisibilityTests
     [Fact]
     public void Parse_NotObject_ReturnsNot()
     {
-        var cond = VisibilityCondition.Parse(J("""{"not":true}"""));
+        var cond = VisibilityCondition.Parse(D("""{"not":true}"""));
         cond.Should().BeOfType<VisibilityCondition.Not>()
             .Which.Condition.Should().BeOfType<VisibilityCondition.Always>();
     }
@@ -75,58 +74,58 @@ public class VisibilityTests
     public void Parse_EqObject_ReturnsEq()
     {
         var cond = VisibilityCondition.Parse(
-            J("""{"eq":[{"path":"x"},1]}"""));
+            D("""{"eq":[{"path":"x"},1]}"""));
         cond.Should().BeOfType<VisibilityCondition.Eq>();
     }
 
     [Fact]
     public void Parse_NeqObject_ReturnsNeq()
-        => VisibilityCondition.Parse(J("""{"neq":[0,1]}"""))
+        => VisibilityCondition.Parse(D("""{"neq":[0,1]}"""))
             .Should().BeOfType<VisibilityCondition.Neq>();
 
     [Fact]
     public void Parse_GtObject_ReturnsGt()
-        => VisibilityCondition.Parse(J("""{"gt":[2,1]}"""))
+        => VisibilityCondition.Parse(D("""{"gt":[2,1]}"""))
             .Should().BeOfType<VisibilityCondition.Gt>();
 
     [Fact]
     public void Parse_GteObject_ReturnsGte()
-        => VisibilityCondition.Parse(J("""{"gte":[1,1]}"""))
+        => VisibilityCondition.Parse(D("""{"gte":[1,1]}"""))
             .Should().BeOfType<VisibilityCondition.Gte>();
 
     [Fact]
     public void Parse_LtObject_ReturnsLt()
-        => VisibilityCondition.Parse(J("""{"lt":[1,2]}"""))
+        => VisibilityCondition.Parse(D("""{"lt":[1,2]}"""))
             .Should().BeOfType<VisibilityCondition.Lt>();
 
     [Fact]
     public void Parse_LteObject_ReturnsLte()
-        => VisibilityCondition.Parse(J("""{"lte":[1,1]}"""))
+        => VisibilityCondition.Parse(D("""{"lte":[1,1]}"""))
             .Should().BeOfType<VisibilityCondition.Lte>();
 
     [Fact]
     public void Parse_Number_Throws()
-        => ((Action)(() => VisibilityCondition.Parse(J("42"))))
+        => ((Action)(() => VisibilityCondition.Parse(D("42"))))
             .Should().Throw<UiValidationException>();
 
     [Fact]
     public void Parse_UnrecognisedObject_Throws()
-        => ((Action)(() => VisibilityCondition.Parse(J("""{"unknown":true}"""))))
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"unknown":true}"""))))
             .Should().Throw<UiValidationException>().WithMessage("*unrecognised*");
 
     [Fact]
     public void Parse_PathMustBeString()
-        => ((Action)(() => VisibilityCondition.Parse(J("""{"path":42}"""))))
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"path":42}"""))))
             .Should().Throw<UiValidationException>();
 
     [Fact]
     public void Parse_AndMustBeArray()
-        => ((Action)(() => VisibilityCondition.Parse(J("""{"and":true}"""))))
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"and":true}"""))))
             .Should().Throw<UiValidationException>();
 
     [Fact]
     public void Parse_EqMustBeTwoElements()
-        => ((Action)(() => VisibilityCondition.Parse(J("""{"eq":[1]}"""))))
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"eq":[1]}"""))))
             .Should().Throw<UiValidationException>();
 
     // ---- VisibilityEvaluator.IsVisible ------------------------------------------------
