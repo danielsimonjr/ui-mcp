@@ -18,6 +18,16 @@ child.on("error", (error) => {
   process.exit(1);
 });
 
-child.on("exit", (code) => {
+child.on("exit", (code, signal) => {
+  if (signal) {
+    try {
+      process.kill(process.pid, signal);
+      return;
+    } catch {
+      process.exit(1);
+      return;
+    }
+  }
+
   process.exit(code ?? 1);
 });
