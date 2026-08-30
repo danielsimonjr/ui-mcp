@@ -8,6 +8,11 @@ namespace UiMcp;
 
 internal static class Program
 {
+    private const string ServerInstructions =
+        "Use ui_open to show or focus the shared window, ui_render to replace the display with a " +
+        "catalog-constrained JSON tree, ui_status to inspect the current window state, and ui_close " +
+        "to hide the window. ui_render accepts tree and data as either JSON objects or JSON strings.";
+
     /// <summary>
     /// Reported over MCP. Read off the assembly, never written as a literal here - the single
     /// source is &lt;Version&gt; in Directory.Build.props. A hardcoded version in Windows-mcp rotted
@@ -39,7 +44,15 @@ internal static class Program
         builder.Services
             .AddMcpServer(o =>
             {
-                o.ServerInfo = new() { Name = "ui-mcp", Version = ServerVersion };
+                o.ServerInfo = new()
+                {
+                    Name = "ui-mcp",
+                    Title = "ui-mcp",
+                    Version = ServerVersion,
+                    Description = "Hosts a native Windows window and renders catalog-constrained JSON UI trees.",
+                    WebsiteUrl = "https://github.com/danielsimonjr/ui-mcp"
+                };
+                o.ServerInstructions = ServerInstructions;
             })
             .WithStdioServerTransport()
             // Discovers [McpServerTool] methods by source generator. Deliberately EMPTY at scaffold
