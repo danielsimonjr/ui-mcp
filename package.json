@@ -21,6 +21,9 @@
   "cpu": [
     "x64"
   ],
+  "bin": {
+    "ui-mcp": "bundle/UiMcp.exe"
+  },
   "files": [
     "bundle/UiMcp.exe",
     ".claude-plugin/plugin.json",
