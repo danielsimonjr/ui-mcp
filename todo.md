@@ -38,7 +38,7 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
 
 ## 🟢 READY — next session, in order
 - [x] (2026-08-15) **Catalog + validator, TDD.** All nine components ported from
-      `AdminLTE/JSON-UI/catalog.js`. **44 tests, 44 pass, 0 warnings.** Every rejection path is
+      `danielsimonjr/JSON-UI/catalog.js`. **44 tests, 44 pass, 0 warnings.** Every rejection path is
       paired with a positive control, and boundaries are tested on both sides (500/501 chars,
       64/65 children, depth 11/13, 8/9 table columns).
       **Proven to have teeth by mutation, not by passing:** with `ForbiddenPathTokens` emptied the
@@ -179,7 +179,7 @@ Format: `- [ ] (YYYY-MM-DD) task`. 🟢 READY means unblocked and next.
       nine-way switch, the 64/200 caps **applied** (not just declared), `$item` scope reaching a
       `Repeat`'s children and a `Table`'s cells, the tone→brush map, and that a missing value is
       *visually* distinct. **Two real defects found by writing them**, both confirmed against
-      `AdminLTE/JSON-UI/render.js` (the stated source of truth):
+      `danielsimonjr/JSON-UI/render.js` (the stated source of truth):
       (1) a `Gauge` whose `maxPath` did not resolve drew its bar against a **default max of 100**,
           so 50 against an unreadable maximum showed **half full** — a confident measurement
           against a scale nobody supplied. Root cause: "no max asked for" and "max asked for and
@@ -211,5 +211,16 @@ name from `Describe` broke nothing because the compared trees still differ by ch
 - [ ] **Add `dotnet test` to CI.** The workflow builds and gates bundle freshness plus an MCP
       `initialize` handshake, but never runs the 217 tests — so they are a local habit, not a
       gate. Deliberately left out of the v0.1.2 sweep at the owner's direction.
+
+## Done 2026-08-30
+
+- [x] (2026-08-30) **JSON-UI alignment.** Ported `visible` prop support from
+      `danielsimonjr/JSON-UI` (`packages/core/src/visibility.ts`). Every catalog node now accepts
+      an optional top-level `visible` property: `true`/`false`, `{"path":"..."}`, `{"and":[...]}`,
+      `{"or":[...]}`, `{"not":{...}}`, and comparison operators (`eq`, `neq`, `gt`, `gte`, `lt`,
+      `lte`). Hidden nodes collapse to `Visibility.Collapsed` in WPF. **53 new tests.**
+      New files: `VisibilityCondition.cs`, `VisibilityEvaluator.cs` in `UiMcp.Abstractions`.
+      Also updated all source references from `AdminLTE/JSON-UI` → `danielsimonjr/JSON-UI` (the
+      GitHub repo) throughout `.cs` and `.md` files.
 
 ## Blocked

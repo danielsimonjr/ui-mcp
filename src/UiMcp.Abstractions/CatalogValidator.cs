@@ -177,6 +177,20 @@ public static class CatalogValidator
             children = list.Select(c => Validate(c, depth + 1)).ToArray();
         }
 
-        return new ValidatedNode(type, props, children);
+        // Parse the optional node-level `visible` property (sibling of `type`, `props`,
+        // `children`). Ported from danielsimonjr/JSON-UI: every UIElement carries an optional
+        // `visible?: VisibilityCondition`. Absent means always-visible; the renderer evaluates
+        // the condition against the render data and skips hidden nodes.
+        VisibilityCondition? visible = null;
+        if (node.TryGetProperty("visible", out var visEl) && visEl.ValueKind != JsonValueKind.Null)
+        {
+            try { visible = VisibilityCondition.Parse(visEl); }
+            catch (UiValidationException e)
+            {
+                throw new UiValidationException($"{type}.visible: {e.Message}", e);
+            }
+        }
+
+        return new ValidatedNode(type, props, children, visible);
     }
 }

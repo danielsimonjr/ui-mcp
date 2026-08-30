@@ -81,6 +81,13 @@ public static class TreeRenderer
 
     public static UIElement Render(ValidatedNode node, JsonElement data, JsonElement? scope = null)
     {
+        // Evaluate the optional `visible` condition (JSON-UI spec). A hidden node collapses to
+        // nothing — Collapsed takes no space in WPF, so invisible siblings do not leave gaps.
+        // The condition is evaluated against the ROOT data, not the current scope: visibility
+        // decisions reference the same shared state the rest of the tree reads.
+        if (!VisibilityEvaluator.IsVisible(node.Visible, data))
+            return new Border { Visibility = Visibility.Collapsed };
+
         switch (node.Type)
         {
             case "StatusBanner": return StatusBanner(node);

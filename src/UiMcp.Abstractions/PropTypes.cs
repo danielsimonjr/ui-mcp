@@ -5,7 +5,7 @@ namespace UiMcp.Abstractions;
 
 /// <summary>
 /// Prop validators. Each returns a COERCED SAFE VALUE or throws - never the raw input.
-/// Ported from AdminLTE/JSON-UI/catalog.js; where the two disagree, the JS is right.
+/// Ported from danielsimonjr/JSON-UI/catalog.js; where the two disagree, the JS is right.
 /// </summary>
 public static class PropTypes
 {
@@ -75,7 +75,7 @@ public static class PropTypes
         // The validator must accept exactly what the resolver implements. It did not, and the
         // mismatch was invisible to both unit suites because each component was correct on its own
         // terms - the seam between them was what nobody tested. The JS original still carries this
-        // bug: AdminLTE/JSON-UI/view.json line 332 uses "$item", which its own catalog.js refuses.
+        // bug: danielsimonjr/JSON-UI/view.json line 332 uses "$item", which its own catalog.js refuses.
         var rest = s;
         if (rest.StartsWith(ItemScopePrefix, StringComparison.Ordinal))
         {
