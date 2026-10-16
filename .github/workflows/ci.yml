@@ -45,6 +45,9 @@ jobs:
           $committed = Get-Item "bundle/UiMcp.exe"
           Write-Host "committed: $($committed.Length) bytes"
           Write-Host "rebuilt  : $($built.Length) bytes"
+          Write-Host "sdk      : $(dotnet --version)"
+          Write-Host "committed sha256: $((Get-FileHash $committed.FullName -Algorithm SHA256).Hash)"
+          Write-Host "rebuilt   sha256: $((Get-FileHash $built.FullName -Algorithm SHA256).Hash)"
           if ($built.Length -ne $committed.Length) {
             Write-Error @"
           bundle/UiMcp.exe is STALE - a rebuild produces a different artifact.

@@ -46,6 +46,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   GitHub repo where the catalog and renderer are published). Comments and test summaries in
   `.cs` files and documentation in `.md` files updated throughout.
 
+- **The CI step "Bundle is not stale" now prints the SDK version and the SHA256 of the
+  rebuilt and the committed bundle.** The step compares total length only, and a length does
+  not show which build produced a file. The comparison itself is unchanged.
+
 ### Fixed
 
 - **`eq` and `neq` visibility conditions compared two boxed values by reference, and `gte` and
