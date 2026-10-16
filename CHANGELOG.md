@@ -6,16 +6,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Tests for the renderer's `visible` gate and for the visibility rules that no test pinned.**
+  With the two gate lines of `TreeRenderer.Render` deleted, every earlier test still passed.
+  `TreeRendererTests` now renders hidden and shown nodes on the STA thread. A hidden node is a
+  collapsed `Border` with no child, a hidden container draws no child, and a `$item` path inside a
+  `Repeat` hides every item because the condition reads the root data. `VisibilityTests` pins the
+  empty `and` and `or`, the order of the form keys, the unresolved `$item` path, JavaScript
+  truthiness, the equality of unresolved operands and the reduction of an object or an array
+  literal to `null`. `UiSurfaceWindowTests` pins that the tree hash ignores `visible` and that the
+  node count includes a hidden node. The suite grows from 290 to 334 tests. Deleting the gate
+  fails 8 of them, and each of nine more mutations fails at least one. No source file changes.
+  `TEST_COVERAGE.md`, `OVERVIEW.md` and the generated reports carry the new counts. Two behaviours
+  stay unpinned: the `visible` path that skips the path rule and the ignored node-level key.
+
 ### Changed
 
 - **The architecture documents describe the current code.** They named the retired
   `repo_map.py` and counted 21 source files and 223 tests. They did not cover the `visible`
   condition, the MCP 2.0 server metadata or the tool annotations. They now do. The numbers come
-  from a fresh `repo-tools map`: 25 source files, 4,173 lines and 42 exported types. The
-  generated reports and their JSON artifacts sit beside the hand-written documents.
-  `TEST_COVERAGE.md` records two gaps: no test covers the renderer's `visible` gate, and eight
-  visibility behaviours have no test. The README status banner, check command, bundle size,
-  marketplace registration and plugin cache path are corrected.
+  from a fresh `repo-tools map`. The generated reports and their JSON artifacts sit beside the
+  hand-written documents.
+  `TEST_COVERAGE.md` lists the test gaps that remain. The README status banner, check command,
+  bundle size, marketplace registration and plugin cache path are corrected.
 - **The CI steps that drive the bundle run before the stale-bundle check.** A failed step
   skips every later step. The stale-bundle check came first. A red stale check therefore hid
   the discover, tools/list and legacy initialize steps. A stale bundle still answers all
