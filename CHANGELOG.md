@@ -56,6 +56,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   change. The line endings of the `.cs` files still change the bytes, because the PDB stores a
   checksum of each source file.
 
+- **`bundle/UiMcp.exe` is rebuilt, so that it carries the `visible` fix.** The bundle on main
+  (30,854,467 bytes, SHA256 `0DD31641BF04B50999F309B6AC9F7CEF784CD547DA5BD9D631C3C7B5FBBAD860`)
+  still has the old evaluator. A smoke run of it, with a tree that has `eq`, `neq`, `gte` and
+  `lte` nodes, hid the `eq` nodes whose operands are equal, and showed the `neq`, `gte` and
+  `lte` nodes that must be hidden. The new bundle (30,052,663 bytes, SHA256
+  `E376EB2602F1E9C6F450358D87C411DAADD0FE11D24AC3F6B4A511DA71336BFE`) is built from a clean
+  export of the commit with the four build properties. The CI runner builds the same hash on
+  two attempts. The same smoke run of the new bundle shows exactly the nodes that must show.
+  The old bundle also held one extra file, `System.Diagnostics.EventLog.Messages.dll`
+  (800,592 bytes), which the new bundle does not hold.
+
 - **The CI step "Bundle is not stale" now prints the SDK version and the SHA256 of the
   rebuilt and the committed bundle.** The step compares total length only, and a length does
   not show which build produced a file. The comparison itself is unchanged.
