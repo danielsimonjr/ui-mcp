@@ -108,6 +108,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   merged clause-anchored rule that sees mid-sentence demonstratives. Each is fixed by naming the
   referent. No measurement changed.
 
+- **The CI steps that read the version from `Directory.Build.props` now find it when the file
+  has more than one `PropertyGroup`.** The steps used
+  `([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version`. With a second
+  `PropertyGroup` (the build properties) that expression returns an array of two items, the
+  second item empty, and `artifact did not report version 0.1.3` failed the discover step on a
+  correct bundle. The steps now use `SelectSingleNode('/Project/PropertyGroup/Version').InnerText`.
+  The discover, tools/list and legacy initialize steps had never run since the build properties
+  were added, because the stale-bundle step failed first and skipped them. A replay of the three
+  step bodies against the committed bundle exits 0.
+
 ## [0.1.2] - 2026-08-15
 
 ### Fixed

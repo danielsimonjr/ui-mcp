@@ -65,7 +65,7 @@ jobs:
       - name: Artifact answers MCP 2.0 discover
         shell: pwsh
         run: |
-          $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
+          $expected = ([xml](Get-Content Directory.Build.props)).SelectSingleNode('/Project/PropertyGroup/Version').InnerText
           Write-Host "expected version: $expected"
           $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
           $psi.RedirectStandardInput = $true
@@ -121,7 +121,7 @@ jobs:
       - name: Artifact still answers legacy initialize
         shell: pwsh
         run: |
-          $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
+          $expected = ([xml](Get-Content Directory.Build.props)).SelectSingleNode('/Project/PropertyGroup/Version').InnerText
           $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
           $psi.RedirectStandardInput = $true
           $psi.RedirectStandardOutput = $true
