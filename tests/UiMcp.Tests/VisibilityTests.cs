@@ -278,6 +278,74 @@ public class VisibilityTests
                 new VisibilityOperand.Literal(D("0"))),
             "{}").Should().BeFalse();
 
+    // ---- eq and neq compare by value ---------------------------------------------------
+
+    private static VisibilityOperand Lit(string json) => new VisibilityOperand.Literal(D(json));
+
+    [Fact]
+    public void IsVisible_Eq_EqualStrings_IsTrue()
+        => V(new VisibilityCondition.Eq(Lit("\"on\""), Lit("\"on\"")), "{}").Should().BeTrue();
+
+    [Fact]
+    public void IsVisible_Eq_EqualBooleans_IsTrue()
+        => V(new VisibilityCondition.Eq(Lit("true"), Lit("true")), "{}").Should().BeTrue();
+
+    [Fact]
+    public void IsVisible_Eq_PathAgainstLiteral_ComparesTheResolvedValue()
+    {
+        var eq = new VisibilityCondition.Eq(new VisibilityOperand.PathRef("mode"), Lit("\"on\""));
+        V(eq, """{"mode":"on"}""").Should().BeTrue();
+        V(eq, """{"mode":"off"}""").Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsVisible_Eq_NumberAgainstItsStringForm_IsFalse()
+        => V(new VisibilityCondition.Eq(Lit("1"), Lit("\"1\"")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Neq_EqualNumbers_IsFalse()
+        => V(new VisibilityCondition.Neq(Lit("1"), Lit("1")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Neq_EqualStrings_IsFalse()
+        => V(new VisibilityCondition.Neq(Lit("\"on\""), Lit("\"on\"")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Neq_NumberAgainstItsStringForm_IsTrue()
+        => V(new VisibilityCondition.Neq(Lit("1"), Lit("\"1\"")), "{}").Should().BeTrue();
+
+    // ---- ordering operators are false when an operand is not a number ------------------
+
+    [Fact]
+    public void IsVisible_Gte_StringOperand_IsFalse()
+        => V(new VisibilityCondition.Gte(Lit("\"hello\""), Lit("0")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Lte_StringOperand_IsFalse()
+        => V(new VisibilityCondition.Lte(Lit("\"hello\""), Lit("0")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Gte_MissingPath_IsFalse()
+        => V(new VisibilityCondition.Gte(new VisibilityOperand.PathRef("missing"), Lit("0")), "{}")
+            .Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Lte_MissingPath_IsFalse()
+        => V(new VisibilityCondition.Lte(new VisibilityOperand.PathRef("missing"), Lit("0")), "{}")
+            .Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Lt_StringOperand_IsFalse()
+        => V(new VisibilityCondition.Lt(Lit("\"hello\""), Lit("0")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Gte_SmallerLeft_IsFalse()
+        => V(new VisibilityCondition.Gte(Lit("1"), Lit("2")), "{}").Should().BeFalse();
+
+    [Fact]
+    public void IsVisible_Lte_GreaterLeft_IsFalse()
+        => V(new VisibilityCondition.Lte(Lit("3"), Lit("2")), "{}").Should().BeFalse();
+
     // ---- CatalogValidator round-trip --------------------------------------------------
 
     [Fact]

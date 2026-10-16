@@ -48,6 +48,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`eq` and `neq` visibility conditions compared two boxed values by reference, and `gte` and
+  `lte` were true for a value that is not a number.** `VisibilityEvaluator.ResolveOperand`
+  returns a boxed double, string or bool, and `IsVisible` compared two of them with `==`. That
+  is reference equality, so `eq` was false for equal values and `neq` was true for equal
+  values. The test `IsVisible_Eq_EqualValues_IsTrue` has failed on `main` since `4579e17`, and
+  it kept the CI test step red. `CompareNumbers` returned 0 for a non-number, and `gte` and
+  `lte` test `>= 0` and `<= 0`, so a missing path or a string made both true. That broke the
+  rule that a condition that cannot be evaluated never shows hidden content. `eq` and `neq`
+  now use `object.Equals`, and `CompareNumbers` returns `null` for a non-number, so every
+  ordering operator is false. 14 new tests: 9 fail on the old code (10 with the test that
+  already failed), and three mutations are each caught.
+
 - **Every per-file LOC figure in the architecture documents was wrong, and had been from the
   start.** `FILE_INVENTORY.md` states that its per-file numbers come from `file-inventory.json`'s
   `loc` field. Not one of the 21 matched it, and all were low, so the per-file tables never
