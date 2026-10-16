@@ -163,6 +163,8 @@ Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <rep
 into a staging folder and copy the other reports. A map run into `docs/architecture` overwrites
 this file. A C# `using` names a namespace. The generated report therefore counts a test as
 covering every file in each namespace that the test imports. This file does not use that report.
+The committed `test-coverage.json` holds the data of that report. Its counts use the same
+namespace rule, so do not read a coverage percentage from it.
 
 | Claim | Value | Source |
 |---|---|---|
