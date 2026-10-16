@@ -428,11 +428,11 @@ public class VisibilityTests
         => P(conditionJson).Should().BeOfType(expected);
 
     [Theory]
-    [InlineData("""{"x":1}""", false)]
-    [InlineData("""{"x":{"y":1}}""", false)]
-    public void IsVisible_AnItemPathIsUnresolvedAtTheRoot(string data, bool expected)
+    [InlineData("""{"x":1}""")]
+    [InlineData("""{"x":{"y":1}}""")]
+    public void IsVisible_AnItemPathIsUnresolvedAtTheRoot(string data)
     {
-        V(P("""{"path":"$item.x"}"""), data).Should().Be(expected);
+        V(P("""{"path":"$item.x"}"""), data).Should().BeFalse();
         V(P("""{"path":"x"}"""), data).Should().BeTrue("the same name without $item resolves");
     }
 
