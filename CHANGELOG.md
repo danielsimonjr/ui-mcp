@@ -60,6 +60,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ordering operator is false. 14 new tests: 9 fail on the old code (10 with the test that
   already failed), and three mutations are each caught.
 
+- **The CI check on the `ui_render` tool hint failed for a correct server.** The step
+  "Artifact lists tools with MCP 2.0 metadata" required `ui_render` to report `idempotentHint`
+  equal to false. The tool is not idempotent on purpose (`e3034a4` removed `Idempotent = true`),
+  and the server omits a false hint from the wire, so the field reads null and the step failed
+  on the committed bundle. The step now fails only when `ui_render` reports the hint as true.
+
 - **Every per-file LOC figure in the architecture documents was wrong, and had been from the
   start.** `FILE_INVENTORY.md` states that its per-file numbers come from `file-inventory.json`'s
   `loc` field. Not one of the 21 matched it, and all were low, so the per-file tables never

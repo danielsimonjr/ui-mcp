@@ -111,7 +111,9 @@ jobs:
           if (-not $status.annotations.readOnlyHint) { Write-Error "ui_status missing readOnlyHint"; exit 1 }
           if ($status.annotations.idempotentHint -ne $true) { Write-Error "ui_status idempotentHint not true"; exit 1 }
           $render = $tools | Where-Object { $_.name -eq 'ui_render' } | Select-Object -First 1
-          if ($render.annotations.idempotentHint -ne $false) { Write-Error "ui_render idempotentHint should be false"; exit 1 }
+          # ui_render is not idempotent (the attribute default). The server omits a false
+          # idempotentHint from the wire, so the field reads null: assert it is never true.
+          if ($render.annotations.idempotentHint -eq $true) { Write-Error "ui_render must not claim idempotentHint true"; exit 1 }
 
       - name: Artifact still answers legacy initialize
         shell: pwsh
