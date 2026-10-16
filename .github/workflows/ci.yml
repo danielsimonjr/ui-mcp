@@ -29,33 +29,9 @@ jobs:
       - run: dotnet build UiMcp.sln --no-restore -c Release
       - run: dotnet test UiMcp.sln --no-build -c Release --verbosity normal
 
-      # The committed bundle IS the artifact the plugin runs, so a stale one
-      # ships silently: nothing else in this repo would notice. Rebuild it here
-      # and fail if it differs from what is committed.
-      #
-      # The flags are load-bearing - a bare `dotnet publish` emits a 156 KB
-      # launcher plus ~45 loose DLLs instead of the single-file exe that
-      # .mcp.json points at. See README "Build".
-      - name: Bundle is not stale
-        shell: pwsh
-        run: |
-          dotnet publish src/UiMcp -c Release -o ${{ runner.temp }}/bundlecheck `
-            -r win-x64 --self-contained false -p:PublishSingleFile=true
-          $built    = Get-Item "${{ runner.temp }}/bundlecheck/UiMcp.exe"
-          $committed = Get-Item "bundle/UiMcp.exe"
-          Write-Host "committed: $($committed.Length) bytes"
-          Write-Host "rebuilt  : $($built.Length) bytes"
-          Write-Host "sdk      : $(dotnet --version)"
-          Write-Host "committed sha256: $((Get-FileHash $committed.FullName -Algorithm SHA256).Hash)"
-          Write-Host "rebuilt   sha256: $((Get-FileHash $built.FullName -Algorithm SHA256).Hash)"
-          if ($built.Length -ne $committed.Length) {
-            Write-Error @"
-          bundle/UiMcp.exe is STALE - a rebuild produces a different artifact.
-          Re-publish and commit it, or the plugin keeps serving the previous build:
-            dotnet publish src/UiMcp -c Release -o bundle -r win-x64 --self-contained false -p:PublishSingleFile=true
-          "@
-            exit 1
-          }
+      # These three steps come BEFORE the stale check on purpose: a step that fails skips every
+      # later step, and a stale bundle still answers all three, so a red stale check must not
+      # hide their results.
 
       # Installed is not serving, and a bundle that starts is not a bundle that
       # works. Drive the artifact over stdio and assert it answers MCP 2.0
@@ -135,3 +111,38 @@ jobs:
           Write-Host "reply: $line"
           if ($line -notmatch '"name"\s*:\s*"ui-mcp"') { Write-Error "no ui-mcp serverInfo in the legacy initialize reply"; exit 1 }
           if ($line -notmatch [regex]::Escape($expected)) { Write-Error "artifact did not report version $expected"; exit 1 }
+
+      # The committed bundle IS the artifact the plugin runs, so a stale one
+      # ships silently: nothing else in this repo would notice. Rebuild it here
+      # and fail if it differs from what is committed.
+      #
+      # The flags are load-bearing - a bare `dotnet publish` emits a 156 KB
+      # launcher plus ~45 loose DLLs instead of the single-file exe that
+      # .mcp.json points at. See README "Build".
+      #
+      # The step compares total length and prints the SHA256 of both files. Length alone passes
+      # for a different build (the same commit built with two package versions gives one length
+      # and two hashes), so read the two SHA256 lines when the step is in doubt. A content compare
+      # is not used: the hash holds only when the checkout has the line endings of the build that
+      # made the bundle (the PDB stores a checksum of each source file), and a checkout setting
+      # would then fail a correct bundle. This step runs last, after the artifact steps.
+      - name: Bundle is not stale
+        shell: pwsh
+        run: |
+          dotnet publish src/UiMcp -c Release -o ${{ runner.temp }}/bundlecheck `
+            -r win-x64 --self-contained false -p:PublishSingleFile=true
+          $built    = Get-Item "${{ runner.temp }}/bundlecheck/UiMcp.exe"
+          $committed = Get-Item "bundle/UiMcp.exe"
+          Write-Host "committed: $($committed.Length) bytes"
+          Write-Host "rebuilt  : $($built.Length) bytes"
+          Write-Host "sdk      : $(dotnet --version)"
+          Write-Host "committed sha256: $((Get-FileHash $committed.FullName -Algorithm SHA256).Hash)"
+          Write-Host "rebuilt   sha256: $((Get-FileHash $built.FullName -Algorithm SHA256).Hash)"
+          if ($built.Length -ne $committed.Length) {
+            Write-Error @"
+          bundle/UiMcp.exe is STALE - a rebuild produces a different artifact.
+          Re-publish and commit it, or the plugin keeps serving the previous build:
+            dotnet publish src/UiMcp -c Release -o bundle -r win-x64 --self-contained false -p:PublishSingleFile=true
+          "@
+            exit 1
+          }
