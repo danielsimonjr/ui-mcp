@@ -403,4 +403,68 @@ public class VisibilityTests
         var and = node.Visible.Should().BeOfType<VisibilityCondition.And>().Subject;
         and.Conditions.Should().HaveCount(2);
     }
+
+    // ---- behaviours the documents state and no earlier test pinned ---------------------------------
+
+    private static VisibilityCondition P(string json) => VisibilityCondition.Parse(D(json));
+
+    [Theory]
+    [InlineData("""{"and":[]}""", true)]
+    [InlineData("""{"or":[]}""", false)]
+    [InlineData("""{"and":[false]}""", false)]
+    [InlineData("""{"or":[true]}""", true)]
+    public void IsVisible_EmptyAndIsTrue_EmptyOrIsFalse(string conditionJson, bool expected)
+        => V(P(conditionJson), "{}").Should().Be(expected);
+
+    [Theory]
+    [InlineData("""{"and":[],"path":"a"}""", typeof(VisibilityCondition.WhenPath))]
+    [InlineData("""{"not":true,"or":[]}""", typeof(VisibilityCondition.Or))]
+    [InlineData("""{"eq":[1,1],"not":true}""", typeof(VisibilityCondition.Not))]
+    [InlineData("""{"gt":[2,1],"eq":[1,1]}""", typeof(VisibilityCondition.Eq))]
+    [InlineData("""{"lte":[1,1],"gt":[1,1]}""", typeof(VisibilityCondition.Gt))]
+    public void Parse_TheFirstFormKeyWins_InTheOrderOfTheForms(string conditionJson, Type expected)
+        // The key order inside the JSON text does not decide the form: each case lists the later form
+        // first, and the earlier form in the order path, and, or, not, eq, neq, gt, gte, lt, lte wins.
+        => P(conditionJson).Should().BeOfType(expected);
+
+    [Theory]
+    [InlineData("""{"x":1}""", false)]
+    [InlineData("""{"x":{"y":1}}""", false)]
+    public void IsVisible_AnItemPathIsUnresolvedAtTheRoot(string data, bool expected)
+    {
+        V(P("""{"path":"$item.x"}"""), data).Should().Be(expected);
+        V(P("""{"path":"x"}"""), data).Should().BeTrue("the same name without $item resolves");
+    }
+
+    [Theory]
+    [InlineData("""{"a":[]}""", true)]
+    [InlineData("""{"a":{}}""", true)]
+    [InlineData("""{"a":"0"}""", true)]
+    [InlineData("""{"a":"x"}""", true)]
+    [InlineData("""{"a":1}""", true)]
+    [InlineData("""{"a":0}""", false)]
+    [InlineData("""{"a":""}""", false)]
+    [InlineData("""{"a":false}""", false)]
+    [InlineData("""{"a":null}""", false)]
+    public void IsVisible_TruthinessFollowsJavaScript(string data, bool expected)
+        => V(new VisibilityCondition.WhenPath("a"), data).Should().Be(expected);
+
+    [Theory]
+    [InlineData("""{"eq":[{"path":"nope1"},{"path":"nope2"}]}""", true)]
+    [InlineData("""{"neq":[{"path":"nope1"},{"path":"nope2"}]}""", false)]
+    [InlineData("""{"eq":[{"path":"nope"},null]}""", true)]
+    [InlineData("""{"eq":[{"path":"nope"},1]}""", false)]
+    [InlineData("""{"eq":[{"path":"nope"},""]}""", false)]
+    public void IsVisible_TwoUnresolvedOperandsAreEqual_AndAnUnresolvedOperandEqualsNull(
+        string conditionJson, bool expected)
+        => V(P(conditionJson), "{}").Should().Be(expected);
+
+    [Theory]
+    [InlineData("""{"eq":[{"a":1},null]}""", true)]
+    [InlineData("""{"eq":[[1,2],null]}""", true)]
+    [InlineData("""{"eq":[{"a":1},{"b":2}]}""", true)]
+    [InlineData("""{"eq":[{"a":1},1]}""", false)]
+    [InlineData("""{"eq":[[1,2],1]}""", false)]
+    public void IsVisible_AnObjectOrArrayLiteralReducesToNull(string conditionJson, bool expected)
+        => V(P(conditionJson), "{}").Should().Be(expected);
 }

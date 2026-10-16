@@ -6,6 +6,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Tests for the renderer's `visible` gate and for the visibility rules that no test pinned.**
+  With the two gate lines of `TreeRenderer.Render` deleted, every earlier test still passed.
+  `TreeRendererTests` now renders hidden and shown nodes on the STA thread. A hidden node is a
+  collapsed `Border` with no child, a hidden container draws no child, and a `$item` path inside a
+  `Repeat` hides every item because the condition reads the root data. `VisibilityTests` pins the
+  empty `and` and `or`, the order of the form keys, the unresolved `$item` path, JavaScript
+  truthiness, the equality of unresolved operands and the reduction of an object or an array
+  literal to `null`. `UiSurfaceWindowTests` pins that the tree hash ignores `visible` and that the
+  node count includes a hidden node. The suite grows from 290 to 334 tests. Deleting the gate
+  fails 8 of them, and each of nine more mutations fails at least one. No source file changes.
+  `TEST_COVERAGE.md`, `OVERVIEW.md` and the generated reports carry the new counts. Two behaviours
+  stay unpinned: the `visible` path that skips the path rule and the ignored node-level key.
+
 ### Changed
 
 - **The architecture documents describe the current code.** They named the retired

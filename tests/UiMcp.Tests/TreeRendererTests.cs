@@ -401,6 +401,94 @@ public class TreeRendererTests : IClassFixture<StaFixture>
         buttons.Should().Be(0, "no element may be constructed from a string in the tree");
     }
 
+    // ---- the `visible` gate ------------------------------------------------------------------------
+    // The parser and the evaluator are covered by VisibilityTests. The one line that applies them,
+    // the gate at the top of TreeRenderer.Render, was read by no test: with the gate deleted, every
+    // other test still passed. Each hidden case below has a shown control, so a gate that hides
+    // everything fails as surely as a gate that hides nothing.
+
+    private static string NoteWithVisible(string visibleJson)
+        => """{"type":"Note","props":{"text":"secret"},"visible":VIS}""".Replace("VIS", visibleJson);
+
+    [Fact]
+    public void AHiddenNodeRendersAsACollapsedBorderWithNoContent()
+    {
+        var (type, visibility, hasChild, texts) = Probe(NoteWithVisible("false"), "{}",
+            el => (el.GetType(), ((FrameworkElement)el).Visibility, el is Border { Child: not null }, AllTexts(el)));
+
+        type.Should().Be(typeof(Border));
+        visibility.Should().Be(Visibility.Collapsed, "Collapsed takes no space, so a hidden node leaves no gap");
+        hasChild.Should().BeFalse();
+        texts.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData("true", "{}", true)]
+    [InlineData("""{"path":"live"}""", """{"live":true}""", true)]
+    [InlineData("""{"not":false}""", "{}", true)]
+    [InlineData("false", "{}", false)]
+    [InlineData("""{"path":"live"}""", """{"live":false}""", false)]
+    [InlineData("""{"path":"absent"}""", "{}", false)]
+    [InlineData("""{"not":true}""", "{}", false)]
+    public void TheGateShowsOrHidesTheNodeByItsCondition(string visibleJson, string data, bool shown)
+    {
+        var texts = Texts(Valid(NoteWithVisible(visibleJson)), data);
+
+        if (shown) texts.Should().Contain("secret");
+        else texts.Should().NotContain("secret");
+    }
+
+    [Fact]
+    public void ANodeWithoutAVisibleConditionIsShown()
+        => Texts("""{"type":"Note","props":{"text":"secret"}}""").Should().Contain("secret");
+
+    [Fact]
+    public void AHiddenContainerDrawsNoChild()
+    {
+        var hidden = Texts("""
+            {"type":"Panel","props":{"title":"outer"},"visible":false,
+             "children":[{"type":"Note","props":{"text":"inside"}}]}
+            """);
+        var shown = Texts("""
+            {"type":"Panel","props":{"title":"outer"},
+             "children":[{"type":"Note","props":{"text":"inside"}}]}
+            """);
+
+        hidden.Should().BeEmpty("the gate returns before the container builds its children");
+        shown.Should().Contain(new[] { "outer", "inside" });
+    }
+
+    [Fact]
+    public void AHiddenChildLeavesItsSiblingsShown()
+        => Texts("""
+            {"type":"Panel","props":{"title":"outer"},
+             "children":[{"type":"Note","props":{"text":"gone"},"visible":false},
+                         {"type":"Note","props":{"text":"kept"}}]}
+            """)
+            .Should().Contain(new[] { "outer", "kept" }).And.NotContain("gone");
+
+    [Fact]
+    public void TheGateReadsTheRootData_NotTheItemScopeOfARepeat()
+    {
+        // The condition is evaluated against the ROOT data. A `$item` path has no scope there, so it
+        // is unresolved and hides the child of EVERY item, even where the item field is true.
+        const string rows = """{"flag":true,"rows":[{"show":true,"name":"first"},{"show":true,"name":"second"}]}""";
+
+        var byItem = Texts("""
+            {"type":"Repeat","props":{"fromPath":"rows"},
+             "children":[{"type":"Field","props":{"label":"n","valuePath":"$item.name"},
+                          "visible":{"path":"$item.show"}}]}
+            """, rows);
+        var byRoot = Texts("""
+            {"type":"Repeat","props":{"fromPath":"rows"},
+             "children":[{"type":"Field","props":{"label":"n","valuePath":"$item.name"},
+                          "visible":{"path":"flag"}}]}
+            """, rows);
+
+        byItem.Should().NotContain(new[] { "first", "second" });
+        byRoot.Should().Contain(new[] { "first", "second" });
+    }
+
     [Fact]
     public void NestingRendersChildrenOfChildren()
         => Texts("""

@@ -64,11 +64,11 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/UiMcp.Tests/ProgramMetadataTests.cs` | UiMcp.Tests | tests | test | 45 |
 | `tests/UiMcp.Tests/RenderRulesTests.cs` | UiMcp.Tests | tests | test | 215 |
 | `tests/UiMcp.Tests/StaFixture.cs` | UiMcp.Tests | tests | test | 31 |
-| `tests/UiMcp.Tests/TreeRendererTests.cs` | UiMcp.Tests | tests | test | 419 |
-| `tests/UiMcp.Tests/UiSurfaceTests.cs` | UiMcp.Tests | tests | test | 213 |
+| `tests/UiMcp.Tests/TreeRendererTests.cs` | UiMcp.Tests | tests | test | 507 |
+| `tests/UiMcp.Tests/UiSurfaceTests.cs` | UiMcp.Tests | tests | test | 241 |
 | `tests/UiMcp.Tests/UiThreadHostTests.cs` | UiMcp.Tests | tests | test | 173 |
 | `tests/UiMcp.Tests/UiToolsTests.cs` | UiMcp.Tests | tests | test | 285 |
-| `tests/UiMcp.Tests/VisibilityTests.cs` | UiMcp.Tests | tests | test | 406 |
+| `tests/UiMcp.Tests/VisibilityTests.cs` | UiMcp.Tests | tests | test | 470 |
 
 ## Skipped links
 

@@ -595,7 +595,7 @@ statistics:
   totalTypeScriptFiles: 25
   totalSourceFiles: 25
   totalModules: 2
-  totalLinesOfCode: 4173
+  totalLinesOfCode: 4353
   totalExports: 42
   entryRoots: 1
   reachableFiles: 13

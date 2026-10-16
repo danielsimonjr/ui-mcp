@@ -166,14 +166,14 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 419
+      "loc": 507
     },
     {
       "file": "tests/UiMcp.Tests/UiSurfaceTests.cs",
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 213
+      "loc": 241
     },
     {
       "file": "tests/UiMcp.Tests/UiThreadHostTests.cs",
@@ -194,7 +194,7 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 406
+      "loc": 470
     }
   ],
   "skippedLinks": [],

@@ -1,7 +1,7 @@
 # ui-mcp — Test Coverage
 
-**290 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
-files and 1 fixture) and 2,374 lines. The 2,374 lines are 57% of the 4,173 lines in the
+**334 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
+files and 1 fixture) and 2,554 lines. The 2,554 lines are 59% of the 4,353 lines in the
 repository's `.cs` files. CI runs the suite on every push to `main` and on every pull request,
 with `dotnet test UiMcp.sln --no-build -c Release` on `windows-latest`.
 
@@ -16,17 +16,17 @@ nobody measured one.
 | `CatalogValidator` + `PropTypes` | 326 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
 | `PathResolver` | 127 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
 | `RenderRules` | 121 | `RenderRulesTests.cs` | 31 Fact | Thorough |
-| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 64 Fact | Good; see gap 2 |
+| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 64 Fact + 6 Theory | Thorough; see gap 1 |
 | `UiThreadHost` | 150 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
 | `UiTools` | 159 | `UiToolsTests.cs` | 16 Fact | Thorough |
-| `TreeRenderer` | 321 | `TreeRendererTests.cs` | 26 Fact + 3 Theory | Good; the `visible` gate has no test (gap 1) |
-| `UiSurface` | 158 | `UiSurfaceTests.cs` | 12 Fact | Good; window paths need a desktop |
+| `TreeRenderer` | 321 | `TreeRendererTests.cs` | 31 Fact + 4 Theory | Good; the `visible` gate has its own tests |
+| `UiSurface` | 158 | `UiSurfaceTests.cs` | 14 Fact | Good; window paths need a desktop |
 | *validator ↔ renderer seam* | — | `CatalogRendererSeamTests.cs` | 3 Fact + 3 Theory | Exhaustive over the catalog |
 | `Program` | 67 | `ProgramMetadataTests.cs` | 2 Fact | Metadata only; the wiring runs in every end-to-end run |
 
 `VisibilityTests.cs` also covers the `visible` key of the validator. The table counts `Fact` and
-`Theory` attributes. A `Theory` runs once for each data row, so the executed count (290) is
-higher than the attribute count (231).
+`Theory` attributes. A `Theory` runs once for each data row, so the executed count (334) is
+higher than the attribute count (245).
 
 `StaFixture.cs` (31 lines) is shared infrastructure, not a test: one STA thread, built from the
 same `UiThreadHost` production uses.
@@ -56,14 +56,25 @@ without it, a "comprehensive" suite quietly stops being one.
 
 **The visibility evaluator is tested as a rule set.** `VisibilityTests` pins that the number
 `1` and the string `"1"` differ, and that an ordering condition is false when an operand is not
-a number. An unresolved path is falsy in the same file.
+a number. An unresolved path is falsy in the same file. The same file pins the rules that a
+reader cannot settle by reading. An empty `and` is true, and an empty `or` is false. The first
+form key wins in the order of the forms. A `$item` path has no scope at the root. Truthiness
+follows JavaScript, so `[]`, `{}` and `"0"` are truthy. Two unresolved operands are equal. An
+object or an array literal reduces to `null`.
+
+**The renderer's `visible` gate is tested through the renderer.** `TreeRendererTests` renders
+a node with a condition and reads the result on the STA thread. A hidden node is a collapsed
+`Border` with no child, and a hidden container draws none of its children. Every hidden case
+has a shown control. The condition reads the root data, so a `$item` path inside a `Repeat`
+hides the child of every item. `UiSurfaceWindowTests` pins that the tree hash ignores the
+condition and that the node count includes a hidden node.
 
 ### The mutation record
 
 A green suite that has never been shown to fail is not evidence. The table lists the mutations
-that were run on the catalog, the path resolver, the renderer and the surface. It holds none
-for the visibility code. Every mutation below was reverted and the file verified
-**byte-identical by SHA-256**.
+that were run on the catalog, the path resolver, the renderer, the surface and the visibility
+code. Every mutation below was reverted. The first nine rows were verified **byte-identical by
+SHA-256**. The rows after them were verified with an empty `git diff` after `git checkout`.
 
 | Mutation | Result |
 |---|---|
@@ -76,6 +87,16 @@ for the visibility code. Every mutation below was reverted and the file verified
 | `Repeat` stops passing the item as scope | 2 — the targeted renderer test **and** the seam test, from different angles |
 | `NodeCount` defaulted to `0` instead of `null` | exactly 1 — `ASurfaceThatHasNeverRenderedReportsNulls_NotZeros` |
 | `Describe` returns a constant | exactly 1 — `ADifferentTreeStructureHashesDifferently` |
+| The two gate lines of `TreeRenderer.Render` deleted | 8 — four hidden cases of the gate theory and four facts; the shown cases still pass |
+| `Describe` includes the `visible` condition | exactly 1 — `TheTreeHashIgnoresTheVisibleCondition` |
+| `CountNodes` skips a hidden node | exactly 1 — `TheNodeCountIncludesAHiddenNode` |
+| An empty `and` made false | exactly 1 — a row of `IsVisible_EmptyAndIsTrue_EmptyOrIsFalse` |
+| An empty `or` made true | exactly 1 — the other row of the same theory |
+| An array or an object made falsy | 5 — two truthiness rows, one item-path row and two renderer cases |
+| Two unresolved operands made unequal | 5 — two unresolved-operand rows and three literal rows |
+| An object or an array literal kept as its text | exactly 3 — the literal rows that expect equality |
+| A `$item` path resolved against the root | 2 — both rows of `IsVisible_AnItemPathIsUnresolvedAtTheRoot` |
+| `Parse` tries `and` before `path` | exactly 1 — a row of `Parse_TheFirstFormKeyWins_InTheOrderOfTheForms` |
 
 One mutation **survived**, and that result is worth a record. The mutation dropped the type
 name from `Describe`, and changed `n.Type + "("` to `"" + "("`. It broke nothing, because the
@@ -108,35 +129,19 @@ untoned panel grey.
 
 ## The gaps that remain
 
-### 1. The renderer's `visible` gate has no test
+### 1. Two visibility behaviours have no test
 
-`TreeRenderer.Render` evaluates `node.Visible` before the `switch`. No test outside
-`VisibilityTests.cs` reads `Visible`, and `VisibilityTests.cs` tests the parser, the evaluator
-and the validator, not the renderer. Removing the gate from `Render` breaks no test. Every test
-that does not open a window still passes with the gate deleted, and no window test reads
-`Visible`. The statement that the seam is covered exhaustively holds for the components, and
-does not hold for `visible`.
+[API.md](API.md) and [COMPONENTS.md](COMPONENTS.md) state two behaviours that no test pins:
 
-### 2. Some visibility behaviours have no test
+- a `visible` path skips the parse-time path rule, which holds the charset check and the
+  prototype check;
+- the validator ignores a node-level key other than `type`, `props`, `children` and `visible`.
 
-No test pins these behaviours, which [COMPONENTS.md](COMPONENTS.md) and [API.md](API.md) state.
-Six belong to the evaluator and the parser:
+A change to either behaviour does not fail the suite.
 
-- an empty `and` is true and an empty `or` is false;
-- the first form key of an object wins;
-- a `$item` path is unresolved;
-- `[]`, `{}` and the string `"0"` are truthy;
-- two unresolved operands are equal;
-- an object or an array literal reduces to `null`.
+### 2. The window-showing tests need an interactive desktop
 
-Two belong to the surface:
-
-- `treeHash` ignores the `visible` condition;
-- `nodeCount` counts hidden nodes.
-
-### 3. The window-showing tests need an interactive desktop
-
-`UiSurfaceWindowTests` briefly opens and closes real windows. Its 8 tests need an interactive
+`UiSurfaceWindowTests` briefly opens and closes real windows. Its 10 tests need an interactive
 desktop. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
 informative** failure, not something to paper over with a skip. See SPEC 10.1: the desktop
 assumption is retired for the interactive path and explicitly *not* for S4U.
@@ -146,7 +151,7 @@ needs no window and runs anywhere. The two groups fail for different reasons: on
 the other for the environment. A suite that cannot tell those two apart teaches you to ignore
 it.
 
-### 4. `Program.cs` has metadata tests only
+### 3. `Program.cs` has metadata tests only
 
 67 lines of composition root. `ProgramMetadataTests` pins `ServerVersion` against
 `Directory.Build.props`, and pins that `ServerInstructions` names the four tools. Wire-level
@@ -169,14 +174,14 @@ namespace rule, so do not read a coverage percentage from it.
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 25 | dependency-graph.json |
-| totalLinesOfCode | 4173 | dependency-graph.json |
+| totalLinesOfCode | 4353 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the **290 tests / 0 failures** figure is `dotnet test` output.
-The test count comes from the CI run on `main` and from a local `dotnet test --list-tests` run.
+**Claims the gate cannot hold:** the **334 tests / 0 failures** figure is `dotnet test` output.
+The test count comes from a CI run and from a local `dotnet test --list-tests` run.
 The failure count comes from the CI run. A count of the `Fact` and `Theory` attributes in each
 test file gives the per-file numbers. Note that the attribute
 count and the executed-test count differ, because a `Theory` runs one time for each `InlineData`
-row or `MemberData` row. The 2,374 test lines and the per-component LOC come from
+row or `MemberData` row. The 2,554 test lines and the per-component LOC come from
 `file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
-applying that mutation, running the suite, and restoring the file to a verified identical hash.
+applying that mutation, running the suite, and restoring the file. The restore checks are the ones that the mutation record names.

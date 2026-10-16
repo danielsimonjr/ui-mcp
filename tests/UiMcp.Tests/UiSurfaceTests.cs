@@ -179,6 +179,34 @@ public class UiSurfaceWindowTests
     }
 
     [Fact]
+    public void TheTreeHashIgnoresTheVisibleCondition()
+    {
+        // The hash answers "is the same view up?". A node that is hidden by a condition is still part
+        // of that view, so adding or changing `visible` must not move the hash.
+        using var a = new UiSurface();
+        using var b = new UiSurface();
+
+        a.Render(Tree("""{"type":"Note","props":{"text":"x"}}"""), Data("{}"));
+        b.Render(Tree("""{"type":"Note","props":{"text":"x"},"visible":false}"""), Data("{}"));
+
+        a.Status.TreeHash.Should().Be(b.Status.TreeHash);
+        a.Status.TreeHash.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public void TheNodeCountIncludesAHiddenNode()
+    {
+        using var surface = new UiSurface();
+        surface.Render(Tree("""
+            {"type":"Panel","props":{"title":"p"},
+             "children":[{"type":"Note","props":{"text":"a"},"visible":false},
+                         {"type":"Note","props":{"text":"b"}}]}
+            """), Data("{}"));
+
+        surface.Status.NodeCount.Should().Be(3, "the count is structural: a hidden node is still a node");
+    }
+
+    [Fact]
     public void CloseTakesTheWindowDownButLeavesTheSurfaceAnswering()
     {
         // "A closed display is not a stopped service." The window goes; ui_status must keep
