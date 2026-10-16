@@ -89,6 +89,15 @@ embedding the checkout path and the commit.
   now needs a commit. The test packages `FluentAssertions` and `Moq` still use a range. They
   are not in the bundle.
 
+- **The version is 0.1.4, and the bundle is rebuilt for it.** `.claude-plugin/plugin.json`,
+  `Directory.Build.props` and `package.json` move from 0.1.3 to 0.1.4. `Program.ServerVersion`
+  reads the version off the assembly and `server/discover` reports it, so the bytes of
+  `bundle/UiMcp.exe` change. The new bundle (30,052,663 bytes, SHA256
+  `0478D53E997F64A778131BE15167E51C9EC1FB95A38DEE6EBB24F19B452E02B1`) replaces the bundle in the rebuilt-bundle item above (SHA256 `E376EB26...`).
+  The two differ in three embedded files that carry the version: `UiMcp.dll`,
+  `UiMcp.Abstractions.dll` and `UiMcp.deps.json`. The other 39 files are identical. Clean
+  exports at two different paths give this hash.
+
 ### Fixed
 
 - **`eq` and `neq` visibility conditions compared two boxed values by reference, and `gte` and
