@@ -46,7 +46,50 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   GitHub repo where the catalog and renderer are published). Comments and test summaries in
   `.cs` files and documentation in `.md` files updated throughout.
 
+- **The build is now reproducible across checkout paths and commits.** Four properties in
+  `Directory.Build.props` stop the build from embedding the checkout path and the commit:
+  `PathMap` of the repository root, `IncludeSourceRevisionInInformationalVersion` false,
+  `EnableSourceLink` false and `EnableSourceControlManagerQueries` false. Before, the same source
+  gave a different `bundle/UiMcp.exe` for every build path (the two project DLLs differ) and for
+  every git commit, so a committed bundle could never equal a CI rebuild. After, builds from three
+  export paths and from a git worktree gave one hash. This is a build change, not a dependency
+  change. The line endings of the `.cs` files still change the bytes, because the PDB stores a
+  checksum of each source file.
+
+- **`bundle/UiMcp.exe` is rebuilt, so that it carries the `visible` fix.** The bundle on main
+  (30,854,467 bytes, SHA256 `0DD31641BF04B50999F309B6AC9F7CEF784CD547DA5BD9D631C3C7B5FBBAD860`)
+  still has the old evaluator. A smoke run of it, with a tree that has `eq`, `neq`, `gte` and
+  `lte` nodes, hid the `eq` nodes whose operands are equal, and showed the `neq`, `gte` and
+  `lte` nodes that must be hidden. The new bundle (30,052,663 bytes, SHA256
+  `E376EB2602F1E9C6F450358D87C411DAADD0FE11D24AC3F6B4A511DA71336BFE`) is built from a clean
+  export of the commit with the four build properties. The CI runner builds the same hash on
+  two attempts. The same smoke run of the new bundle shows exactly the nodes that must show.
+  The old bundle also held one extra file, `System.Diagnostics.EventLog.Messages.dll`
+  (800,592 bytes), which the new bundle does not hold.
+
+- **The CI step "Bundle is not stale" now prints the SDK version and the SHA256 of the
+  rebuilt and the committed bundle.** The step compares total length only, and a length does
+  not show which build produced a file. The comparison itself is unchanged.
+
 ### Fixed
+
+- **`eq` and `neq` visibility conditions compared two boxed values by reference, and `gte` and
+  `lte` were true for a value that is not a number.** `VisibilityEvaluator.ResolveOperand`
+  returns a boxed double, string or bool, and `IsVisible` compared two of them with `==`. That
+  is reference equality, so `eq` was false for equal values and `neq` was true for equal
+  values. The test `IsVisible_Eq_EqualValues_IsTrue` has failed on `main` since `4579e17`, and
+  it kept the CI test step red. `CompareNumbers` returned 0 for a non-number, and `gte` and
+  `lte` test `>= 0` and `<= 0`, so a missing path or a string made both true. That broke the
+  rule that a condition that cannot be evaluated never shows hidden content. `eq` and `neq`
+  now use `object.Equals`, and `CompareNumbers` returns `null` for a non-number, so every
+  ordering operator is false. 14 new tests: 9 fail on the old code (10 with the test that
+  already failed), and three mutations are each caught.
+
+- **The CI check on the `ui_render` tool hint failed for a correct server.** The step
+  "Artifact lists tools with MCP 2.0 metadata" required `ui_render` to report `idempotentHint`
+  equal to false. The tool is not idempotent on purpose (`e3034a4` removed `Idempotent = true`),
+  and the server omits a false hint from the wire, so the field reads null and the step failed
+  on the committed bundle. The step now fails only when `ui_render` reports the hint as true.
 
 - **Every per-file LOC figure in the architecture documents was wrong, and had been from the
   start.** `FILE_INVENTORY.md` states that its per-file numbers come from `file-inventory.json`'s
@@ -64,6 +107,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Seven ambiguous references across four documents**, found when the STE checker gained a
   merged clause-anchored rule that sees mid-sentence demonstratives. Each is fixed by naming the
   referent. No measurement changed.
+
+- **The CI steps that read the version from `Directory.Build.props` now find it when the file
+  has more than one `PropertyGroup`.** The steps used
+  `([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version`. With a second
+  `PropertyGroup` (the build properties) that expression returns an array of two items, the
+  second item empty, and `artifact did not report version 0.1.3` failed the discover step on a
+  correct bundle. The steps now use `SelectSingleNode('/Project/PropertyGroup/Version').InnerText`.
+  The discover, tools/list and legacy initialize steps had never run since the build properties
+  were added, because the stale-bundle step failed first and skipped them. A replay of the three
+  step bodies against the committed bundle exits 0.
 
 ## [0.1.2] - 2026-08-15
 

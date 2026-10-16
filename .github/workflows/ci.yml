@@ -45,6 +45,9 @@ jobs:
           $committed = Get-Item "bundle/UiMcp.exe"
           Write-Host "committed: $($committed.Length) bytes"
           Write-Host "rebuilt  : $($built.Length) bytes"
+          Write-Host "sdk      : $(dotnet --version)"
+          Write-Host "committed sha256: $((Get-FileHash $committed.FullName -Algorithm SHA256).Hash)"
+          Write-Host "rebuilt   sha256: $((Get-FileHash $built.FullName -Algorithm SHA256).Hash)"
           if ($built.Length -ne $committed.Length) {
             Write-Error @"
           bundle/UiMcp.exe is STALE - a rebuild produces a different artifact.
@@ -62,7 +65,7 @@ jobs:
       - name: Artifact answers MCP 2.0 discover
         shell: pwsh
         run: |
-          $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
+          $expected = ([xml](Get-Content Directory.Build.props)).SelectSingleNode('/Project/PropertyGroup/Version').InnerText
           Write-Host "expected version: $expected"
           $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
           $psi.RedirectStandardInput = $true
@@ -111,12 +114,14 @@ jobs:
           if (-not $status.annotations.readOnlyHint) { Write-Error "ui_status missing readOnlyHint"; exit 1 }
           if ($status.annotations.idempotentHint -ne $true) { Write-Error "ui_status idempotentHint not true"; exit 1 }
           $render = $tools | Where-Object { $_.name -eq 'ui_render' } | Select-Object -First 1
-          if ($render.annotations.idempotentHint -ne $false) { Write-Error "ui_render idempotentHint should be false"; exit 1 }
+          # ui_render is not idempotent (the attribute default). The server omits a false
+          # idempotentHint from the wire, so the field reads null: assert it is never true.
+          if ($render.annotations.idempotentHint -eq $true) { Write-Error "ui_render must not claim idempotentHint true"; exit 1 }
 
       - name: Artifact still answers legacy initialize
         shell: pwsh
         run: |
-          $expected = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
+          $expected = ([xml](Get-Content Directory.Build.props)).SelectSingleNode('/Project/PropertyGroup/Version').InnerText
           $psi = [Diagnostics.ProcessStartInfo]::new("bundle/UiMcp.exe")
           $psi.RedirectStandardInput = $true
           $psi.RedirectStandardOutput = $true

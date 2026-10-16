@@ -37,12 +37,12 @@ public static class VisibilityEvaluator
             VisibilityCondition.And(var conds)           => conds.All(c => IsVisible(c, data)),
             VisibilityCondition.Or(var conds)            => conds.Any(c => IsVisible(c, data)),
             VisibilityCondition.Not(var inner)           => !IsVisible(inner, data),
-            VisibilityCondition.Eq(var l, var r)         => ResolveOperand(l, data) == ResolveOperand(r, data),
-            VisibilityCondition.Neq(var l, var r)        => ResolveOperand(l, data) != ResolveOperand(r, data),
-            VisibilityCondition.Gt(var l, var r)         => CompareNumbers(l, r, data) > 0,
-            VisibilityCondition.Gte(var l, var r)        => CompareNumbers(l, r, data) >= 0,
-            VisibilityCondition.Lt(var l, var r)         => CompareNumbers(l, r, data) < 0,
-            VisibilityCondition.Lte(var l, var r)        => CompareNumbers(l, r, data) <= 0,
+            VisibilityCondition.Eq(var l, var r)         => object.Equals(ResolveOperand(l, data), ResolveOperand(r, data)),
+            VisibilityCondition.Neq(var l, var r)        => !object.Equals(ResolveOperand(l, data), ResolveOperand(r, data)),
+            VisibilityCondition.Gt(var l, var r)         => CompareNumbers(l, r, data) is > 0,
+            VisibilityCondition.Gte(var l, var r)        => CompareNumbers(l, r, data) is >= 0,
+            VisibilityCondition.Lt(var l, var r)         => CompareNumbers(l, r, data) is < 0,
+            VisibilityCondition.Lte(var l, var r)        => CompareNumbers(l, r, data) is <= 0,
             _                                            => true   // unknown sub-type: show by default
         };
     }
@@ -69,7 +69,8 @@ public static class VisibilityEvaluator
 
     /// <summary>
     /// Resolve an operand to a canonical comparison value (boxed double for numbers,
-    /// string for strings/booleans, null for missing/null).
+    /// string for strings, boxed bool for booleans, null for missing/null). The caller compares
+    /// two results with <c>object.Equals</c>: <c>==</c> on boxed values is reference equality.
     /// </summary>
     private static object? ResolveOperand(VisibilityOperand op, JsonElement data)
     {
@@ -93,14 +94,14 @@ public static class VisibilityEvaluator
     }
 
     /// <summary>
-    /// Numeric comparison. Returns 0 when either operand is non-numeric or unresolvable,
-    /// which means the condition evaluates to <c>false</c> — matching JS where a non-numeric
+    /// Numeric comparison. Returns <c>null</c> when either operand is non-numeric or unresolvable,
+    /// so every ordering operator evaluates to <c>false</c> — matching JS where a non-numeric
     /// comparison produces <c>false</c>.
     /// </summary>
-    private static int CompareNumbers(VisibilityOperand left, VisibilityOperand right, JsonElement data)
+    private static int? CompareNumbers(VisibilityOperand left, VisibilityOperand right, JsonElement data)
     {
-        if (ResolveOperand(left, data) is not double l) return 0;
-        if (ResolveOperand(right, data) is not double r) return 0;
+        if (ResolveOperand(left, data) is not double l) return null;
+        if (ResolveOperand(right, data) is not double r) return null;
         return l.CompareTo(r);
     }
 }
