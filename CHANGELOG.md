@@ -14,7 +14,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   from a fresh `repo-tools map`: 25 source files, 4,173 lines and 42 exported types. The
   generated reports and their JSON artifacts sit beside the hand-written documents.
   `TEST_COVERAGE.md` records two gaps: no test covers the renderer's `visible` gate, and eight
-  evaluator rules have no test. The README status banner, check command, bundle size,
+  visibility behaviours have no test. The README status banner, check command, bundle size,
   marketplace registration and plugin cache path are corrected.
 - **The CI steps that drive the bundle run before the stale-bundle check.** A failed step
   skips every later step. The stale-bundle check came first. A red stale check therefore hid

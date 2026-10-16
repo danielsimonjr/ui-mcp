@@ -282,7 +282,7 @@ instruction text names the four tools in one short paragraph.
 
 > `WithToolsFromAssembly()` discovers `[McpServerTool]` methods by **source generator**, so
 > there is no `using UiMcp.Tools;` here. That is why static analysis reports `UiTools.cs` as
-> test-only — see [DEPENDENCY_GRAPH.md](DEPENDENCY_GRAPH.md).
+> test-only — see [unused-analysis.md](unused-analysis.md).
 
 ### `Tools/UiTools.cs` — the MCP surface
 

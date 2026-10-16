@@ -112,20 +112,25 @@ untoned panel grey.
 
 `TreeRenderer.Render` evaluates `node.Visible` before the `switch`. No test outside
 `VisibilityTests.cs` reads `Visible`, and `VisibilityTests.cs` tests the parser, the evaluator
-and the validator, not the renderer. A change that removes the gate from `Render` passes every
-test. The statement that the seam is covered exhaustively holds for the components, and does not
-hold for `visible`.
+and the validator, not the renderer. Removing the gate from `Render` breaks no test. Every test
+that does not open a window still passes with the gate deleted, and no window test reads
+`Visible`. The statement that the seam is covered exhaustively holds for the components, and
+does not hold for `visible`.
 
-### 2. Some evaluator rules have no test
+### 2. Some visibility behaviours have no test
 
-No test pins these rules, which [COMPONENTS.md](COMPONENTS.md) and [API.md](API.md) state:
+No test pins these behaviours, which [COMPONENTS.md](COMPONENTS.md) and [API.md](API.md) state.
+Six belong to the evaluator and the parser:
 
 - an empty `and` is true and an empty `or` is false;
 - the first form key of an object wins;
 - a `$item` path is unresolved;
 - `[]`, `{}` and the string `"0"` are truthy;
 - two unresolved operands are equal;
-- an object or an array literal reduces to `null`;
+- an object or an array literal reduces to `null`.
+
+Two belong to the surface:
+
 - `treeHash` ignores the `visible` condition;
 - `nodeCount` counts hidden nodes.
 

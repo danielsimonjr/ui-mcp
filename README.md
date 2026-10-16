@@ -83,8 +83,11 @@ against self-contained 153.7 MB, because `WindowsDesktop.App 9.0.x` is present o
 machines. Switching back is one flag.
 
 Publish also emits `.pdb` files; only `UiMcp.exe` is committed. **Re-publish after any change to
-`src/`, or the plugin keeps serving the previous build** — and re-run
-`claude plugin install ui-mcp@local-marketplace` so the plugin cache picks it up.
+`src/`, or the plugin keeps serving the previous build.** Commit the rebuilt `bundle/UiMcp.exe`
+and push it. The plugin cache holds a clone of the remote repository, so a change that is not
+pushed does not deploy. Then run `claude plugin marketplace update local-marketplace` and
+`claude plugin update ui-mcp@local-marketplace`. The updater reads the version in
+`.claude-plugin/plugin.json`, so a new bundle needs a new version there.
 
 ## Install as a plugin
 
