@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **The CI steps that drive the bundle run before the stale-bundle check.** A failed step
+  skips every later step. The stale-bundle check came first. A red stale check therefore hid
+  the discover, tools/list and legacy initialize steps. A stale bundle still answers all
+  three. The order is now the tests, the three artifact steps, then the stale check. No step
+  changes. A comment on the stale check records why it compares total length and prints both
+  SHA256 values. The same commit built with `Microsoft.Extensions.Hosting` 9.0.20 and 9.0.21
+  gives one length and two hashes. A content compare would depend on the line endings of the
+  checkout.
+
 ## [0.1.4] - 2026-10-16
 
 This section holds the changes to the server, the build and the CI made since commit
