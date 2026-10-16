@@ -8,8 +8,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.1.4] - 2026-10-16
 
-Version 0.1.3 was set in the version files on 2026-08-16. It has no tag and no section in
-this file (only `v0.1.2` exists), so this section holds every change since 0.1.2.
+The version files have said 0.1.3 since 2026-08-16, but no tag and no section in this file
+exist for 0.1.3 (only `v0.1.2` exists). This section therefore holds every change since
+0.1.2.
 
 The rebuilt `bundle/UiMcp.exe` carries two main changes. The `visible` evaluator compares
 `eq` and `neq` operands by value, and `gte` and `lte` are false for a value that is not a
