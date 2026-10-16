@@ -1,7 +1,9 @@
 # ui-mcp — Test Coverage
 
-**225 tests, 0 failures, 0 skipped** (`dotnet test`, ~10 s). 10 test files, 1,899+ lines — 56% of
-the repository's source lines are tests.
+**290 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
+files and 1 fixture) and 2,374 lines. The 2,374 lines are 57% of the 4,173 lines in the
+repository's `.cs` files. CI runs the suite on every push to `main` and on every pull request,
+with `dotnet test UiMcp.sln --no-build -c Release` on `windows-latest`.
 
 No line-coverage instrumentation is configured, so this file reports coverage **by component and
 by behaviour**, which is the honest thing to report. This document gives no percentage, because
@@ -11,15 +13,20 @@ nobody measured one.
 
 | Component | LOC | Test file | Tests | Assessment |
 |---|---|---|---|---|
-| `CatalogValidator` + `PropTypes` | 312 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
+| `CatalogValidator` + `PropTypes` | 326 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
 | `PathResolver` | 127 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
-| `RenderRules` | 121 | `RenderRulesTests.cs` | 25 Fact | Thorough |
+| `RenderRules` | 121 | `RenderRulesTests.cs` | 31 Fact | Thorough |
+| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 64 Fact | Good; see gap 2 |
 | `UiThreadHost` | 150 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
-| `UiTools` | 159 | `UiToolsTests.cs` | 15 Fact | Thorough |
-| `TreeRenderer` | 314 | `TreeRendererTests.cs` | 26 Fact + 3 Theory | Thorough |
+| `UiTools` | 159 | `UiToolsTests.cs` | 16 Fact | Thorough |
+| `TreeRenderer` | 321 | `TreeRendererTests.cs` | 26 Fact + 3 Theory | Good; the `visible` gate has no test (gap 1) |
 | `UiSurface` | 158 | `UiSurfaceTests.cs` | 12 Fact | Good; window paths need a desktop |
 | *validator ↔ renderer seam* | — | `CatalogRendererSeamTests.cs` | 3 Fact + 3 Theory | Exhaustive over the catalog |
-| `Program` | 54 | none | 0 | Composition root; exercised by every end-to-end run |
+| `Program` | 67 | `ProgramMetadataTests.cs` | 2 Fact | Metadata only; the wiring runs in every end-to-end run |
+
+`VisibilityTests.cs` also covers the `visible` key of the validator. The table counts `Fact` and
+`Theory` attributes. A `Theory` runs once for each data row, so the executed count (290) is
+higher than the attribute count (231).
 
 `StaFixture.cs` (31 lines) is shared infrastructure, not a test: one STA thread, built from the
 same `UiThreadHost` production uses.
@@ -47,10 +54,16 @@ without a warning.
 `EveryCatalogComponentIsCovered` fails if a tenth component is ever added without a seam case —
 without it, a "comprehensive" suite quietly stops being one.
 
-### Everything here has been mutation-proven
+**The visibility evaluator is tested as a rule set.** `VisibilityTests` pins that the number
+`1` and the string `"1"` differ, and that an ordering condition is false when an operand is not
+a number. An unresolved path is falsy in the same file.
 
-A green suite that has never been shown to fail is not evidence. Every mutation below was
-reverted and the file verified **byte-identical by SHA-256**.
+### The mutation record
+
+A green suite that has never been shown to fail is not evidence. The table lists the mutations
+that were run on the catalog, the path resolver, the renderer and the surface. It holds none
+for the visibility code. Every mutation below was reverted and the file verified
+**byte-identical by SHA-256**.
 
 | Mutation | Result |
 |---|---|
@@ -95,17 +108,36 @@ untoned panel grey.
 
 ## The gaps that remain
 
-### 1. `dotnet test` does not run in CI
+### 1. The renderer's `visible` gate has no test
 
-`.github/workflows/ci.yml` builds on `windows-latest`, gates bundle freshness, and drives the
-shipped artifact over stdio for MCP `server/discover` (protocol `2026-07-28`), `tools/list`, and
-the legacy `initialize` handshake — but never runs the 225 tests. They are a local habit, not a
-gate. Recorded in `todo.md`.
+`TreeRenderer.Render` evaluates `node.Visible` before the `switch`. No test outside
+`VisibilityTests.cs` reads `Visible`, and `VisibilityTests.cs` tests the parser, the evaluator
+and the validator, not the renderer. Removing the gate from `Render` breaks no test. Every test
+that does not open a window still passes with the gate deleted, and no window test reads
+`Visible`. The statement that the seam is covered exhaustively holds for the components, and
+does not hold for `visible`.
 
-### 2. The window-showing tests need an interactive desktop
+### 2. Some visibility behaviours have no test
 
-`UiSurfaceWindowTests` briefly opens and closes real windows. Its 8 tests account for ~8 s of the
-~10 s run. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
+No test pins these behaviours, which [COMPONENTS.md](COMPONENTS.md) and [API.md](API.md) state.
+Six belong to the evaluator and the parser:
+
+- an empty `and` is true and an empty `or` is false;
+- the first form key of an object wins;
+- a `$item` path is unresolved;
+- `[]`, `{}` and the string `"0"` are truthy;
+- two unresolved operands are equal;
+- an object or an array literal reduces to `null`.
+
+Two belong to the surface:
+
+- `treeHash` ignores the `visible` condition;
+- `nodeCount` counts hidden nodes.
+
+### 3. The window-showing tests need an interactive desktop
+
+`UiSurfaceWindowTests` briefly opens and closes real windows. Its 8 tests need an interactive
+desktop. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
 informative** failure, not something to paper over with a skip. See SPEC 10.1: the desktop
 assumption is retired for the interactive path and explicitly *not* for S4U.
 
@@ -114,27 +146,37 @@ needs no window and runs anywhere. The two groups fail for different reasons: on
 the other for the environment. A suite that cannot tell those two apart teaches you to ignore
 it.
 
-### 3. `Program.cs` has no direct test
+### 4. `Program.cs` has metadata tests only
 
-54 lines of composition root. `ProgramMetadataTests` pins `ServerVersion` and
-`ServerInstructions`; wire-level `server/discover` is gated in CI against the shipped binary.
-Full host wiring is otherwise covered transitively by every end-to-end run of the shipped
-binary, which is the only place its wiring is observable at all.
+67 lines of composition root. `ProgramMetadataTests` pins `ServerVersion` against
+`Directory.Build.props`, and pins that `ServerInstructions` names the four tools. Wire-level
+`server/discover` is gated in CI against the shipped binary. Every end-to-end run of the shipped
+binary covers the rest of the host wiring. The shipped binary is the only place where that wiring
+is observable.
 
 ## Verification
 
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-16 by `repo-tools map`.
+Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
+
+**This file is hand-written.** `repo-tools map` writes its own `TEST_COVERAGE.md`. Run the map
+into a staging folder and copy the other reports. A map run into `docs/architecture` overwrites
+this file. A C# `using` names a namespace. The generated report therefore counts a test as
+covering every file in each namespace that the test imports. This file does not use that report.
+The committed `test-coverage.json` holds the data of that report. Its counts use the same
+namespace rule, so do not read a coverage percentage from it.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 21 | dependency-graph.json |
-| totalLinesOfCode | 3375 | dependency-graph.json |
+| totalSourceFiles | 25 | dependency-graph.json |
+| totalLinesOfCode | 4173 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the **223 tests / 0 failures / ~10 s** figure is `dotnet test`
-output. A count of the `Fact` and `Theory` attributes in each test file gives the per-file
-numbers. Note that the attribute count and the executed-test count differ, because a `Theory`
-runs one time for each `InlineData` row or `MemberData` row. The 1,899 test lines and the per-component LOC come from
+**Claims the gate cannot hold:** the **290 tests / 0 failures** figure is `dotnet test` output.
+The test count comes from the CI run on `main` and from a local `dotnet test --list-tests` run.
+The failure count comes from the CI run. A count of the `Fact` and `Theory` attributes in each
+test file gives the per-file numbers. Note that the attribute
+count and the executed-test count differ, because a `Theory` runs one time for each `InlineData`
+row or `MemberData` row. The 2,374 test lines and the per-component LOC come from
 `file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
 applying that mutation, running the suite, and restoring the file to a verified identical hash.

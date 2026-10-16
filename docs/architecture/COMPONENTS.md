@@ -16,7 +16,8 @@ reference WPF, so the guarantee is a compiler error rather than a code-review ha
 public sealed record ValidatedNode(
     string Type,                                  // guaranteed a catalog key
     IReadOnlyDictionary<string, object> Props,    // coerced, never raw input
-    IReadOnlyList<ValidatedNode> Children);       // never null
+    IReadOnlyList<ValidatedNode> Children,        // never null
+    VisibilityCondition? Visible = null);         // null means always visible
 
 public sealed record ValidatedColumn(string Header, string ValuePath);
 ```
@@ -24,6 +25,9 @@ public sealed record ValidatedColumn(string Header, string ValuePath);
 `Props` values are already safe: a string here is length-checked, a path is charset-checked and
 prototype-guarded, a tone is a member of the closed set. There is deliberately no public
 construction path from JSON that skips `CatalogValidator`.
+
+`Visible` holds the parsed `visible` condition of the node. A `null` value means that the node
+is always visible.
 
 ### `UiValidationException.cs`
 
@@ -109,10 +113,16 @@ The validator throws on each rejection path below, and names the component and t
 - a missing required prop,
 - children on a component that accepts none,
 - children that are not an array,
-- more than 64 children.
+- more than 64 children,
+- a `visible` value that is not `true`, `false` or a valid condition object.
 
 A failing prop validator becomes `"{type}.{key}: {message}"`. The message `"expected string"`
 alone tells a reader nothing useful in a tree of 60 nodes.
+
+The validator reads four node-level keys: `type`, `props`, `children` and `visible`. It reads
+`visible` after the props and the children. A failure in the condition becomes
+`"{type}.visible: {message}"`. A `visible` value of `null` has the same result as an absent
+key. The validator reads no other node-level key, so it ignores an unknown one.
 
 ### `PathResolver.cs` — binding, and the UNKNOWN rule
 
@@ -158,6 +168,96 @@ public static string  EmptyText(string? supplied);            // "none" when bla
 **label** carries the difference between "empty bar" and "no reading", and it shows `UNKNOWN`.
 A bar of zero length with no `UNKNOWN` beside it is the green-zero failure again.
 
+### `VisibilityCondition.cs` — the closed condition union
+
+```csharp
+public abstract record VisibilityCondition
+{
+    private VisibilityCondition() { }
+
+    public sealed record Always : VisibilityCondition;
+    public sealed record Never : VisibilityCondition;
+    public sealed record WhenPath(string Path) : VisibilityCondition;
+    public sealed record And(IReadOnlyList<VisibilityCondition> Conditions) : VisibilityCondition;
+    public sealed record Or(IReadOnlyList<VisibilityCondition> Conditions) : VisibilityCondition;
+    public sealed record Not(VisibilityCondition Condition) : VisibilityCondition;
+    public sealed record Eq(VisibilityOperand Left, VisibilityOperand Right) : VisibilityCondition;
+    public sealed record Neq(VisibilityOperand Left, VisibilityOperand Right) : VisibilityCondition;
+    public sealed record Gt(VisibilityOperand Left, VisibilityOperand Right) : VisibilityCondition;
+    public sealed record Gte(VisibilityOperand Left, VisibilityOperand Right) : VisibilityCondition;
+    public sealed record Lt(VisibilityOperand Left, VisibilityOperand Right) : VisibilityCondition;
+    public sealed record Lte(VisibilityOperand Left, VisibilityOperand Right) : VisibilityCondition;
+
+    public static VisibilityCondition Parse(JsonElement el);   // throws UiValidationException
+}
+
+public abstract record VisibilityOperand
+{
+    private VisibilityOperand() { }
+
+    public sealed record Literal(JsonElement Value) : VisibilityOperand;
+    public sealed record PathRef(string Path) : VisibilityOperand;
+
+    public static VisibilityOperand Parse(JsonElement el);
+}
+```
+
+The private constructor closes both unions. Only the nested records can derive from them, so the
+case list above is the full list. A new case is a deliberate edit.
+
+`VisibilityCondition.Parse` maps the JSON shapes as follows:
+
+- `true` gives `Always`. `false` gives `Never`.
+- Any other value that is not an object throws `"visible must be true, false, or an object"`.
+- For an object, the parser tests these keys in order: `path`, `and`, `or`, `not`, `eq`, `neq`,
+  `gt`, `gte`, `lt`, `lte`. The first key that the object holds decides the form. The parser
+  ignores the other keys.
+- `and` and `or` take an array of conditions. `not` takes one condition. The parser reads each
+  nested condition with the same rules.
+- `eq`, `neq`, `gt`, `gte`, `lt` and `lte` take an array of exactly two operands.
+- An object with none of these keys throws `"visible: unrecognised condition shape"`.
+
+An operand is a `PathRef` when it is an object with a string `path` key. Every other operand is
+a `Literal`. That includes an object without a string `path`.
+
+The parser stores the path of a `WhenPath` or a `PathRef` as written. The parser does not apply
+the `PropTypes.Path` charset rule to either path.
+
+### `VisibilityEvaluator.cs` — the decision
+
+```csharp
+public static class VisibilityEvaluator
+{
+    public static bool IsVisible(VisibilityCondition? condition, JsonElement data);
+}
+```
+
+`IsVisible` returns `true` for a `null` condition. `IsVisible` does not throw. The rules are:
+
+| Condition | Result |
+|---|---|
+| `Always` / `Never` | `true` / `false` |
+| `WhenPath` | `true` when the path resolves to a truthy value |
+| `And` / `Or` | all / any of the sub-conditions; an empty `And` is `true` and an empty `Or` is `false` |
+| `Not` | the negation of the sub-condition |
+| `Eq` / `Neq` | equality / inequality of the two canonical operand values |
+| `Gt`, `Gte`, `Lt`, `Lte` | the numeric order of the two operands; `false` unless both are numbers |
+
+A path resolves against the root `data`, and never against a `Repeat` scope. A `$item` path
+therefore stays unresolved.
+
+Truthiness follows JavaScript. `false`, `null`, `0` and the empty string are falsy. `true`, a
+non-zero number, a non-empty string, an array and an object are truthy. An unresolved path is
+falsy, so a condition that cannot be evaluated does not show a node.
+
+An operand reduces to a canonical value. A number becomes a `double`. A string stays a string.
+`true` and `false` stay booleans. `null`, an unresolved path, an array and an object become
+`null`. `Eq` compares two canonical values with `object.Equals`, so the number `1` and the string
+`"1"` are different values, and two `null` values are equal.
+
+The `switch` ends with a default arm that returns `true`. No input reaches that arm, because the
+unions are closed.
+
 ---
 
 ## `UiMcp` — the host, tools and WPF
@@ -174,9 +274,15 @@ transport). Registers `IUiSurface → UiSurface` as a **singleton** — there is
 surface, which is the entire point. Then `.AddMcpServer(…).WithStdioServerTransport()
 .WithToolsFromAssembly()`.
 
+The `AddMcpServer` options set the server information and a short instruction text. The server
+information holds the name and title `ui-mcp`, a description, the repository address and the
+version. `ServerVersion` reads the assembly version to three parts, so no literal in the code
+carries the version. The assembly version comes from `<Version>` in `Directory.Build.props`. The
+instruction text names the four tools in one short paragraph.
+
 > `WithToolsFromAssembly()` discovers `[McpServerTool]` methods by **source generator**, so
 > there is no `using UiMcp.Tools;` here. That is why static analysis reports `UiTools.cs` as
-> test-only — see [DEPENDENCY_GRAPH.md](DEPENDENCY_GRAPH.md).
+> test-only — see [unused-analysis.md](unused-analysis.md).
 
 ### `Tools/UiTools.cs` — the MCP surface
 
@@ -186,20 +292,23 @@ public sealed class UiTools
 {
     public UiTools(IUiSurface surface);
 
-    [McpServerTool(Name = "ui_open")]
+    [McpServerTool(Name = "ui_open", Title = "Open Shared Window", Idempotent = true)]
     public string Open(string title = "Starship Console", bool topmost = false,
                        double width = 1100, double height = 800);
 
-    [McpServerTool(Name = "ui_render")]
+    [McpServerTool(Name = "ui_render", Title = "Render Shared UI")]
     public string Render(JsonElement tree, JsonElement? data = null);
 
-    [McpServerTool(Name = "ui_status")]
+    [McpServerTool(Name = "ui_status", Title = "Get Window Status", ReadOnly = true, Idempotent = true)]
     public string Status();
 
-    [McpServerTool(Name = "ui_close")]
+    [McpServerTool(Name = "ui_close", Title = "Close Shared Window", Idempotent = true)]
     public string Close();
 }
 ```
+
+Three tools carry `Idempotent = true`: `ui_open`, `ui_status` and `ui_close`. `ui_status` also
+carries `ReadOnly = true`. `ui_render` carries neither hint.
 
 **The order of operations in `Render` is the safety property.** Unwrap → validate the whole
 tree → *only then* `_surface.Render(...)`. Every failure returns `{ok: false, rejected: …}`
@@ -285,7 +394,11 @@ public static class TreeRenderer
 }
 ```
 
-One `switch` over the nine component names, one private builder each (`StatusBanner`,
+`Render` first asks `VisibilityEvaluator.IsVisible(node.Visible, data)`. A hidden node returns a
+`Border` with `Visibility.Collapsed`, so the node takes no space and none of its children is
+drawn. The condition reads the root `data` and never the `scope`.
+
+Then one `switch` over the nine component names, one private builder each (`StatusBanner`,
 `PanelBox`, `RowBox`, `Metric`, `Field`, `Gauge`, `Repeat`, `Table`, `Note`). All colours are
 frozen `SolidColorBrush` constants selected by the closed `tone` set; unresolved values use a
 distinct brush so `UNKNOWN` is visually loud. Text goes through a single `Text(...)` helper onto
@@ -293,16 +406,16 @@ distinct brush so `UNKNOWN` is visually loud. Text goes through a single `Text(.
 
 ## Verification
 
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-16 by `repo-tools map`.
+Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 21 | dependency-graph.json |
-| totalExports | 23 | dependency-graph.json |
-| totalSymbols | 13 | duplicate-symbols.json |
+| totalSourceFiles | 25 | dependency-graph.json |
+| totalExports | 42 | dependency-graph.json |
+| totalSymbols | 30 | duplicate-symbols.json |
 
 **Claims the gate cannot hold:** every signature above was copied from the named source file.
-`totalExports` (23) counts exported *types* across all 21 files including tests;
-`totalSymbols` (13) is the distinct-symbol count duplicate-symbols.json analyses. Neither is a
+`totalExports` (42) counts exported *types* across all 25 files including tests;
+`totalSymbols` (30) is the distinct-symbol count duplicate-symbols.json analyses. Neither is a
 count of methods, so the per-method signatures here are source-read, not gate-enforced.

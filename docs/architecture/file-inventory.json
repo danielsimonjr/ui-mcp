@@ -1,0 +1,202 @@
+{
+  "totalFiles": 25,
+  "byDisposition": {
+    "reachable": 12,
+    "build-entry": 1,
+    "test-only": 1,
+    "orphan": 0,
+    "test": 11,
+    "tool": 0,
+    "config": 0,
+    "bench": 0,
+    "example": 0
+  },
+  "byArea": {
+    "src": 14,
+    "tests": 11
+  },
+  "byPackage": {
+    "UiMcp.Abstractions": 8,
+    "UiMcp": 6,
+    "UiMcp.Tests": 11
+  },
+  "files": [
+    {
+      "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 196
+    },
+    {
+      "file": "src/UiMcp.Abstractions/PathResolver.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 127
+    },
+    {
+      "file": "src/UiMcp.Abstractions/PropTypes.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 130
+    },
+    {
+      "file": "src/UiMcp.Abstractions/RenderRules.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 121
+    },
+    {
+      "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 15
+    },
+    {
+      "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 28
+    },
+    {
+      "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 177
+    },
+    {
+      "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+      "package": "UiMcp.Abstractions",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 107
+    },
+    {
+      "file": "src/UiMcp/Hosting/IUiSurface.cs",
+      "package": "UiMcp",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 43
+    },
+    {
+      "file": "src/UiMcp/Hosting/UiSurface.cs",
+      "package": "UiMcp",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 158
+    },
+    {
+      "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+      "package": "UiMcp",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 150
+    },
+    {
+      "file": "src/UiMcp/Program.cs",
+      "package": "UiMcp",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 67
+    },
+    {
+      "file": "src/UiMcp/Rendering/TreeRenderer.cs",
+      "package": "UiMcp",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 321
+    },
+    {
+      "file": "src/UiMcp/Tools/UiTools.cs",
+      "package": "UiMcp",
+      "area": "src",
+      "disposition": "test-only",
+      "loc": 159
+    },
+    {
+      "file": "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 162
+    },
+    {
+      "file": "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 259
+    },
+    {
+      "file": "tests/UiMcp.Tests/PathResolverTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 166
+    },
+    {
+      "file": "tests/UiMcp.Tests/ProgramMetadataTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
+    },
+    {
+      "file": "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 215
+    },
+    {
+      "file": "tests/UiMcp.Tests/StaFixture.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
+      "file": "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 419
+    },
+    {
+      "file": "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 213
+    },
+    {
+      "file": "tests/UiMcp.Tests/UiThreadHostTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 173
+    },
+    {
+      "file": "tests/UiMcp.Tests/UiToolsTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 285
+    },
+    {
+      "file": "tests/UiMcp.Tests/VisibilityTests.cs",
+      "package": "UiMcp.Tests",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 406
+    }
+  ],
+  "skippedLinks": [],
+  "warnings": []
+}

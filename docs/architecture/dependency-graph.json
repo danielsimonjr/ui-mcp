@@ -1,0 +1,969 @@
+{
+  "metadata": {
+    "name": "ui-mcp",
+    "schemaVersion": "2.0.0",
+    "language": "csharp",
+    "totalFiles": 25,
+    "totalModules": 2,
+    "totalExports": 42
+  },
+  "modules": {
+    "src": {
+      "src/UiMcp/Hosting/IUiSurface.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "UiSurfaceStatus",
+          "IUiSurface"
+        ]
+      },
+      "src/UiMcp/Hosting/UiSurface.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Security.Cryptography",
+          "System.Text",
+          "System.Text.Json",
+          "System.Windows",
+          "System.Windows.Controls",
+          "System.Windows.Media"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Rendering/TreeRenderer.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "UiSurface"
+        ]
+      },
+      "src/UiMcp/Hosting/UiThreadHost.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Windows.Threading"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "UiThreadHost"
+        ]
+      },
+      "src/UiMcp/Program.cs": {
+        "externalDependencies": [
+          "Microsoft.Extensions.DependencyInjection",
+          "Microsoft.Extensions.Hosting",
+          "Microsoft.Extensions.Logging",
+          "ModelContextProtocol.Server"
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp/Hosting/IUiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": []
+      },
+      "src/UiMcp/Rendering/TreeRenderer.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Text.Json",
+          "System.Windows",
+          "System.Windows.Controls",
+          "System.Windows.Controls.Primitives",
+          "System.Windows.Media"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "TreeRenderer"
+        ]
+      },
+      "src/UiMcp/Tools/UiTools.cs": {
+        "externalDependencies": [
+          "ModelContextProtocol.Server"
+        ],
+        "nodeDependencies": [
+          "System.ComponentModel",
+          "System.Security.Cryptography",
+          "System.Text",
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/IUiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "UiTools"
+        ]
+      },
+      "src/UiMcp.Abstractions/CatalogValidator.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "CatalogValidator"
+        ]
+      },
+      "src/UiMcp.Abstractions/PathResolver.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Globalization",
+          "System.Text.Json",
+          "System.Text.RegularExpressions"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "PathResolver"
+        ]
+      },
+      "src/UiMcp.Abstractions/PropTypes.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Text.Json",
+          "System.Text.RegularExpressions"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "PropTypes"
+        ]
+      },
+      "src/UiMcp.Abstractions/RenderRules.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Globalization",
+          "System.Text.Json"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "RenderRules"
+        ]
+      },
+      "src/UiMcp.Abstractions/UiValidationException.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "UiValidationException"
+        ]
+      },
+      "src/UiMcp.Abstractions/ValidatedNode.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "ValidatedNode",
+          "ValidatedColumn"
+        ]
+      },
+      "src/UiMcp.Abstractions/VisibilityCondition.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "VisibilityCondition",
+          "Always",
+          "Never",
+          "WhenPath",
+          "And",
+          "Or",
+          "Not",
+          "Eq",
+          "Neq",
+          "Gt",
+          "Gte",
+          "Lt",
+          "Lte",
+          "VisibilityOperand",
+          "Literal",
+          "PathRef"
+        ]
+      },
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [
+          "System.Globalization",
+          "System.Text.Json"
+        ],
+        "internalDependencies": [],
+        "exports": [
+          "VisibilityEvaluator"
+        ]
+      }
+    },
+    "tests": {
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Rendering/TreeRenderer.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "CatalogRendererSeamTests"
+        ]
+      },
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "CatalogValidatorTests"
+        ]
+      },
+      "tests/UiMcp.Tests/PathResolverTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "PathResolverTests"
+        ]
+      },
+      "tests/UiMcp.Tests/ProgramMetadataTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Reflection",
+          "System.Xml.Linq"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp/Program.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "ProgramMetadataTests"
+        ]
+      },
+      "tests/UiMcp.Tests/RenderRulesTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "RenderRulesTests"
+        ]
+      },
+      "tests/UiMcp.Tests/StaFixture.cs": {
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp/Hosting/IUiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "StaFixture"
+        ]
+      },
+      "tests/UiMcp.Tests/TreeRendererTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json",
+          "System.Windows",
+          "System.Windows.Controls",
+          "System.Windows.Controls.Primitives",
+          "System.Windows.Media"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Rendering/TreeRenderer.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "TreeRendererTests"
+        ]
+      },
+      "tests/UiMcp.Tests/UiSurfaceTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/IUiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "UiSurfaceTests",
+          "UiSurfaceWindowTests"
+        ]
+      },
+      "tests/UiMcp.Tests/UiThreadHostTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Threading"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp/Hosting/IUiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "UiThreadHostTests"
+        ]
+      },
+      "tests/UiMcp.Tests/UiToolsTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions",
+          "ModelContextProtocol.Server"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/IUiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiSurface.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Hosting/UiThreadHost.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp/Tools/UiTools.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "UiToolsTests"
+        ]
+      },
+      "tests/UiMcp.Tests/VisibilityTests.cs": {
+        "externalDependencies": [
+          "FluentAssertions"
+        ],
+        "nodeDependencies": [
+          "System.Text.Json"
+        ],
+        "internalDependencies": [
+          {
+            "file": "src/UiMcp.Abstractions/CatalogValidator.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PathResolver.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/PropTypes.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/RenderRules.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/UiValidationException.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/ValidatedNode.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityCondition.cs",
+            "imports": [],
+            "typeOnly": false
+          },
+          {
+            "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+            "imports": [],
+            "typeOnly": false
+          }
+        ],
+        "exports": [
+          "VisibilityTests"
+        ]
+      }
+    }
+  },
+  "statistics": {
+    "totalTypeScriptFiles": 25,
+    "totalSourceFiles": 25,
+    "totalModules": 2,
+    "totalLinesOfCode": 4173,
+    "totalExports": 42,
+    "entryRoots": 1,
+    "reachableFiles": 13,
+    "dormantFiles": 1,
+    "orphanedFiles": 0,
+    "testOnlyFiles": 1,
+    "runtimeCircularDeps": 0,
+    "typeOnlyCircularDeps": 0,
+    "totalTypeOnlyImports": 0,
+    "noImporterFileCount": 0,
+    "unusedExportsCount": 0,
+    "circularDepsTruncated": false,
+    "runtimeCyclicComponents": 0,
+    "typeOnlyCyclicComponents": 0,
+    "runtimeFilesInCycles": 0,
+    "typeOnlyFilesInCycles": 0
+  },
+  "reachability": {
+    "roots": [
+      "src/UiMcp/Program.cs"
+    ],
+    "reachableCount": 13,
+    "dormantCount": 1,
+    "orphaned": [],
+    "testOnly": [
+      "src/UiMcp/Tools/UiTools.cs"
+    ]
+  },
+  "warnings": []
+}

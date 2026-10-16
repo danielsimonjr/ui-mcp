@@ -1,98 +1,61 @@
-# ui-mcp — Unused Analysis
+<!-- repo-map:no-verification -->
+<!-- GENERATED FILE -- do not edit by hand.
+     Regenerate with `repo-tools map`. -->
 
-> **Derived from `unused-analysis.json`.** ui-mcp has no Markdown-emitting analyser of its own,
-> so this file is authored from that artifact rather than generated. Refresh it by re-running
-> `repo_map.py map` and updating both the tables and the Verification block.
+# Unused Files and Exports Analysis
 
-## Result
+## Summary
 
-| | |
-|---|---|
-| Files with no in-repo importer | **0** |
-| Exports flagged | **0** |
-| — of which deletion candidates (`unreferencedAnywhere`) | **0** |
-| — referenced only within their own file | **0** |
-| — unclassifiable | **0** |
+- **Files with no in-repo importer**: 0
+- **Dormant files**: 1
+  - **Orphaned (reachable from nothing)**: 0
+  - **Test-only (only a test reaches them)**: 1
+- **Potentially unused exports**: 0
+  - **Unreferenced anywhere**: 0
+  - **Referenced in their own module**: 0
+  - **Not classified**: 0
 
-Nothing is flagged.
+## Caveats
 
-## What changed, and why it is not merely a quieter report
+- A literal relative `import(...)` is a graph edge. A runtime call is a namespace use (`*`), so the exports of that file count as used. A type-position `import(...).Name` counts only `Name`, and `typeof import(...)` counts none. A dynamic import built from a variable or a template, and other runtime loads (e.g. `new Worker(path)`), are still invisible -- a file or export reached ONLY through one of those is reported as no-importer/unreferenced even though it may be live.
+- `noImporterFiles` is NOT a deletion-candidate list. A file with zero in-repo importers is expected, not suspicious, for: a standalone script invoked directly (e.g. a smoketest run via `node script.mjs`, never `import`ed by anything), or a build/lint config file loaded by its own tool rather than by source code (e.g. `eslint.config.mjs`, read by eslint itself). Cross-check against package.json scripts / tool configs before treating any entry here as dead.
+- Only NAMED exports are analysed (`FileNode.exports` carries named exports only) -- `export default` usage is not checked here.
+- The `referencedInModule` vs `unreferencedAnywhere` split for exports is a TEXT-LEVEL heuristic (whole-identifier occurrence count within the defining file's own source, minus the declaration site itself), not an AST reference count -- it can over-count a name that also appears in a string literal or comment. When the source text can't be read at all (no `RepoGraph.root_path`, or the file is missing) the export lands in `unclassifiedExports` instead of being guessed into either bucket.
+- `unreferencedAnywhereNotes`'s dynamic-import check (`_dynamic_import_referrers`) only sees `import(...)` calls with a LITERAL string specifier. A dynamic import built from a variable or template literal (e.g. `import(`./cmds/${name}.js`)`, a command-dispatcher pattern) is invisible to it -- 'found none' in a note means no LITERAL match was found, NOT that nothing imports the file.
+- This language's imports name a namespace, not the symbols they bring in (C#'s `using App.Hosting;`), so per-symbol usage cannot be read off the import edges at all. Usage here is a whole-identifier text search across every scanned file instead -- the same class of TEXT-LEVEL heuristic as the `referencedInModule` split above, and subject to the same limit: a name appearing in another file's comment or string literal counts as a use. That makes this direction conservative -- it UNDER-reports dead code rather than inventing it -- which is the safe direction for a list whose entries read as deletion candidates. A type reached only by reflection (`Activator.CreateInstance`, DI-by-convention) or named solely in a .csproj/XAML file is invisible either way.
 
-The previous run flagged **2** exports: `ComponentSpec` and `PropRule`, both in
-`CatalogValidator.cs`, both classified `referencedInModule` — used, but only inside the file that
-declares them.
+## Dormant files: orphaned
 
-That classification was correct, and the result was a **real finding**: both were `public` while every
-one of their 15 occurrences was in one file. A consumer handed a `ComponentSpec` could do nothing
-with it, because `Validate()` is the only entry point and it takes JSON. They described how the
-catalog is *built*, which is not a fact `UiMcp.Abstractions` needs to publish.
+Source files that no root and no test reaches. Verify each one before you delete it.
 
-**Both are now `internal`.** The count went 2 → 0 because the surface actually narrowed, not
-because the analysis was relaxed. `dotnet build` reports 0 warnings and 0 errors, and all 223
-tests pass — nothing outside the file was relying on them, exactly as the analysis said.
+_None._
 
-That change is the intended use of this artifact. A `referencedInModule` entry is not a bug
-report. The entry asks a question: *does this type need to be public?* Here the answer was no.
+## Dormant files: test-only
 
-## How usage is determined for C#, and what that limits
+Source files that only a test reaches. They ship nothing, but a test uses them.
 
-This matters enough to state prominently, because the method here is **weaker** than for the
-other languages `repo_map` supports.
-
-A C# `using` names a **namespace**, never a symbol. `using UiMcp.Abstractions;` says nothing
-about *which* types the file uses. The import edges therefore carry no symbol names. The
-dependency graph cannot answer the question "who imports this symbol?".
-
-A **whole-identifier text search across every scanned file** therefore determines the usage.
-That search is the same class of text-level heuristic that splits `referencedInModule` from
-`unreferencedAnywhere`. The consequences follow. This document states them now, so that no
-reader has to discover them later.
-
-- **The search can over-count.** A name in another file's comment or string literal counts as
-  a use. The analysis therefore **reports less dead code than the truth, and never more**. Under-
-  reporting is the safe direction for a list whose entries read as deletion candidates.
-- **Reflection is invisible.** Neither method sees a type that only `Activator.CreateInstance`,
-  DI-by-convention, or attribute discovery reaches. `UiTools` is such a type. A source
-  generator finds it from `[McpServerToolType]`, so it appears `test-only` in the graph while
-  it is fully live. See [DEPENDENCY_GRAPH.md](DEPENDENCY_GRAPH.md).
-- **Names in non-scanned files do not count.** A type referenced only from a `.csproj`, XAML, or
-  a JSON manifest would look unused.
-
-This method exists for a reason. Before it, the analysis assumed that an import names its
-symbols. That assumption holds for TypeScript and Python. It fails for C#. Under that
-assumption the analysis flagged **15 of 20 exports in this repository, and called 9 of them
-genuine deletion candidates**. The 9 included `IUiSurface`, `PathResolver` and `TreeRenderer`,
-which are three of the most-used types here. Every count was internally consistent and every
-gate passed, and the agreement is what made the report dangerous.
+- `src/UiMcp/Tools/UiTools.cs`
 
 ## Files with no in-repo importer
 
-None. The entry root (`Program.cs`) is excluded from this measure by definition — a root is what
-nothing imports.
+No file of this repository imports these files. This is not a deletion list.
 
-## Before deleting anything
+_None._
 
-Read the caveats above first. Then confirm with a second method. Search for the identifier
-across the whole working tree, and include the `.csproj`, XAML and JSON files. Then check
-whether an attribute or reflection reaches the type. A `public` type that only *looks* unused
-is common in this repository, because attribute discovery finds every MCP tool.
+## Exports unreferenced anywhere
 
-## Verification
+No other file imports these names, and their own module does not use them.
 
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+_None._
 
-| Claim | Value | Source |
-|---|---|---|
-| unusedExportCount | 0 | unused-analysis.json |
-| unreferencedAnywhereCount | 0 | unused-analysis.json |
-| referencedInModuleCount | 0 | unused-analysis.json |
-| unclassifiedExportCount | 0 | unused-analysis.json |
-| noImporterFileCount | 0 | unused-analysis.json |
-| unusedExportsCount | 0 | dependency-graph.json |
+## Exports referenced in their own module
 
-**Claims that the gate cannot hold.** A search across the repository confirmed two facts:
-`ComponentSpec` and `PropRule` were the two flagged exports, and all 15 of their occurrences
-sit in `CatalogValidator.cs`. That search is a second method, and not a restatement of the
-artifact. The "15 of 20" and "9 deletion candidates" figures come from an earlier run. That
-run used the previous version of the analysis, during the work that fixed it.
+No other file imports these names, but their own module uses them.
+
+_None._
+
+## Exports not classified
+
+The analysis could not read the source of these names.
+
+_None._
