@@ -71,6 +71,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   rebuilt and the committed bundle.** The step compares total length only, and a length does
   not show which build produced a file. The comparison itself is unchanged.
 
+- **The build inputs are now exact versions.** `Microsoft.Extensions.Hosting` and
+  `Microsoft.Extensions.Logging.Console` were `9.*`, so the bundle depended on the day of
+  the build. Both are now `9.0.21`, the latest 9.x, and `dotnet list package --vulnerable`
+  reports no advisory for them. `global.json` now pins SDK `9.0.319` with `rollForward`
+  `disable` (it was `9.0.314` with `latestFeature`). A new package version or SDK version
+  now needs a commit. The test packages `FluentAssertions` and `Moq` still use a range. They
+  are not in the bundle.
+
 ### Fixed
 
 - **`eq` and `neq` visibility conditions compared two boxed values by reference, and `gte` and
