@@ -17,6 +17,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   gives one length and two hashes. A content compare would depend on the line endings of the
   checkout.
 
+### Fixed
+
+- **The CHANGELOG has one `## [Unreleased]` heading.** A second block sat between 0.1.2 and 0.1.1.
+  Commit 797cba4 wrote the block after the 0.1.1 release commit. Commit 611ade9 added the
+  `[0.1.2]` heading above it and did not move it. The v0.1.2 tag therefore contains the block.
+  Its entries now sit under 0.1.2: the architecture documentation under Added, the README status
+  banner under Fixed, and the three gap notes under Notes. The tag resolves each gap note, and a
+  closing paragraph says how. One note claimed CI does not run `dotnet test`. The claim was
+  wrong when written: CI has run `dotnet test` since commit 238895b.
+
 ## [0.1.4] - 2026-10-16
 
 This section holds the changes to the server, the build and the CI made since commit
@@ -232,6 +242,10 @@ The version files first said 0.1.3 on this date (commit `64b7008`). No tag exist
   constructible in-process, so it is reachable, and an unreachable branch that behaves wrongly is
   a trap for whoever makes it reachable.
 
+- **The README declared the project unimplemented.** Its status banner still read
+  *"specification only. No implementation yet."* on a repository that is released at v0.1.1,
+  installed as a plugin, and serving four tools — the most misleading single line in the repo.
+
 ### Changed
 
 - **`ComponentSpec` and `PropRule` are now `internal`.** Both describe how the catalog is *built*,
@@ -260,16 +274,6 @@ The version files first said 0.1.3 on this date (commit `64b7008`). No tag exist
   bespoke test thread. WPF objects have thread affinity, so every query runs *inside* the STA call
   and returns plain values; the first version of the renderer suite ignored that and failed all 34
   tests for one reason that looked like 34.
-
-**132 → 217 tests.** Every new guard is mutation-proven, each mutation reverted to a
-SHA-256-identical file: reverting the gauge fix, the tone fix, the `Repeat` cap, `$item` scope
-propagation, `NodeCount`'s null, and the structural hash each killed exactly the intended test —
-and `$item` scope killed two, from different angles.
-
-## [Unreleased]
-
-### Added
-
 - **Architecture documentation — all ten canonical documents** in `docs/architecture/`
   (OVERVIEW, ARCHITECTURE, COMPONENTS, DATAFLOW, API, FILE_INVENTORY, TEST_COVERAGE,
   DEPENDENCY_GRAPH, unused-analysis, duplicate-symbols), plus a Documentation index in the
@@ -286,11 +290,10 @@ and `$item` scope killed two, from different angles.
     Before that, every .NET repo scanned to an empty graph and could not be documented against
     a drift gate at all.
 
-### Fixed
-
-- **The README declared the project unimplemented.** Its status banner still read
-  *"specification only. No implementation yet."* on a repository that is released at v0.1.1,
-  installed as a plugin, and serving four tools — the most misleading single line in the repo.
+**132 → 217 tests.** Every new guard is mutation-proven, each mutation reverted to a
+SHA-256-identical file: reverting the gauge fix, the tone fix, the `Repeat` cap, `$item` scope
+propagation, `NodeCount`'s null, and the structural hash each killed exactly the intended test —
+and `$item` scope killed two, from different angles.
 
 ### Notes — real gaps surfaced by writing the documentation
 
@@ -303,6 +306,11 @@ Recorded in `todo.md`, not fixed here, because documenting is not the same act a
 - **`dotnet test` does not run in CI** — the 132 tests are a local habit, not a gate.
 - **`ComponentSpec` and `PropRule` are `public`** while every use is confined to
   `CatalogValidator.cs`.
+
+Resolution, checked against the v0.1.2 tag. The first gap is closed: `TreeRendererTests` is in the
+Added list above. The third gap is closed: `ComponentSpec` and `PropRule` are `internal`, as the
+Changed list above says. The second note was wrong when written: CI has run `dotnet test` since
+commit 238895b.
 
 ## [0.1.1] - 2026-08-15
 
