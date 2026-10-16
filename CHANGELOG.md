@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-16
+
+Version 0.1.3 was set in the version files on 2026-08-16. It has no tag and no section in
+this file (only `v0.1.2` exists), so this section holds every change since 0.1.2.
+
+The rebuilt `bundle/UiMcp.exe` carries two main changes. The `visible` evaluator compares
+`eq` and `neq` operands by value, and `gte` and `lte` are false for a value that is not a
+number. The build is reproducible: four properties in `Directory.Build.props` stop it from
+embedding the checkout path and the commit.
+
 ### Added
 
 - **MCP 2.0 (`2026-07-28`) compliance for the stdio server.** Upgraded to
