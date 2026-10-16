@@ -143,7 +143,7 @@ ui-mcp/
   bundle/UiMcp.exe           self-contained publish output, committed
   .claude-plugin/plugin.json
   .mcp.json                  ${CLAUDE_PLUGIN_ROOT}/bundle/UiMcp.exe
-  global.json                SDK pin, rollForward latestFeature
+  global.json                SDK pin, exact version, rollForward disable
   docs/SPEC.md               this file
 ```
 
@@ -151,8 +151,8 @@ ui-mcp/
 resolver testable on any runner, and it is the seam a future headless or terminal renderer would
 use.
 
-Packages: `ModelContextProtocol` 2.2.0 (MCP `2026-07-28`) · `Microsoft.Extensions.Hosting` 9.* ·
-`Microsoft.Extensions.Logging.Console` 9.*.
+Packages: `ModelContextProtocol` 2.2.0 (MCP `2026-07-28`) · `Microsoft.Extensions.Hosting` 9.0.21 ·
+`Microsoft.Extensions.Logging.Console` 9.0.21.
 
 ---
 

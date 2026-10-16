@@ -22,8 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.*" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.*" />
+    <!--
+      Exact versions, not "9.*". A floating range makes the bundle depend on the day it is
+      built, and no update tool can track it. To update: list the newer versions with the
+      outdated option of dotnet list package, move both versions together, run dotnet test,
+      rebuild bundle/UiMcp.exe and commit it.
+    -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.21" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.21" />
     <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
   </ItemGroup>
 
