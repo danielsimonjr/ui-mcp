@@ -1,0 +1,252 @@
+{
+  "metadata": {
+    "totalSourceFiles": 14,
+    "totalTestFiles": 11,
+    "testedCount": 14,
+    "untestedCount": 0,
+    "coveragePercent": "100.0",
+    "effectiveCoverage": {
+      "policyLoaded": false,
+      "activeFiles": 14,
+      "testedActive": 14,
+      "activeUntested": 0,
+      "excludedTotal": 0,
+      "percent": "100.0",
+      "breakdown": {
+        "active_untested": 0
+      }
+    }
+  },
+  "untestedFiles": [],
+  "testedFiles": [
+    "src/UiMcp.Abstractions/CatalogValidator.cs",
+    "src/UiMcp.Abstractions/PathResolver.cs",
+    "src/UiMcp.Abstractions/PropTypes.cs",
+    "src/UiMcp.Abstractions/RenderRules.cs",
+    "src/UiMcp.Abstractions/UiValidationException.cs",
+    "src/UiMcp.Abstractions/ValidatedNode.cs",
+    "src/UiMcp.Abstractions/VisibilityCondition.cs",
+    "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+    "src/UiMcp/Hosting/IUiSurface.cs",
+    "src/UiMcp/Hosting/UiSurface.cs",
+    "src/UiMcp/Hosting/UiThreadHost.cs",
+    "src/UiMcp/Program.cs",
+    "src/UiMcp/Rendering/TreeRenderer.cs",
+    "src/UiMcp/Tools/UiTools.cs"
+  ],
+  "coverageMap": {
+    "src/UiMcp/Hosting/IUiSurface.cs": [
+      "tests/UiMcp.Tests/StaFixture.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiThreadHostTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs"
+    ],
+    "src/UiMcp/Hosting/UiSurface.cs": [
+      "tests/UiMcp.Tests/StaFixture.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiThreadHostTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs"
+    ],
+    "src/UiMcp/Hosting/UiThreadHost.cs": [
+      "tests/UiMcp.Tests/StaFixture.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiThreadHostTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs"
+    ],
+    "src/UiMcp/Program.cs": [
+      "tests/UiMcp.Tests/ProgramMetadataTests.cs"
+    ],
+    "src/UiMcp/Rendering/TreeRenderer.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs"
+    ],
+    "src/UiMcp/Tools/UiTools.cs": [
+      "tests/UiMcp.Tests/UiToolsTests.cs"
+    ],
+    "src/UiMcp.Abstractions/CatalogValidator.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/PathResolver.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/PropTypes.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/RenderRules.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/UiValidationException.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/ValidatedNode.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/VisibilityCondition.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ],
+    "src/UiMcp.Abstractions/VisibilityEvaluator.cs": [
+      "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
+      "tests/UiMcp.Tests/CatalogValidatorTests.cs",
+      "tests/UiMcp.Tests/PathResolverTests.cs",
+      "tests/UiMcp.Tests/RenderRulesTests.cs",
+      "tests/UiMcp.Tests/TreeRendererTests.cs",
+      "tests/UiMcp.Tests/UiSurfaceTests.cs",
+      "tests/UiMcp.Tests/UiToolsTests.cs",
+      "tests/UiMcp.Tests/VisibilityTests.cs"
+    ]
+  },
+  "testToSourceMap": {
+    "tests/UiMcp.Tests/CatalogRendererSeamTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+      "src/UiMcp/Rendering/TreeRenderer.cs"
+    ],
+    "tests/UiMcp.Tests/CatalogValidatorTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs"
+    ],
+    "tests/UiMcp.Tests/PathResolverTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs"
+    ],
+    "tests/UiMcp.Tests/ProgramMetadataTests.cs": [
+      "src/UiMcp/Program.cs"
+    ],
+    "tests/UiMcp.Tests/RenderRulesTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs"
+    ],
+    "tests/UiMcp.Tests/StaFixture.cs": [
+      "src/UiMcp/Hosting/IUiSurface.cs",
+      "src/UiMcp/Hosting/UiSurface.cs",
+      "src/UiMcp/Hosting/UiThreadHost.cs"
+    ],
+    "tests/UiMcp.Tests/TreeRendererTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+      "src/UiMcp/Rendering/TreeRenderer.cs"
+    ],
+    "tests/UiMcp.Tests/UiSurfaceTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+      "src/UiMcp/Hosting/IUiSurface.cs",
+      "src/UiMcp/Hosting/UiSurface.cs",
+      "src/UiMcp/Hosting/UiThreadHost.cs"
+    ],
+    "tests/UiMcp.Tests/UiThreadHostTests.cs": [
+      "src/UiMcp/Hosting/IUiSurface.cs",
+      "src/UiMcp/Hosting/UiSurface.cs",
+      "src/UiMcp/Hosting/UiThreadHost.cs"
+    ],
+    "tests/UiMcp.Tests/UiToolsTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
+      "src/UiMcp/Hosting/IUiSurface.cs",
+      "src/UiMcp/Hosting/UiSurface.cs",
+      "src/UiMcp/Hosting/UiThreadHost.cs",
+      "src/UiMcp/Tools/UiTools.cs"
+    ],
+    "tests/UiMcp.Tests/VisibilityTests.cs": [
+      "src/UiMcp.Abstractions/CatalogValidator.cs",
+      "src/UiMcp.Abstractions/PathResolver.cs",
+      "src/UiMcp.Abstractions/PropTypes.cs",
+      "src/UiMcp.Abstractions/RenderRules.cs",
+      "src/UiMcp.Abstractions/UiValidationException.cs",
+      "src/UiMcp.Abstractions/ValidatedNode.cs",
+      "src/UiMcp.Abstractions/VisibilityCondition.cs",
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs"
+    ]
+  },
+  "classifiedUntested": []
+}

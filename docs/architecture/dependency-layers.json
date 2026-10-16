@@ -1,0 +1,506 @@
+{
+  "metadata": {
+    "name": "@danielsimonjr/ui-mcp",
+    "version": "0.1.4",
+    "schemaVersion": "2.0.0",
+    "language": "csharp"
+  },
+  "entryPoints": [],
+  "modules": {
+    "UiMcp": {
+      "src/UiMcp/Hosting/IUiSurface.cs": {
+        "description": "IUiSurface.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "UiSurfaceStatus",
+          "IUiSurface"
+        ]
+      },
+      "src/UiMcp/Hosting/UiSurface.cs": {
+        "description": "UiSurface.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Security.Cryptography",
+            "imports": []
+          },
+          {
+            "module": "System.Text",
+            "imports": []
+          },
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          },
+          {
+            "module": "System.Windows",
+            "imports": []
+          },
+          {
+            "module": "System.Windows.Controls",
+            "imports": []
+          },
+          {
+            "module": "System.Windows.Media",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Rendering",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "UiSurface"
+        ]
+      },
+      "src/UiMcp/Hosting/UiThreadHost.cs": {
+        "description": "UiThreadHost.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Windows.Threading",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "UiThreadHost"
+        ]
+      },
+      "src/UiMcp/Program.cs": {
+        "description": "Program.cs module",
+        "externalDependencies": [
+          {
+            "package": "Microsoft.Extensions.DependencyInjection",
+            "imports": []
+          },
+          {
+            "package": "Microsoft.Extensions.Hosting",
+            "imports": []
+          },
+          {
+            "package": "Microsoft.Extensions.Logging",
+            "imports": []
+          },
+          {
+            "package": "ModelContextProtocol.Server",
+            "imports": []
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "UiMcp.Hosting",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Hosting",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Hosting",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
+      },
+      "src/UiMcp/Rendering/TreeRenderer.cs": {
+        "description": "TreeRenderer.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          },
+          {
+            "module": "System.Windows",
+            "imports": []
+          },
+          {
+            "module": "System.Windows.Controls",
+            "imports": []
+          },
+          {
+            "module": "System.Windows.Controls.Primitives",
+            "imports": []
+          },
+          {
+            "module": "System.Windows.Media",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "TreeRenderer"
+        ]
+      },
+      "src/UiMcp/Tools/UiTools.cs": {
+        "description": "UiTools.cs module",
+        "externalDependencies": [
+          {
+            "package": "ModelContextProtocol.Server",
+            "imports": []
+          }
+        ],
+        "nodeDependencies": [
+          {
+            "module": "System.ComponentModel",
+            "imports": []
+          },
+          {
+            "module": "System.Security.Cryptography",
+            "imports": []
+          },
+          {
+            "module": "System.Text",
+            "imports": []
+          },
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Abstractions",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Hosting",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Hosting",
+            "imports": []
+          },
+          {
+            "file": "UiMcp.Hosting",
+            "imports": []
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "UiTools"
+        ]
+      }
+    },
+    "UiMcp.Abstractions": {
+      "src/UiMcp.Abstractions/CatalogValidator.cs": {
+        "description": "CatalogValidator.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "CatalogValidator"
+        ]
+      },
+      "src/UiMcp.Abstractions/PathResolver.cs": {
+        "description": "PathResolver.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Globalization",
+            "imports": []
+          },
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          },
+          {
+            "module": "System.Text.RegularExpressions",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "PathResolver"
+        ]
+      },
+      "src/UiMcp.Abstractions/PropTypes.cs": {
+        "description": "PropTypes.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          },
+          {
+            "module": "System.Text.RegularExpressions",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "PropTypes"
+        ]
+      },
+      "src/UiMcp.Abstractions/RenderRules.cs": {
+        "description": "RenderRules.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Globalization",
+            "imports": []
+          },
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "RenderRules"
+        ]
+      },
+      "src/UiMcp.Abstractions/UiValidationException.cs": {
+        "description": "UiValidationException.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "UiValidationException"
+        ]
+      },
+      "src/UiMcp.Abstractions/ValidatedNode.cs": {
+        "description": "ValidatedNode.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "ValidatedNode",
+          "ValidatedColumn"
+        ]
+      },
+      "src/UiMcp.Abstractions/VisibilityCondition.cs": {
+        "description": "VisibilityCondition.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "VisibilityCondition",
+          "Always",
+          "Never",
+          "WhenPath",
+          "And",
+          "Or",
+          "Not",
+          "Eq",
+          "Neq",
+          "Gt",
+          "Gte",
+          "Lt",
+          "Lte",
+          "VisibilityOperand",
+          "Literal",
+          "PathRef"
+        ]
+      },
+      "src/UiMcp.Abstractions/VisibilityEvaluator.cs": {
+        "description": "VisibilityEvaluator.cs module",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "System.Globalization",
+            "imports": []
+          },
+          {
+            "module": "System.Text.Json",
+            "imports": []
+          }
+        ],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "VisibilityEvaluator"
+        ]
+      }
+    }
+  },
+  "cyclicComponents": {
+    "runtime": [],
+    "typeOnly": []
+  },
+  "layers": [
+    {
+      "name": "UiMcp",
+      "files": [
+        "src/UiMcp/Hosting/IUiSurface.cs",
+        "src/UiMcp/Hosting/UiSurface.cs",
+        "src/UiMcp/Hosting/UiThreadHost.cs",
+        "src/UiMcp/Program.cs",
+        "src/UiMcp/Rendering/TreeRenderer.cs",
+        "src/UiMcp/Tools/UiTools.cs"
+      ]
+    },
+    {
+      "name": "UiMcp.Abstractions",
+      "files": [
+        "src/UiMcp.Abstractions/CatalogValidator.cs",
+        "src/UiMcp.Abstractions/PathResolver.cs",
+        "src/UiMcp.Abstractions/PropTypes.cs",
+        "src/UiMcp.Abstractions/RenderRules.cs",
+        "src/UiMcp.Abstractions/UiValidationException.cs",
+        "src/UiMcp.Abstractions/ValidatedNode.cs",
+        "src/UiMcp.Abstractions/VisibilityCondition.cs",
+        "src/UiMcp.Abstractions/VisibilityEvaluator.cs"
+      ]
+    }
+  ]
+}

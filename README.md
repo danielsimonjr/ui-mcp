@@ -3,22 +3,23 @@
 An MCP server that hosts a native Windows window and renders **catalog-constrained JSON UI trees**.
 Any agent connected to the host can draw to it; nothing else can.
 
-> **Status: v0.1.1, implemented and installed.** Four tools, nine components, 133 tests
-> passing. Design intent is in [`docs/SPEC.md`](docs/SPEC.md); the as-built architecture is in
-> [`docs/architecture/`](docs/architecture/OVERVIEW.md).
+> **Status: implemented.** Four tools, nine components, a `visible` condition on every node, and a
+> test suite that CI runs on every change. Design intent is in [`docs/SPEC.md`](docs/SPEC.md); the
+> as-built architecture is in [`docs/architecture/`](docs/architecture/OVERVIEW.md).
 
 ## What it is for
 
 Agents on this machine can measure the system and report in text. They cannot *show* anything.
-ui-mcp gives them one shared display: an agent emits a JSON tree, the server validates it against a
-fixed component catalog, and a WPF window renders it. Anything outside the catalog is refused.
+ui-mcp gives them one shared display. An agent emits a JSON tree. The server validates the tree
+against a fixed component catalog, and a WPF window renders it. The server refuses anything
+outside the catalog.
 
 ## Why an MCP server rather than a script
 
 A WPF window needs an STA thread with a message pump. An MCP server needs async stdio that never
-blocks. A PowerShell script cannot do both — `ShowDialog()` blocks its only thread, so it can run
-timers but cannot serve an agent. A C# server runs the UI on a dedicated STA thread and marshals
-every update through the `Dispatcher`.
+blocks. A PowerShell script cannot do both. `ShowDialog()` blocks the only thread of the script.
+The script can run timers but cannot serve an agent. A C# server runs the UI on a dedicated STA
+thread and marshals every update through the `Dispatcher`.
 
 ## Safety model
 
@@ -33,9 +34,9 @@ spot displayed as a green zero reads as health.
 
 ## Documentation
 
-Every numeric claim in these is derived from a parse of the source and re-checked by a gate
-that exits non-zero when the code moves
-(`python repo_map.py check <repo> --docs docs/architecture`).
+The counts in these documents come from a parse of the source, and a gate re-checks them. The
+gate exits non-zero when the code moves (`repo-tools check . --docs=docs/architecture`). A claim
+that the gate cannot measure names its source in the document.
 
 | Document | Answers |
 |---|---|
@@ -73,9 +74,9 @@ dotnet publish src/UiMcp -c Release -o bundle `
 `bundle/UiMcp.exe` is committed — it is the artifact the plugin runs.
 
 **Do not drop the flags.** A bare `dotnet publish -c Release -o bundle` produces a 156 KB
-launcher plus **45 loose DLLs** scattered into `bundle/`, not the single 29,799,584-byte
-executable `.mcp.json` points at. The recipe was previously undocumented and reconstructing it
-cost a cleanup; the byte size is the check that it is right.
+launcher plus **45 loose DLLs** scattered into `bundle/`. `.mcp.json` points at one single-file
+executable of about 30 MB instead. The recipe was previously undocumented and reconstructing it
+cost a cleanup; the file size is the check that it is right.
 
 `--self-contained false` is the measured choice (SPEC 10.2): framework-dependent 28.42 MB
 against self-contained 153.7 MB, because `WindowsDesktop.App 9.0.x` is present on both target
@@ -87,8 +88,9 @@ Publish also emits `.pdb` files; only `UiMcp.exe` is committed. **Re-publish aft
 
 ## Install as a plugin
 
-Registered in `~/Github/skills/.claude-plugin/marketplace.json` as a local source
-(`./ui-mcp`, a symlink to this repo) and enabled in `~/.claude/settings.json`.
+Registered in `.claude-plugin/marketplace.json` of the `local-marketplace` marketplace
+(`danielsimonjr/skills`) with a `url` source that points at this repository, and enabled in
+`~/.claude/settings.json`.
 
 ```powershell
 claude plugin marketplace update local-marketplace
@@ -103,7 +105,7 @@ To check the deployed artifact directly, drive it over stdio:
 
 ```powershell
 # MCP 2.0 clients should send server/discover first; legacy clients can still initialize.
-& "$env:USERPROFILE\.claude\plugins\cache\local-marketplace\ui-mcp\0.1.0\bundle\UiMcp.exe"
+& "$env:USERPROFILE\.claude\plugins\cache\local-marketplace\ui-mcp\<version>\bundle\UiMcp.exe"
 ```
 
 ## License

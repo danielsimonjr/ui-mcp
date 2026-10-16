@@ -14,7 +14,8 @@ accepts the legacy `initialize` handshake for older clients. Each tool returns a
 text payload.
 
 `tools/list` also publishes human-readable tool titles plus safety hints where they are true:
-`ui_status` is read-only; all four tools are idempotent.
+`ui_status` is read-only. `ui_open`, `ui_status` and `ui_close` are idempotent. `ui_render` carries
+neither hint.
 
 ### `ui_open`
 
@@ -46,6 +47,10 @@ refused rather than ignored.
 ```json
 { "ok": true, "nodeCount": 19, "treeHash": "105e2c486c52" }
 ```
+
+`nodeCount` counts every node of the validated tree, and it includes hidden nodes. `treeHash`
+covers the type, the prop keys and the children of each node. It holds no prop value and no
+`visible` condition, so two trees that differ only in values or conditions have the same hash.
 
 On refusal — and the UI is **not** touched:
 
@@ -91,12 +96,17 @@ stopped service.
 ## The tree format
 
 ```json
-{ "type": "<component>", "props": { … }, "children": [ … ] }
+{ "type": "<component>", "props": { … }, "children": [ … ], "visible": <condition> }
 ```
 
 - `type` — required, must be a catalog component name.
 - `props` — unknown props are **refused**, not ignored. Missing required props are refused.
 - `children` — only on components that accept them; max 64; max tree depth 12.
+- `visible` — optional. A condition that hides the node when it is false (see
+  [Visibility conditions](#visibility-conditions)). A `null` value counts as an absent key.
+
+The validator reads no other key of a node. The validator ignores an unknown key and does not
+refuse it.
 
 ### Components
 
@@ -143,6 +153,61 @@ than an absent key.
 Value formatting: numbers round-trip in `InvariantCulture`; `true`/`false` become `YES`/`NO`;
 an array becomes its length; an object becomes `OBJ`.
 
+### Visibility conditions
+
+A node draws when its `visible` condition is true. A node without the key always draws. A hidden
+node takes no space, and none of its children is drawn. The validator still checks a hidden node
+in full.
+
+A condition has one of twelve forms:
+
+| Form | JSON | The node shows when |
+|---|---|---|
+| always | `true` | always |
+| never | `false` | never |
+| path | `{"path": "disk.alert"}` | the path resolves to a truthy value |
+| and | `{"and": [c, …]}` | every `c` is true; an empty array is true |
+| or | `{"or": [c, …]}` | any `c` is true; an empty array is false |
+| not | `{"not": c}` | `c` is false |
+| eq | `{"eq": [a, b]}` | the two operands are equal |
+| neq | `{"neq": [a, b]}` | the two operands differ |
+| gt, gte, lt, lte | `{"gt": [a, b]}` | both operands are numbers and the order holds |
+
+Each `c` is a condition. Each `a` and `b` is an operand. An operand is `{"path": "…"}`, which
+reads the data, or a literal: a string, a number, a boolean or `null`.
+
+- A path reads the root data. It never reads the `$item` scope of a `Repeat`, so a `$item` path
+  stays unresolved.
+- Truthiness follows JavaScript. `false`, `null`, `0` and the empty string are falsy. Every other
+  value is truthy, and that includes an empty array and an empty object.
+- An unresolved path is falsy, so the node stays hidden.
+- `eq` and `neq` compare the value and its type. The number `1` and the string `"1"` differ. An
+  unresolved path and `null` are equal.
+- `gt`, `gte`, `lt` and `lte` are false unless both operands are numbers.
+- An object that holds more than one form key uses the first of these keys: `path`, `and`, `or`,
+  `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
+- The path of a condition skips the path charset rule of the prop types. The prototype guard still
+  refuses `__proto__`, `constructor` and `prototype`.
+
+This tree shows the note only when `disk.usedPct` is 90 or more:
+
+```json
+{
+  "type": "Panel", "props": { "title": "Disk" },
+  "children": [
+    { "type": "Note", "props": { "text": "Disk is nearly full", "tone": "critical" },
+      "visible": { "gte": [ { "path": "disk.usedPct" }, 90 ] } }
+  ]
+}
+```
+
+A condition that does not parse refuses the whole tree. The message starts with
+`<Type>.visible:`:
+
+```json
+{ "ok": false, "rejected": "Panel.visible: visible: unrecognised condition shape" }
+```
+
 ### Caps
 
 | Cap | Value | Behaviour past it |
@@ -168,13 +233,16 @@ executable.
 
 | Type | Kind | Purpose |
 |---|---|---|
-| `ValidatedNode` | record | A node that passed validation. The renderer accepts only this. |
+| `ValidatedNode` | record | A node that passed validation, with its parsed `visible` condition. The renderer accepts only this. |
 | `ValidatedColumn` | record | A validated table column. |
 | `UiValidationException` | exception | A deliberate refusal, distinguishable from a fault. |
 | `CatalogValidator` | static | `Validate`, `ComponentNames`, `MaxDepth`, `MaxChildren`. |
 | `PropTypes` | static | The prop validators, `Tones`, `RowColumnCounts`, caps. |
 | `PathResolver` | static | `Resolve`, `Display`, `Unknown`. |
 | `RenderRules` | static | `IsUnknown`, `MetricText`, `DeltaText`, `GaugePercent`, `EmptyText`, caps. |
+| `VisibilityCondition` | abstract record | The closed union of twelve conditions, and `Parse`. |
+| `VisibilityOperand` | abstract record | One side of a comparison, a `Literal` or a `PathRef`, and `Parse`. |
+| `VisibilityEvaluator` | static | `IsVisible`. |
 
 ### `UiMcp`
 
@@ -191,20 +259,22 @@ executable.
 
 ## Verification
 
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-16 by `repo-tools map`.
+Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalExports | 23 | dependency-graph.json |
-| totalSourceFiles | 21 | dependency-graph.json |
+| totalExports | 42 | dependency-graph.json |
+| totalSourceFiles | 25 | dependency-graph.json |
 | duplicateCount | 0 | duplicate-symbols.json |
 
 **Claims that the gate cannot hold.** A reading of `UiTools.cs` gives the **four tools**, their
 parameters, their defaults and their response shapes. A reading of `CatalogValidator.cs` and
-`PropTypes.cs` gives the **nine components** and every prop rule. repo_map counts exported
-*types*. `totalExports` (23) therefore covers the 13 types listed above **and the test classes
-and fixtures**. The number is not a count of tools, components or props. `ComponentSpec` and `PropRule` are deliberately absent from that
-table: both were narrowed to `internal`, because every use of either is inside
-`CatalogValidator.cs`. The tool list was additionally confirmed over the wire: a real `tools/list`
+`PropTypes.cs` gives the **nine components** and every prop rule. A reading of
+`VisibilityCondition.cs` and `VisibilityEvaluator.cs` gives the twelve condition forms and their
+rules. `repo-tools` counts exported *types*. `totalExports` (42) therefore covers the 16 types
+listed above, the 14 nested records of the two visibility unions **and the 12 test classes and
+fixtures**. The number is not a count of tools, components or props. `ComponentSpec` and
+`PropRule` are deliberately absent from that table: both were narrowed to `internal`, because
+every use of either is inside `CatalogValidator.cs`. The tool list was additionally confirmed over the wire: a real `tools/list`
 against the shipped binary returned exactly `ui_open`, `ui_render`, `ui_status`, `ui_close`.

@@ -142,6 +142,39 @@ with no WPF. That includes unit suppression, delta existence, gauge clamping, em
 the 64/200 caps. `TreeRenderer` only assembles elements, so a reader can verify it. That split
 makes the interesting half testable without a desktop.
 
+### `visible` is a closed condition, parsed by the validator and decided in `Abstractions`
+
+A node can carry a `visible` key beside `type`, `props` and `children`. The key is not a prop.
+The validator parses the key into a `VisibilityCondition`. That type is a closed union with
+twelve cases: `Always`, `Never`, `WhenPath`, `And`, `Or`, `Not`, `Eq`, `Neq`, `Gt`, `Gte`, `Lt`
+and `Lte`. The operand of a comparison is a literal or a path reference. Any other shape is
+refused with a message that starts with `<Type>.visible:`. A `null` value means the same as an
+absent key, and the node is always visible.
+
+`VisibilityEvaluator.IsVisible` decides the result in `Abstractions`, with no WPF. Four rules
+apply:
+
+- A path condition is true when the path resolves to a truthy value. Truthiness follows
+  JavaScript: `false`, `null`, `0` and the empty string are falsy.
+- An unresolved path is falsy. A condition that cannot be evaluated never shows a node that
+  should stay hidden.
+- `Eq` and `Neq` compare canonical values. The number `1` and the string `"1"` are different
+  values. Two unresolved operands are equal.
+- An ordering operator is false unless both operands are numbers.
+
+`TreeRenderer.Render` evaluates the condition against the **root** data. It never uses the
+`$item` scope of a `Repeat`. A hidden node becomes a collapsed `Border`, so the node takes no
+space and the renderer does not draw its children.
+
+**Rationale.** The condition is data from a closed set. The closed-output principle therefore
+holds: the tree cannot run code or choose an element type through `visible`. The decision sits
+in `Abstractions` because the renderer draws what the rules decide.
+
+**Trade-offs.** A condition cannot read the current item of a `Repeat`. A `visible` path goes
+straight to `PathResolver.Resolve`, and `PropTypes.Path` does not check it, so the path
+charset rule does not apply to it. The prototype guard in `PathResolver.Resolve` still refuses
+`__proto__`, `constructor` and `prototype`.
+
 ### STDOUT is the transport
 
 Anything on stdout that is not a JSON-RPC frame corrupts the protocol. The failure then shows
@@ -181,33 +214,37 @@ job.
 
 ## Deployment
 
-The build is framework-dependent, single-file and `win-x64`, at **28.42 MB**. A measurement
-chose it over the self-contained build at 153.7 MB. Both target machines already hold
-`WindowsDesktop.App 9.0.19`. The repository also commits the bundle, and the cache clones it
-for each version.
+The build is framework-dependent, single-file and `win-x64`. A measurement chose it over the
+self-contained build: 28.42 MB against 153.7 MB, which is 5.4 times smaller (SPEC 10.2). Both
+target machines already hold the `WindowsDesktop.App` 9.0 runtime that the build needs. The
+repository also commits the bundle, and the plugin cache clones it for each version.
 
 ## Known limitations
 
 - **Last-write-wins.** Two agents rendering different trees is a race; `ui_status` names only
   the last render. Multi-agent arbitration is deferred.
 - **No partial update.** `ui_render` is a full replace; `ui_update` is deferred to v0.2.
+- **A key beside `props` is ignored unless it is `type`, `children` or `visible`.** The catalog
+  refuses an unknown prop, but the validator reads no other node-level key. A misspelled
+  `visible` key therefore does nothing, and the node is always visible.
 - **The desktop assumption is retired only for the interactive path.** An S4U-triggered host
   has no desktop by definition. No task that starts the host uses S4U today; if that changes,
   re-run `tools/probe-desktop.ps1` first. See SPEC 10.1.
 
 ## Verification
 
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-16 by `repo-tools map`.
+Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalSourceFiles | 21 | dependency-graph.json |
+| totalSourceFiles | 25 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 
 **Claims that the gate cannot hold.** A reading of the source and its comments gives every
 architectural rule above. The files are `CatalogValidator.cs`, `PathResolver.cs`,
-`RenderRules.cs`, `UiThreadHost.cs` and `Program.cs`. These rules are design properties, and
+`PropTypes.cs`, `RenderRules.cs`, `VisibilityCondition.cs`, `VisibilityEvaluator.cs`,
+`TreeRenderer.cs`, `UiThreadHost.cs` and `Program.cs`. These rules are design properties, and
 not graph metrics. The publish task measured the **28.42 MB** and **153.7 MB** figures, and
 SPEC 10.2 records them.

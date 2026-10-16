@@ -12,7 +12,7 @@ launch UiMcp.exe
   ├─ Logging.ClearProviders()          ← stdout is the MCP transport
   ├─ Logging.AddConsole(→ stderr)
   ├─ AddSingleton<IUiSurface, UiSurface>()   ← ONE shared surface
-  └─ AddMcpServer(name: "ui-mcp", version: <from assembly>)
+  └─ AddMcpServer(name: "ui-mcp", version: <from assembly>, instructions: <four-tool text>)
        .WithStdioServerTransport()
        .WithToolsFromAssembly()        ← source generator finds [McpServerTool] methods
   │
@@ -63,13 +63,30 @@ part-rendered invalid tree looks like a working display, and it quietly leaves o
 failed. That result is the same "silence reads as health" defect that `UNKNOWN` prevents
 elsewhere.
 
+Step 3 also parses the `visible` key of each node. A condition that does not parse refuses the
+whole tree. The parse decides nothing about display: `TreeRenderer` decides, at draw time, from
+the data.
+
 **Step 5 re-reads rather than recomputing.** An earlier version hashed the raw JSON here while
 the surface hashed the structure, so `ui_render` and `ui_status` reported different values under
 the same name.
 
 ## Inside `TreeRenderer.Render` — binding and formatting
 
-For each node, recursively:
+For each node, recursively, the first step is the visibility gate:
+
+```
+ValidatedNode ──▶ VisibilityEvaluator.IsVisible(node.Visible, data)
+                     │
+                     ├─ false → Border { Visibility = Collapsed }   ← takes no space; no child is drawn
+                     └─ true  → the switch below
+```
+
+The condition reads the root `data`. It never reads the `$item` scope of a `Repeat`. Each child
+of a container and each item of a `Repeat` passes through the same gate, because the renderer
+calls `Render` for each of them.
+
+Then the node type selects the builder:
 
 ```
 ValidatedNode ──▶ switch (node.Type)
@@ -125,6 +142,8 @@ UiTools.Status() ──▶ _surface.Status
 |---|---|---|
 | Malformed `tree`/`data` JSON | `{ok:false, rejected: "tree is not valid JSON: …"}` | unaffected |
 | Anything the catalog refuses | `{ok:false, rejected: "<Type>.<prop>: <reason>"}` | unaffected; **UI untouched** |
+| A `visible` value that does not parse | `{ok:false, rejected: "<Type>.visible: <reason>"}` | unaffected; **UI untouched** |
+| A `visible` path that does not resolve | the node is hidden | unaffected; render completes |
 | Unresolvable binding path | renders `UNKNOWN` in place | unaffected; render completes |
 | Awaited UI work throws | exception surfaces on the caller's `Task` | host stays alive |
 | **Unawaited** UI work throws (window event handler) | nothing — it had no caller | `Dispatcher.UnhandledException` marks it handled, records `LastFault`; **`ui_status` reports it** |
@@ -136,14 +155,14 @@ the process and takes MCP tool serving down with the display.
 
 ## Verification
 
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-16 by `repo-tools map`.
+Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
 | entryRoots | 1 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| totalSourceFiles | 21 | dependency-graph.json |
+| totalSourceFiles | 25 | dependency-graph.json |
 
 **Claims that the gate cannot hold.** A reading of `UiTools.Render`, `UiSurface.Render`,
 `TreeRenderer.Render` and `UiThreadHost` gives every sequence above. A dependency graph shows

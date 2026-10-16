@@ -1,169 +1,385 @@
-# ui-mcp — Dependency Graph
+<!-- repo-map:no-verification -->
+<!-- GENERATED FILE -- do not edit by hand.
+     Regenerate with `repo-tools map`. -->
 
-> **Derived from `dependency-graph.json`.** ui-mcp has no Markdown-emitting analyser of its
-> own, so this file is authored from that artifact rather than generated. Refresh it by
-> re-running `repo_map.py map` and updating both the tables and the Verification block.
+# @danielsimonjr/ui-mcp - Dependency Graph
 
-## Read this first — C# edges are NAMESPACE-granular
+**Version**: 0.1.4
 
-A C# `using` names a **namespace**, not a file. `using UiMcp.Abstractions;` therefore produces
-an edge to **every one of the six files declaring that namespace**, whether or not the importing
-file uses anything from each.
+This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
-The behaviour is not a defect in the analysis. The behaviour is what the language expresses.
-The raw edge counts below therefore **over-state the coupling between files**. A reader must
-not conclude from the table that `IUiSurface.cs` depends on `PathResolver.cs`. No such
-dependency exists. `IUiSurface.cs` only imports the namespace that the two files share.
+---
 
-Consequences visible in this graph:
+## Table of Contents
 
-- Every file importing `UiMcp.Abstractions` shows 6 internal dependencies.
-- `reachableFiles` is 11 of 12 `src` files partly because of this fan-out.
-- Cycle detection is correspondingly conservative: **0 runtime cycles** is a strong result
-  precisely because namespace-level edges would make cycles *easier*, not harder, to produce.
+1. [Overview](#overview)
+2. [Package Dependencies](#package-dependencies)
+3. [UiMcp Dependencies](#uimcp-dependencies)
+4. [UiMcp.Abstractions Dependencies](#uimcp-abstractions-dependencies)
+5. [Dependency Matrix](#dependency-matrix)
+6. [Circular Dependency Analysis](#circular-dependency-analysis)
+7. [Visual Dependency Graph](#visual-dependency-graph)
+8. [Summary Statistics](#summary-statistics)
 
-## Project-level dependencies
+---
 
+<a id="overview"></a>
+## Overview
+
+The codebase is organized into the following modules:
+
+- **UiMcp**: 6 files
+- **UiMcp.Abstractions**: 8 files
+
+---
+
+<a id="uimcp-dependencies"></a>
+
+## UiMcp Dependencies
+
+### `src/UiMcp/Hosting/IUiSurface.cs` - IUiSurface.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Text.Json` | `` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+
+**Exports:**
+
+---
+
+### `src/UiMcp/Hosting/UiSurface.cs` - UiSurface.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Security.Cryptography` | `` |
+| `System.Text` | `` |
+| `System.Text.Json` | `` |
+| `System.Windows` | `` |
+| `System.Windows.Controls` | `` |
+| `System.Windows.Media` | `` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Rendering` | `` | Import |
+
+**Exports:**
+
+---
+
+### `src/UiMcp/Hosting/UiThreadHost.cs` - UiThreadHost.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Windows.Threading` | `` |
+
+**Exports:**
+
+---
+
+### `src/UiMcp/Program.cs` - Program.cs module
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `Microsoft.Extensions.DependencyInjection` | `` |
+| `Microsoft.Extensions.Hosting` | `` |
+| `Microsoft.Extensions.Logging` | `` |
+| `ModelContextProtocol.Server` | `` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `UiMcp.Hosting` | `` | Import |
+| `UiMcp.Hosting` | `` | Import |
+| `UiMcp.Hosting` | `` | Import |
+
+---
+
+### `src/UiMcp/Rendering/TreeRenderer.cs` - TreeRenderer.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Text.Json` | `` |
+| `System.Windows` | `` |
+| `System.Windows.Controls` | `` |
+| `System.Windows.Controls.Primitives` | `` |
+| `System.Windows.Media` | `` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+
+**Exports:**
+
+---
+
+### `src/UiMcp/Tools/UiTools.cs` - UiTools.cs module
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `ModelContextProtocol.Server` | `` |
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.ComponentModel` | `` |
+| `System.Security.Cryptography` | `` |
+| `System.Text` | `` |
+| `System.Text.Json` | `` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Abstractions` | `` | Import |
+| `UiMcp.Hosting` | `` | Import |
+| `UiMcp.Hosting` | `` | Import |
+| `UiMcp.Hosting` | `` | Import |
+
+**Exports:**
+
+---
+
+<a id="uimcp-abstractions-dependencies"></a>
+
+## UiMcp.Abstractions Dependencies
+
+### `src/UiMcp.Abstractions/CatalogValidator.cs` - CatalogValidator.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Text.Json` | `` |
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/PathResolver.cs` - PathResolver.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Globalization` | `` |
+| `System.Text.Json` | `` |
+| `System.Text.RegularExpressions` | `` |
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/PropTypes.cs` - PropTypes.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Text.Json` | `` |
+| `System.Text.RegularExpressions` | `` |
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/RenderRules.cs` - RenderRules.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Globalization` | `` |
+| `System.Text.Json` | `` |
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/UiValidationException.cs` - UiValidationException.cs module
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/ValidatedNode.cs` - ValidatedNode.cs module
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/VisibilityCondition.cs` - VisibilityCondition.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Text.Json` | `` |
+
+**Exports:**
+
+---
+
+### `src/UiMcp.Abstractions/VisibilityEvaluator.cs` - VisibilityEvaluator.cs module
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `System.Globalization` | `` |
+| `System.Text.Json` | `` |
+
+**Exports:**
+
+---
+
+<a id="dependency-matrix"></a>
+## Dependency Matrix
+
+### File Import/Export Matrix
+
+| File | Imports From | Exports To |
+|------|--------------|------------|
+| `src/UiMcp/Hosting/UiSurface.cs` | 2 files | 2 files |
+| `src/UiMcp.Abstractions/CatalogValidator.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/PathResolver.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/PropTypes.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/RenderRules.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/UiValidationException.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/ValidatedNode.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/VisibilityCondition.cs` | 0 files | 4 files |
+| `src/UiMcp.Abstractions/VisibilityEvaluator.cs` | 0 files | 4 files |
+| `src/UiMcp/Hosting/IUiSurface.cs` | 1 file | 2 files |
+| `src/UiMcp/Hosting/UiThreadHost.cs` | 0 files | 2 files |
+| `src/UiMcp/Rendering/TreeRenderer.cs` | 1 file | 1 file |
+| `src/UiMcp/Tools/UiTools.cs` | 2 files | 0 files |
+| `src/UiMcp/Program.cs` | 1 file | 0 files |
+
+---
+
+<a id="circular-dependency-analysis"></a>
+## Circular Dependency Analysis
+
+**No circular dependencies detected.**
+---
+
+<a id="visual-dependency-graph"></a>
+## Visual Dependency Graph
+
+```mermaid
+graph TD
+    subgraph UiMcp
+        N0[IUiSurface.cs]
+        N1[UiSurface.cs]
+        N2[UiThreadHost.cs]
+        N3[Program.cs]
+        N4[TreeRenderer.cs]
+        N5[UiTools.cs]
+    end
+
+    subgraph UiMcp.Abstractions
+        N6[CatalogValidator.cs]
+        N7[PathResolver.cs]
+        N8[PropTypes.cs]
+        N9[RenderRules.cs]
+        N10[UiValidationException.cs]
+        N11[ValidatedNode.cs]
+        N12[VisibilityCondition.cs]
+        N13[VisibilityEvaluator.cs]
+    end
+
+    N0 --> N6
+    N0 --> N7
+    N0 --> N8
+    N0 --> N9
+    N0 --> N10
+    N0 --> N11
+    N0 --> N12
+    N0 --> N13
+    N1 --> N6
+    N1 --> N7
+    N1 --> N8
+    N1 --> N9
+    N1 --> N10
+    N1 --> N11
+    N1 --> N12
+    N1 --> N13
+    N1 --> N4
+    N3 --> N0
+    N3 --> N1
+    N3 --> N2
+    N4 --> N6
+    N4 --> N7
+    N4 --> N8
+    N4 --> N9
+    N4 --> N10
+    N4 --> N11
+    N4 --> N12
+    N4 --> N13
+    N5 --> N6
+    N5 --> N7
+    N5 --> N8
+    N5 --> N9
+    N5 --> N10
+    N5 --> N11
+    N5 --> N12
+    N5 --> N13
+    N5 --> N0
+    N5 --> N1
+    N5 --> N2
 ```
-UiMcp.Tests ──▶ UiMcp ──▶ UiMcp.Abstractions
-     │                          ▲
-     └──────────────────────────┘
-```
 
-`UiMcp.Abstractions` depends on **nothing in this repository** and on no WPF assembly. That
-independence is the architectural boundary. The `net9.0` target framework enforces it.
+---
 
-## External dependencies
+<a id="summary-statistics"></a>
+## Summary Statistics
 
-| Package | Used by | For |
-|---|---|---|
-| `ModelContextProtocol.Server` | `Program.cs`, `UiTools.cs` | MCP server, stdio transport, `[McpServerTool]` |
-| `Microsoft.Extensions.Hosting` | `Program.cs` | Generic host |
-| `Microsoft.Extensions.DependencyInjection` | `Program.cs` | `AddSingleton<IUiSurface, UiSurface>` |
-| `Microsoft.Extensions.Logging` | `Program.cs` | Logging, pinned to stderr |
-| `FluentAssertions` | all 8 test classes | Assertions |
+| Category | Count |
+|----------|-------|
+| Total Source Files | 25 |
+| Subsystems | 2 |
+| Total Lines of Code | 4173 |
+| Total Exports | 42 |
+| Type-only Imports | 0 |
+| Runtime Cyclic Components | 0 |
+| Type-only Cyclic Components | 0 |
+| Files in Runtime Cycles | 0 |
+| Files in Type-only Cycles | 0 |
 
-Only **one** external package reaches beyond the composition root: `ModelContextProtocol.Server`,
-in `UiTools.cs`, for the tool attributes. Nothing in `UiMcp.Abstractions` has any external
-dependency at all.
+---
 
-Runtime framework namespaces (`System.*`) are classified separately from packages. `Microsoft.*`
-is correctly counted as **external**, not framework: `Microsoft.Extensions.*` arrives as NuGet
-packages.
-
-## Per-file edges
-
-### `UiMcp` project
-
-| File | Internal deps | External | Framework |
-|---|---|---|---|
-| `Program.cs` | `IUiSurface.cs`, `UiSurface.cs`, `UiThreadHost.cs` | 4 `Microsoft.*` / `ModelContextProtocol.Server` | — |
-| `Tools/UiTools.cs` | 6 × Abstractions + `IUiSurface.cs`, `UiSurface.cs`, `UiThreadHost.cs` | `ModelContextProtocol.Server` | `System.ComponentModel`, `System.Security.Cryptography`, `System.Text`, `System.Text.Json` |
-| `Hosting/UiSurface.cs` | 6 × Abstractions + `TreeRenderer.cs` | — | `System.Security.Cryptography`, `System.Text`, `System.Text.Json`, `System.Windows{,.Controls,.Media}` |
-| `Hosting/IUiSurface.cs` | 6 × Abstractions | — | `System.Text.Json` |
-| `Hosting/UiThreadHost.cs` | **none** | — | `System.Windows.Threading` |
-| `Rendering/TreeRenderer.cs` | 6 × Abstractions | — | `System.Text.Json`, `System.Windows{,.Controls,.Controls.Primitives,.Media}` |
-
-`UiThreadHost.cs` has **zero** internal dependencies, and that fact is worth note. The
-concurrency primitive knows nothing about the catalog, the renderer or MCP. `UiThreadHost.cs`
-is therefore the most reusable file in the repository, and also the easiest file to
-understand alone.
-
-### `UiMcp.Abstractions` project
-
-Every file has **zero internal dependencies** and **zero external dependencies**.
-
-| File | Framework only |
-|---|---|
-| `CatalogValidator.cs` | `System.Text.Json` |
-| `PropTypes.cs` | `System.Text.Json`, `System.Text.RegularExpressions` |
-| `PathResolver.cs` | `System.Globalization`, `System.Text.Json`, `System.Text.RegularExpressions` |
-| `RenderRules.cs` | `System.Globalization`, `System.Text.Json` |
-| `ValidatedNode.cs` | — |
-| `UiValidationException.cs` | — |
-
-The intra-project references (`CatalogValidator` → `PropTypes` → `ValidatedNode`) do not appear
-as edges because they share the single `UiMcp.Abstractions` namespace and need no `using`.
-**The namespace granularity works in the other direction here.** Coupling inside one namespace
-is invisible to the graph. Read the internal structure of this project from
-[COMPONENTS.md](COMPONENTS.md). Do not read it from the zero edges.
-
-### Tests
-
-| File | Depends on |
-|---|---|
-| `CatalogValidatorTests.cs` | 6 × Abstractions |
-| `PathResolverTests.cs` | 6 × Abstractions |
-| `RenderRulesTests.cs` | 6 × Abstractions |
-| `UiThreadHostTests.cs` | `IUiSurface.cs`, `UiSurface.cs`, `UiThreadHost.cs` |
-| `UiToolsTests.cs` | 6 × Abstractions + 3 × Hosting + `UiTools.cs` |
-| `TreeRendererTests.cs` | 6 × Abstractions + `TreeRenderer.cs` + `StaFixture.cs` |
-| `CatalogRendererSeamTests.cs` | 6 × Abstractions + `TreeRenderer.cs` + `StaFixture.cs` |
-| `UiSurfaceTests.cs` | 6 × Abstractions + 3 × Hosting |
-| `StaFixture.cs` | `UiThreadHost.cs` (shared infrastructure, not a test) |
-
-## Entry point and reachability
-
-| | |
-|---|---|
-| Entry root | `src/UiMcp/Program.cs` |
-| Reachable from it | 11 files |
-| Orphaned | **0** |
-| Test-only | 1 — `src/UiMcp/Tools/UiTools.cs` |
-| Dormant | 1 |
-
-The root was found from `src/UiMcp/UiMcp.csproj` declaring `<OutputType>Exe</OutputType>`,
-then the file in that project declaring `Main`.
-
-### `UiTools.cs` is test-only in the graph and live in production
-
-`Program.cs` registers the tools with `.WithToolsFromAssembly()`. That call finds each
-`[McpServerTool]` method with a **source generator**. There is no `using UiMcp.Tools;` anywhere in `UiMcp`, so
-no static edge exists for the analysis to follow, and the only in-repo importer is
-`UiToolsTests.cs`.
-
-A live test confirms this, and no part of it is an assumption. A `tools/list` call against the
-shipped binary returns all four tools. An end-to-end session then drew a real window, and an
-independent process observed that window.
-
-**Any file reached only through reflection, attribute discovery or DI-by-convention will look
-this way.** Treat a `test-only` or `orphan` disposition on such a file as a question, not a
-verdict.
-
-## Cycles
-
-| | |
-|---|---|
-| Runtime circular dependencies | **0** |
-| Type-only circular dependencies | **0** |
-| Truncated | no |
-
-Zero cycles is a genuinely strong result here, because namespace-granular edges make cycles
-*more* likely to appear, not less. The layering — `Abstractions` ← `Hosting`/`Rendering` ←
-`Tools` ← `Program` — holds strictly, with `IUiSurface` as the one inversion point that keeps
-`UiTools` independent of `UiSurface`'s WPF.
-
-## Verification
-
-Generated 2026-08-15 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
-
-| Claim | Value | Source |
-|---|---|---|
-| totalSourceFiles | 21 | dependency-graph.json |
-| totalModules | 2 | dependency-graph.json |
-| entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 11 | dependency-graph.json |
-| orphanedFiles | 0 | dependency-graph.json |
-| testOnlyFiles | 1 | dependency-graph.json |
-| dormantFiles | 1 | dependency-graph.json |
-| runtimeCircularDeps | 0 | dependency-graph.json |
-| typeOnlyCircularDeps | 0 | dependency-graph.json |
-| totalTypeOnlyImports | 0 | dependency-graph.json |
-| circularDepsTruncated | False | dependency-graph.json |
-
-**Claims the gate cannot hold:** the per-file edge tables are read from
-`dependency-graph.json`'s `modules` section, which the gate does not check claim-by-claim. The
-namespace-granularity explanation is a property of the C# language and of `repo_map`'s C#
-resolver, not a metric. `UiTools.cs`'s production liveness was confirmed by driving the shipped
-binary, which no static artifact can show.
+*Version*: 0.1.4

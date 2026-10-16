@@ -8,6 +8,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **The architecture documents describe the current code.** They named the retired
+  `repo_map.py` and counted 21 source files and 223 tests. They did not cover the `visible`
+  condition, the MCP 2.0 server metadata or the tool annotations. They now do. The numbers come
+  from a fresh `repo-tools map`: 25 source files, 4,173 lines and 42 exported types. The
+  generated reports and their JSON artifacts sit beside the hand-written documents.
+  `TEST_COVERAGE.md` records two gaps: no test covers the renderer's `visible` gate, and eight
+  evaluator rules have no test. The README status banner, check command, bundle size,
+  marketplace registration and plugin cache path are corrected.
 - **The CI steps that drive the bundle run before the stale-bundle check.** A failed step
   skips every later step. The stale-bundle check came first. A red stale check therefore hid
   the discover, tools/list and legacy initialize steps. A stale bundle still answers all
