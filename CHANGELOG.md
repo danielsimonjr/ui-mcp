@@ -46,6 +46,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   GitHub repo where the catalog and renderer are published). Comments and test summaries in
   `.cs` files and documentation in `.md` files updated throughout.
 
+- **The build is now reproducible across checkout paths and commits.** Four properties in
+  `Directory.Build.props` stop the build from embedding the checkout path and the commit:
+  `PathMap` of the repository root, `IncludeSourceRevisionInInformationalVersion` false,
+  `EnableSourceLink` false and `EnableSourceControlManagerQueries` false. Before, the same source
+  gave a different `bundle/UiMcp.exe` for every build path (the two project DLLs differ) and for
+  every git commit, so a committed bundle could never equal a CI rebuild. After, builds from three
+  export paths and from a git worktree gave one hash. This is a build change, not a dependency
+  change. The line endings of the `.cs` files still change the bytes, because the PDB stores a
+  checksum of each source file.
+
 - **The CI step "Bundle is not stale" now prints the SDK version and the SHA256 of the
   rebuilt and the committed bundle.** The step compares total length only, and a length does
   not show which build produced a file. The comparison itself is unchanged.
