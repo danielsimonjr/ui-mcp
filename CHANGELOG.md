@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-16
+
+This section holds the changes to the server, the build and the CI made since commit
+`64b7008` (2026-08-16), the commit that set version 0.1.3. The 0.1.3 entries are in the
+next section.
+
+Compared with the previous committed bundle (30,854,467 bytes), the rebuilt
+`bundle/UiMcp.exe` changes two things that the reader sees. The `visible` evaluator
+compares `eq` and `neq` operands by value, and `gte` and `lte` are false for a value that
+is not a number. The build is reproducible: four properties in `Directory.Build.props` stop
+it from embedding the checkout path and the commit.
+
 ### Added
 
 - **MCP 2.0 (`2026-07-28`) compliance for the stdio server.** Upgraded to
@@ -39,6 +51,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     existing call sites are unchanged).
   - **53 new tests** in `VisibilityTests.cs` covering Parse, IsVisible, and the CatalogValidator
     round-trip. Every rejection case is paired with a positive control.
+
+- **An npm package manifest and a Node launcher for the `ui-mcp` command.** `package.json`
+  names the package `@danielsimonjr/ui-mcp` and gives it a public `publishConfig`, a `bin`
+  entry and a `files` list. `npm-bin/ui-mcp.js` starts `bundle/UiMcp.exe` on Windows x64,
+  passes the arguments through and exits with the exit code of the server.
 
 ### Changed
 
@@ -78,6 +95,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `disable` (it was `9.0.314` with `latestFeature`). A new package version or SDK version
   now needs a commit. The test packages `FluentAssertions` and `Moq` still use a range. They
   are not in the bundle.
+
+- **The version is 0.1.4, and the bundle is rebuilt for it.** `.claude-plugin/plugin.json`,
+  `Directory.Build.props` and `package.json` move from 0.1.3 to 0.1.4. `Program.ServerVersion`
+  reads the version off the assembly and `server/discover` reports it, so the bytes of
+  `bundle/UiMcp.exe` change. The new bundle (30,052,663 bytes, SHA256
+  `0478D53E997F64A778131BE15167E51C9EC1FB95A38DEE6EBB24F19B452E02B1`) replaces the bundle in the rebuilt-bundle item above (SHA256 `E376EB26...`).
+  The two differ in three embedded files that carry the version: `UiMcp.dll`,
+  `UiMcp.Abstractions.dll` and `UiMcp.deps.json`. The other 39 files are identical. Clean
+  exports at two different paths give this hash.
 
 ### Fixed
 
@@ -125,6 +151,50 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   The discover, tools/list and legacy initialize steps had never run since the build properties
   were added, because the stale-bundle step failed first and skipped them. A replay of the three
   step bodies against the committed bundle exits 0.
+
+## [0.1.3] - 2026-08-16
+
+The version files first said 0.1.3 on this date (commit `64b7008`). No tag exists for 0.1.3.
+
+### Fixed
+
+- **Table column paths are now ROW-relative by default.** A column path was resolved against the
+  data ROOT unless it began with `$item`, so the natural path `"name"` looked for a top-level `name`,
+  found nothing, and rendered UNKNOWN. Found on the HTML console that shares these semantics: every
+  row of every table read UNKNOWN **while the row counts were correct** — `fromPath` resolved and the
+  column paths did not, which is the diagnostic combination.
+  The default was the defect, not the views: of the ten column paths written for that console, **nine
+  were bare and one carried the prefix**. When the author reaches for the "wrong" form nine times in
+  ten, the surprising form is what needs changing. An explicit `$item.` prefix still works and means
+  the same thing. Scoped to Table columns only — inside a `Repeat`, a bare path resolving against the
+  root is meaningful and is untouched. **223 tests**, including an end-to-end case proving a bare path
+  reaches the row (asserting only the string rewrite would pass even if the resolver ignored it) and
+  a regression witness pinning the old root-resolving behaviour.
+
+- **`ui_open` now activates the window on CREATION, not only on the idempotent re-open.** Reported as
+  "no window is displayed" while `ui_status` correctly said `windowAlive: true` — the window existed
+  with a real HWND the whole time, sitting behind the terminal. `Show()` alone places a window
+  wherever the z-order puts it, which for a background-spawned process is underneath whatever has
+  focus. The status was honest; the FIRST open was the one least likely to be seen, which is
+  backwards. `Activate()` is best-effort by design — Windows refuses foreground to a process that
+  does not own it — so the tool description now states that `topmost:true` is the only guarantee
+  rather than leaving callers to discover it.
+
+### Known
+
+- **The running server locks its own binary, so `dotnet publish` fails while the plugin is loaded.**
+  `.mcp.json` points at `${CLAUDE_PLUGIN_ROOT}/bundle/UiMcp.exe`; the marketplace junction resolves
+  that to this working tree, so the live process holds the build output open and publish dies with
+  `IOException: being used by another process`. Rebuilding requires stopping the `UiMcp.exe`
+  processes first (match on **ExecutablePath**, never a name sweep), then publishing, then
+  `/reload-plugins`. The Node-based plugins do not hit this because they ship source, not a locked exe.
+
+- **Verify a rebuild by HASH, never by file size.** The single-file bundle is 29,799,584 bytes at
+  0.1.0, 0.1.1, 0.1.2 **and** 0.1.3 — four builds, four distinct SHA256 values, one identical size.
+  The payload dominates and version strings are the same length, so size never moves. A size check
+  written here produced a false positive (concluding three earlier versions had shipped identical
+  binaries — they had not) and then a false negative (reporting no change on a rebuild that did
+  happen). Hash both sides or the check is theatre.
 
 ## [0.1.2] - 2026-08-15
 
@@ -186,46 +256,6 @@ propagation, `NodeCount`'s null, and the structural hash each killed exactly the
 and `$item` scope killed two, from different angles.
 
 ## [Unreleased]
-
-### Fixed
-
-- **Table column paths are now ROW-relative by default.** A column path was resolved against the
-  data ROOT unless it began with `$item`, so the natural path `"name"` looked for a top-level `name`,
-  found nothing, and rendered UNKNOWN. Found on the HTML console that shares these semantics: every
-  row of every table read UNKNOWN **while the row counts were correct** — `fromPath` resolved and the
-  column paths did not, which is the diagnostic combination.
-  The default was the defect, not the views: of the ten column paths written for that console, **nine
-  were bare and one carried the prefix**. When the author reaches for the "wrong" form nine times in
-  ten, the surprising form is what needs changing. An explicit `$item.` prefix still works and means
-  the same thing. Scoped to Table columns only — inside a `Repeat`, a bare path resolving against the
-  root is meaningful and is untouched. **223 tests**, including an end-to-end case proving a bare path
-  reaches the row (asserting only the string rewrite would pass even if the resolver ignored it) and
-  a regression witness pinning the old root-resolving behaviour.
-
-- **`ui_open` now activates the window on CREATION, not only on the idempotent re-open.** Reported as
-  "no window is displayed" while `ui_status` correctly said `windowAlive: true` — the window existed
-  with a real HWND the whole time, sitting behind the terminal. `Show()` alone places a window
-  wherever the z-order puts it, which for a background-spawned process is underneath whatever has
-  focus. The status was honest; the FIRST open was the one least likely to be seen, which is
-  backwards. `Activate()` is best-effort by design — Windows refuses foreground to a process that
-  does not own it — so the tool description now states that `topmost:true` is the only guarantee
-  rather than leaving callers to discover it.
-
-### Known
-
-- **The running server locks its own binary, so `dotnet publish` fails while the plugin is loaded.**
-  `.mcp.json` points at `${CLAUDE_PLUGIN_ROOT}/bundle/UiMcp.exe`; the marketplace junction resolves
-  that to this working tree, so the live process holds the build output open and publish dies with
-  `IOException: being used by another process`. Rebuilding requires stopping the `UiMcp.exe`
-  processes first (match on **ExecutablePath**, never a name sweep), then publishing, then
-  `/reload-plugins`. The Node-based plugins do not hit this because they ship source, not a locked exe.
-
-- **Verify a rebuild by HASH, never by file size.** The single-file bundle is 29,799,584 bytes at
-  0.1.0, 0.1.1, 0.1.2 **and** 0.1.3 — four builds, four distinct SHA256 values, one identical size.
-  The payload dominates and version strings are the same length, so size never moves. A size check
-  written here produced a false positive (concluding three earlier versions had shipped identical
-  binaries — they had not) and then a false negative (reporting no change on a rebuild that did
-  happen). Hash both sides or the check is theatre.
 
 ### Added
 
