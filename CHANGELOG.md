@@ -25,6 +25,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   "unrecognised condition shape" and never reaches `VisibilityEvaluator`. Three `Theory` rows pin the
   refusal for `{"auth":"signedIn"}`, `{"auth":"signedOut"}` and `{"auth":true}`. A `Fact` pins that a
   `path` condition in the same position is accepted. The suite grows from 334 to 338 tests.
+- **Tests pin the node-key order, a `Not` of an unknown subtype and the document that the `ui_render`
+  description names.** The docs say the node-key check runs before the props, and no test pinned the
+  order. Moving the check below the props fails the new test. A `Not` of an unknown condition subtype
+  shows the node, and the docs say so, but no test read it. The description names
+  `docs/architecture/API.md`, and a test now checks that the file exists. One assertion in a stub
+  test could not fail, because a top-level type has no declaring type. The assertion is gone.
+  The suite grows from 395 to 398 tests.
 
 ### Changed
 

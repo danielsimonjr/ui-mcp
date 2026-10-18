@@ -570,11 +570,11 @@ public class VisibilityTests
             .Should().Throw<UiValidationException>().WithMessage("*Note.visible*illegal characters in path*");
 
     // ---- an unknown condition subtype ---------------------------------------------------------------
-    // VisibilityCondition has a private constructor, so no code outside the type can add a subtype and
-    // the evaluator cannot meet an unknown one today. The arm still decides what a future subtype
-    // does. A condition that cannot be evaluated must not show a node. The stub below is a real
-    // subtype built at run time: the record has a protected copy constructor, and a derived type may
-    // call it.
+    // VisibilityCondition has a private constructor, so C# source outside the type cannot add a
+    // subtype, and Parse builds only the twelve nested records. A validated tree never reaches the
+    // default arm. The arm decides what a subtype does that reaches it anyway, and it must hide the
+    // node. The stub below is a real subtype built at run time: the record has a protected copy
+    // constructor, and a derived type may call it.
 
     private static VisibilityCondition StubSubtype()
     {
@@ -614,7 +614,6 @@ public class VisibilityTests
         var stub = StubSubtype();
 
         stub.GetType().BaseType.Should().Be(typeof(VisibilityCondition), "the stub must be a subtype the switch does not name");
-        stub.GetType().DeclaringType.Should().BeNull();
         V(stub, "{}").Should().BeFalse();
     }
 
@@ -627,5 +626,13 @@ public class VisibilityTests
         V(new VisibilityCondition.Or(new[] { stub }), "{}").Should().BeFalse();
         V(new VisibilityCondition.And(new VisibilityCondition[] { new VisibilityCondition.Always() }), "{}")
             .Should().BeTrue("a known form still shows the node");
+    }
+
+    [Fact]
+    public void IsVisible_ANotOfAnUnknownConditionSubtype_ShowsTheNode_AsTheDocumentsSay()
+    {
+        // Not negates the hidden result of the unknown subtype. The architecture documents state this
+        // on purpose, and no test read it.
+        V(new VisibilityCondition.Not(StubSubtype()), "{}").Should().BeTrue();
     }
 }

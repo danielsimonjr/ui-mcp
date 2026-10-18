@@ -309,4 +309,11 @@ public class CatalogValidatorTests
     public void AnUnknownNodeKey_IsRejected_EvenWhenEveryOtherPartIsValid()
         => Validating("""{"type":"Note","props":{"text":"hi"},"visible":true,"extra":1}""")
             .Should().Throw<UiValidationException>().WithMessage("*unknown node key \"extra\"*");
+
+    [Fact]
+    public void TheNodeKeyCheck_RunsBeforeTheProps_SoANodeWithBothFaultsNamesTheNodeKey()
+        // The props of this node are also wrong. The node-key refusal is the one that must win: a
+        // node key is the outer shape of the node, and the docs say the check runs first.
+        => Validating("""{"type":"Note","props":{"onclick":1},"style":"x"}""")
+            .Should().Throw<UiValidationException>().WithMessage("Note: unknown node key \"style\"");
 }
