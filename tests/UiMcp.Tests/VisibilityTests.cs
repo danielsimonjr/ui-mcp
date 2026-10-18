@@ -467,4 +467,19 @@ public class VisibilityTests
     [InlineData("""{"eq":[[1,2],1]}""", false)]
     public void IsVisible_AnObjectOrArrayLiteralReducesToNull(string conditionJson, bool expected)
         => V(P(conditionJson), "{}").Should().Be(expected);
+
+    [Theory]
+    [InlineData("""{"auth":"signedIn"}""")]
+    [InlineData("""{"auth":"signedOut"}""")]
+    [InlineData("""{"auth":true}""")]
+    public void Validator_AnAuthCondition_IsRefused_NotTreatedAsHidden(string conditionJson)
+        => ((Action)(() => Validate(
+                """{"type":"Note","props":{"text":"hi"},"visible":""" + conditionJson + "}")))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("*Note.visible*unrecognised condition shape*");
+
+    [Fact]
+    public void Validator_APathCondition_IsAccepted_ControlForTheAuthRefusal()
+        => Validate("""{"type":"Note","props":{"text":"hi"},"visible":{"path":"signedIn"}}""")
+            .Visible.Should().BeOfType<VisibilityCondition.WhenPath>();
 }

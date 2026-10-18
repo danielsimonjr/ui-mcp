@@ -1,7 +1,7 @@
 # ui-mcp — Test Coverage
 
-**334 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
-files and 1 fixture) and 2,554 lines. The 2,554 lines are 59% of the 4,353 lines in the
+**338 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
+files and 1 fixture) and 2,569 lines. The 2,569 lines are 59% of the 4,368 lines in the
 repository's `.cs` files. CI runs the suite on every push to `main` and on every pull request,
 with `dotnet test UiMcp.sln --no-build -c Release` on `windows-latest`.
 
@@ -16,7 +16,7 @@ nobody measured one.
 | `CatalogValidator` + `PropTypes` | 326 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
 | `PathResolver` | 127 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
 | `RenderRules` | 121 | `RenderRulesTests.cs` | 31 Fact | Thorough |
-| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 64 Fact + 6 Theory | Thorough; see gap 1 |
+| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 65 Fact + 7 Theory | Thorough; see gap 1 |
 | `UiThreadHost` | 150 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
 | `UiTools` | 159 | `UiToolsTests.cs` | 16 Fact | Thorough |
 | `TreeRenderer` | 321 | `TreeRendererTests.cs` | 31 Fact + 4 Theory | Good; the `visible` gate has its own tests |
@@ -25,8 +25,8 @@ nobody measured one.
 | `Program` | 67 | `ProgramMetadataTests.cs` | 2 Fact | Metadata only; the wiring runs in every end-to-end run |
 
 `VisibilityTests.cs` also covers the `visible` key of the validator. The table counts `Fact` and
-`Theory` attributes. A `Theory` runs once for each data row, so the executed count (334) is
-higher than the attribute count (245).
+`Theory` attributes. A `Theory` runs once for each data row, so the executed count (338) is
+higher than the attribute count (247).
 
 `StaFixture.cs` (31 lines) is shared infrastructure, not a test: one STA thread, built from the
 same `UiThreadHost` production uses.
@@ -174,14 +174,14 @@ namespace rule, so do not read a coverage percentage from it.
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 25 | dependency-graph.json |
-| totalLinesOfCode | 4353 | dependency-graph.json |
+| totalLinesOfCode | 4368 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the **334 tests / 0 failures** figure is `dotnet test` output.
+**Claims the gate cannot hold:** the **338 tests / 0 failures** figure is `dotnet test` output.
 The test count comes from a CI run and from a local `dotnet test --list-tests` run.
 The failure count comes from the CI run. A count of the `Fact` and `Theory` attributes in each
 test file gives the per-file numbers. Note that the attribute
 count and the executed-test count differ, because a `Theory` runs one time for each `InlineData`
-row or `MemberData` row. The 2,554 test lines and the per-component LOC come from
+row or `MemberData` row. The 2,569 test lines and the per-component LOC come from
 `file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
 applying that mutation, running the suite, and restoring the file. The restore checks are the ones that the mutation record names.

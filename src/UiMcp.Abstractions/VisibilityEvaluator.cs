@@ -10,9 +10,9 @@ namespace UiMcp.Abstractions;
 /// (<c>evaluateVisibility</c>, <c>evaluateLogicExpression</c>).
 ///
 /// Auth-based conditions (<c>{auth: "signedIn"}</c>) are not applicable in ui-mcp; the MCP server
-/// has no session/auth model. An auth condition always evaluates to <c>false</c> (hidden) so that
-/// a view authored for the Neural Computer web app degrades safely rather than inadvertently
-/// showing content the condition was meant to guard.
+/// has no session/auth model. <c>VisibilityCondition.Parse</c> has no auth branch, so a tree that
+/// carries one is refused at validation ("unrecognised condition shape") and never reaches this
+/// method. A view authored for the Neural Computer web app therefore fails loudly, not silently.
 ///
 /// An unresolvable path is treated as falsy — matching the JS behaviour where a missing path
 /// value is <c>undefined</c>, which is falsy in a boolean context.
