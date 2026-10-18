@@ -14,7 +14,7 @@ launch UiMcp.exe
   ├─ AddSingleton<IUiSurface, UiSurface>()   ← ONE shared surface
   └─ AddMcpServer(name: "ui-mcp", version: <from assembly>, instructions: <four-tool text>)
        .WithStdioServerTransport()
-       .WithToolsFromAssembly()        ← source generator finds [McpServerTool] methods
+       .WithToolsFromAssembly()        ← reflection finds [McpServerTool] methods
   │
   └─ RunAsync()  → serving on stdio
 ```

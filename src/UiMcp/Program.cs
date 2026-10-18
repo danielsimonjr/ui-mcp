@@ -55,10 +55,10 @@ internal static class Program
                 o.ServerInstructions = ServerInstructions;
             })
             .WithStdioServerTransport()
-            // Discovers [McpServerTool] methods by source generator. Deliberately EMPTY at scaffold
-            // time: this build exists to prove the host wiring serves a real MCP session before any
-            // tool or window code depends on it. ui_open / ui_render / ui_status / ui_close land in
-            // the tools task, after the catalog and validator are green.
+            // Discovers the [McpServerTool] methods of this assembly by reflection at run time. The
+            // four tools (ui_open, ui_render, ui_status, ui_close) are the methods of UiTools.
+            // Nothing is listed here, so a new tool is a new attributed method and needs no change
+            // to this call. ServerInstructions above is a string, so add a new tool to it by hand.
             .WithToolsFromAssembly();
 
         await builder.Build().RunAsync();

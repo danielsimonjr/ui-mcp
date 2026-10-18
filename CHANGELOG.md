@@ -20,6 +20,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   fails 8 of them, and each of nine more mutations fails at least one. No source file changes.
   `TEST_COVERAGE.md`, `OVERVIEW.md` and the generated reports carry the new counts. Two behaviours
   stay unpinned: the `visible` path that skips the path rule and the ignored node-level key.
+- **A test pins that the validator refuses an `auth` condition.** `VisibilityCondition.Parse` has no
+  `auth` branch. A tree with an `auth` condition in `visible` therefore fails validation with
+  "unrecognised condition shape" and never reaches `VisibilityEvaluator`. Three `Theory` rows pin the
+  refusal for `{"auth":"signedIn"}`, `{"auth":"signedOut"}` and `{"auth":true}`. A `Fact` pins that a
+  `path` condition in the same position is accepted. The suite grows from 334 to 338 tests.
 
 ### Changed
 
@@ -48,6 +53,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   banner under Fixed, and the three gap notes under Notes. The tag resolves each gap note, and a
   closing paragraph says how. One note claimed CI does not run `dotnet test`. The claim was
   wrong when written: CI has run `dotnet test` since commit 238895b.
+- **Two code comments no longer state a false fact.** The comment above `.WithToolsFromAssembly()` in
+  `Program.cs` said the call is empty and that the tools land later. The call discovers the four
+  `UiTools` methods by reflection at run time, and the comment now says so. The class comment of
+  `VisibilityEvaluator` said an `auth` condition evaluates to hidden. The validator refuses such a
+  tree before the evaluator runs, and the comment now says so. No behavior changes.
 
 ## [0.1.4] - 2026-10-16
 

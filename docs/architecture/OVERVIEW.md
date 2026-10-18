@@ -39,7 +39,7 @@ Three projects. The split is a compiler-enforced boundary, not a convention.
 |---|---|---|---|
 | `src/UiMcp.Abstractions` | `net9.0` | The catalog, validator, path resolver, render *rules*, visibility conditions. **No WPF.** | 8 / 901 |
 | `src/UiMcp` | `net9.0-windows10.0.19041.0` | MCP host, tool surface, STA thread host, WPF renderer | 6 / 898 |
-| `tests/UiMcp.Tests` | `net9.0-windows10.0.19041.0` | xunit + FluentAssertions + Moq | 11 / 2554 |
+| `tests/UiMcp.Tests` | `net9.0-windows10.0.19041.0` | xunit + FluentAssertions + Moq | 11 / 2569 |
 
 **`Abstractions` targets plain `net9.0` deliberately.** The spec requires that the project
 does not reference WPF. A non-Windows target framework makes that requirement a compiler
@@ -59,8 +59,8 @@ holds it. `TreeRenderer` asks `VisibilityEvaluator` whether to draw each node.
 
 ## The numbers
 
-25 source files, 4,353 lines, 42 exported types, 1 entry root, **0 circular dependencies**,
-**0 duplicate symbols**, **0 orphaned files**, **0 unused exports**. 334 tests, all passing.
+25 source files, 4,368 lines, 42 exported types, 1 entry root, **0 circular dependencies**,
+**0 duplicate symbols**, **0 orphaned files**, **0 unused exports**. 338 tests, all passing.
 
 The counts include the 11 test files. They **exclude `obj/` and `bin/`**. A build writes
 compiler-generated `.cs` files (`*.AssemblyInfo.cs`, `*.GlobalUsings.g.cs`) into those
@@ -91,7 +91,7 @@ Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <rep
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 25 | dependency-graph.json |
-| totalLinesOfCode | 4353 | dependency-graph.json |
+| totalLinesOfCode | 4368 | dependency-graph.json |
 | totalExports | 42 | dependency-graph.json |
 | totalModules | 2 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
@@ -103,5 +103,5 @@ Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <rep
 **Claims that the gate cannot hold.** Each claim below gives its basis. A direct reading of
 `UiTools.cs` and `CatalogValidator.cs` confirms the **four MCP tools** and the **nine catalog
 components**. No `repo-tools` metric gives them: `repo-tools` counts exported *types*, and a tool
-is a method. The **334 tests** figure comes from the `dotnet test` step of the CI run on `main`,
+is a method. The **338 tests** figure comes from the `dotnet test` step of the CI run on `main`,
 and not from a graph metric.
