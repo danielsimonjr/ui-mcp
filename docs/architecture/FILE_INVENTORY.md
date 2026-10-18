@@ -46,20 +46,20 @@ This report lists each source file that the map census finds, with a disposition
 | --- | --- | --- | --- | --: |
 | `src/UiMcp.Abstractions/CatalogValidator.cs` | UiMcp.Abstractions | src | reachable | 205 |
 | `src/UiMcp.Abstractions/PathResolver.cs` | UiMcp.Abstractions | src | reachable | 127 |
-| `src/UiMcp.Abstractions/PropTypes.cs` | UiMcp.Abstractions | src | reachable | 130 |
+| `src/UiMcp.Abstractions/PropTypes.cs` | UiMcp.Abstractions | src | reachable | 131 |
 | `src/UiMcp.Abstractions/RenderRules.cs` | UiMcp.Abstractions | src | reachable | 121 |
 | `src/UiMcp.Abstractions/UiValidationException.cs` | UiMcp.Abstractions | src | reachable | 15 |
 | `src/UiMcp.Abstractions/ValidatedNode.cs` | UiMcp.Abstractions | src | reachable | 28 |
 | `src/UiMcp.Abstractions/VisibilityCondition.cs` | UiMcp.Abstractions | src | reachable | 196 |
-| `src/UiMcp.Abstractions/VisibilityEvaluator.cs` | UiMcp.Abstractions | src | reachable | 111 |
+| `src/UiMcp.Abstractions/VisibilityEvaluator.cs` | UiMcp.Abstractions | src | reachable | 112 |
 | `src/UiMcp/Hosting/IUiSurface.cs` | UiMcp | src | reachable | 43 |
 | `src/UiMcp/Hosting/UiSurface.cs` | UiMcp | src | reachable | 158 |
 | `src/UiMcp/Hosting/UiThreadHost.cs` | UiMcp | src | reachable | 150 |
 | `src/UiMcp/Program.cs` | UiMcp | src | build-entry | 67 |
 | `src/UiMcp/Rendering/TreeRenderer.cs` | UiMcp | src | reachable | 321 |
 | `src/UiMcp/Tools/UiTools.cs` | UiMcp | src | test-only | 160 |
-| `tests/UiMcp.Tests/CatalogRendererSeamTests.cs` | UiMcp.Tests | tests | test | 162 |
-| `tests/UiMcp.Tests/CatalogValidatorTests.cs` | UiMcp.Tests | tests | test | 312 |
+| `tests/UiMcp.Tests/CatalogRendererSeamTests.cs` | UiMcp.Tests | tests | test | 184 |
+| `tests/UiMcp.Tests/CatalogValidatorTests.cs` | UiMcp.Tests | tests | test | 319 |
 | `tests/UiMcp.Tests/PathResolverTests.cs` | UiMcp.Tests | tests | test | 166 |
 | `tests/UiMcp.Tests/ProgramMetadataTests.cs` | UiMcp.Tests | tests | test | 45 |
 | `tests/UiMcp.Tests/RenderRulesTests.cs` | UiMcp.Tests | tests | test | 215 |
@@ -67,8 +67,8 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/UiMcp.Tests/TreeRendererTests.cs` | UiMcp.Tests | tests | test | 510 |
 | `tests/UiMcp.Tests/UiSurfaceTests.cs` | UiMcp.Tests | tests | test | 241 |
 | `tests/UiMcp.Tests/UiThreadHostTests.cs` | UiMcp.Tests | tests | test | 173 |
-| `tests/UiMcp.Tests/UiToolsTests.cs` | UiMcp.Tests | tests | test | 311 |
-| `tests/UiMcp.Tests/VisibilityTests.cs` | UiMcp.Tests | tests | test | 629 |
+| `tests/UiMcp.Tests/UiToolsTests.cs` | UiMcp.Tests | tests | test | 320 |
+| `tests/UiMcp.Tests/VisibilityTests.cs` | UiMcp.Tests | tests | test | 638 |
 
 ## Skipped links
 

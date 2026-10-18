@@ -1,5 +1,5 @@
 metadata:
-  name: fleet-uimcp
+  name: ui-mcp
   schemaVersion: 2.0.0
   language: csharp
   totalFiles: 25
@@ -597,7 +597,7 @@ statistics:
   totalTypeScriptFiles: 25
   totalSourceFiles: 25
   totalModules: 2
-  totalLinesOfCode: 4627
+  totalLinesOfCode: 4676
   totalExports: 42
   entryRoots: 1
   reachableFiles: 13

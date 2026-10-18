@@ -59,8 +59,8 @@ holds it. `TreeRenderer` asks `VisibilityEvaluator` whether to draw each node.
 
 ## The numbers
 
-25 source files, 4,627 lines, 42 exported types, 1 entry root, **0 circular dependencies**,
-**0 duplicate symbols**, **0 orphaned files**, **0 unused exports**. 385 tests, all passing.
+25 source files, 4,676 lines, 42 exported types, 1 entry root, **0 circular dependencies**,
+**0 duplicate symbols**, **0 orphaned files**, **0 unused exports**. 398 tests, all passing.
 
 The counts include the 11 test files. They **exclude `obj/` and `bin/`**. A build writes
 compiler-generated `.cs` files (`*.AssemblyInfo.cs`, `*.GlobalUsings.g.cs`) into those
@@ -85,13 +85,13 @@ Design intent and the v0.1 definition of done live in [../SPEC.md](../SPEC.md).
 
 ## Verification
 
-Generated 2026-10-16 by `repo-tools map`.
+Generated 2026-10-18 by `repo-tools map`.
 Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 25 | dependency-graph.json |
-| totalLinesOfCode | 4627 | dependency-graph.json |
+| totalLinesOfCode | 4676 | dependency-graph.json |
 | totalExports | 42 | dependency-graph.json |
 | totalModules | 2 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
@@ -103,5 +103,5 @@ Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <rep
 **Claims that the gate cannot hold.** Each claim below gives its basis. A direct reading of
 `UiTools.cs` and `CatalogValidator.cs` confirms the **four MCP tools** and the **nine catalog
 components**. No `repo-tools` metric gives them: `repo-tools` counts exported *types*, and a tool
-is a method. The **385 tests** figure comes from the `dotnet test` step of the CI run on `main`,
-and not from a graph metric.
+is a method. The **398 tests** figure is the result of `dotnet test UiMcp.sln -c Release`, which CI
+also runs. A graph metric does not give this figure.

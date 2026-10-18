@@ -40,7 +40,7 @@
       "package": "UiMcp.Abstractions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 130
+      "loc": 131
     },
     {
       "file": "src/UiMcp.Abstractions/RenderRules.cs",
@@ -75,7 +75,7 @@
       "package": "UiMcp.Abstractions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 111
+      "loc": 112
     },
     {
       "file": "src/UiMcp/Hosting/IUiSurface.cs",
@@ -124,14 +124,14 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 162
+      "loc": 184
     },
     {
       "file": "tests/UiMcp.Tests/CatalogValidatorTests.cs",
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 312
+      "loc": 319
     },
     {
       "file": "tests/UiMcp.Tests/PathResolverTests.cs",
@@ -187,14 +187,14 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 311
+      "loc": 320
     },
     {
       "file": "tests/UiMcp.Tests/VisibilityTests.cs",
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 629
+      "loc": 638
     }
   ],
   "skippedLinks": [],
