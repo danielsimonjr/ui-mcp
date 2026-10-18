@@ -36,6 +36,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`bundle/UiMcp.exe` is rebuilt with the changes of this release.** The plugin runs the committed
+  bundle, so a source fix reaches the plugin only through a rebuilt bundle. Two builds with
+  `dotnet clean` between them give the same file, with the pinned SDK and the build properties of
+  `Directory.Build.props`. The version in `Directory.Build.props` and the plugin manifests does not
+  change in this commit. The plugin updater reads the version in the plugin manifest, so a release
+  bumps that version before the new bytes reach a plugin.
 - **The `ui_render` description names the `visible` condition.** The description never mentioned that a
   node can carry `visible`. It has one sentence that names the condition and points to
   `docs/architecture/API.md`. Two tests read the description through its attribute. One checks the
