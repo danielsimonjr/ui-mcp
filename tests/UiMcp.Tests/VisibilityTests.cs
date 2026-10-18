@@ -497,6 +497,8 @@ public class VisibilityTests
     public static TheoryData<string> IllegalPaths => new()
     {
         "a b", "a'b", "a\"b", "a/b", "a;b", "a-b", "", "$other", "$", "a$b",
+        // .NET `$` also matches before a final line feed, so a path that ends in one is a case of its own.
+        "a\n", "a.b\n",
     };
 
     [Theory]

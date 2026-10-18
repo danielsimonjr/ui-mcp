@@ -28,11 +28,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- **The `ui_render` description names the `visible` condition.** A client reads the tool description and
-  nothing else, and the description never mentioned that a node can carry `visible`. It now has one
-  sentence that names the condition and points to `docs/architecture/API.md`. Two tests read the
-  description through its attribute: one for the `visible` name and the document path, and one control
-  that every catalog component is still named. The suite grows from 383 to 385 tests.
+- **The `ui_render` description names the `visible` condition.** The description never mentioned that a
+  node can carry `visible`. It has one sentence that names the condition and points to
+  `docs/architecture/API.md`. Two tests read the description through its attribute. One checks the
+  `visible` name and the document path. The other is a control: every catalog component appears in the
+  description. The suite grows from 383 to 385 tests.
 - **The architecture documents describe the current code.** They named the retired
   `repo_map.py` and counted 21 source files and 223 tests. They did not cover the `visible`
   condition, the MCP 2.0 server metadata or the tool annotations. They now do. The numbers come
@@ -51,13 +51,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The path rule refuses a path that ends in a line feed.** `PropTypes` ended the path pattern with
+  `$`, and in .NET `$` also matches before a final line feed. A path such as `a` followed by a line
+  feed therefore passed the rule for every prop path and every `visible` path. The pattern now ends
+  with `\z`. 10 tests pin the change: 3 refusals and 3 legal-path controls for the prop rule, and
+  2 new rows in a theory that two tests use at both parse sites of a `visible` condition.
+  The suite grows from 385 to 395 tests. `PathResolver` keeps its `$` anchor, because it resolves
+  only paths that the validator accepted.
 - **`VisibilityEvaluator.IsVisible` hides a condition of an unknown subtype.** The `switch` ended with
-  `_ => true`, which showed the node, and the class comment promised the opposite. The arm is
-  unreachable today, because `VisibilityCondition` has a private constructor, so the change has no
-  effect at run time. It decides what a future subtype does. The arm now returns `false`. `Not`
-  negates the result, so a `Not` of an unknown subtype still shows the node, and the class comment
-  says so. Two tests build a real subtype at run time with `Reflection.Emit` (the record has a
-  protected copy constructor that a derived type may call) and check it directly and inside `and`
+  `_ => true`, which showed the node. The `VisibilityCondition` summary says that a condition that
+  cannot be evaluated never silently shows content that should be hidden. A validated tree cannot reach
+  the arm, because `Parse` builds only the twelve nested records. The change therefore has no effect on a
+  tree the server validates. The arm returns `false`. `Not` negates the result, so a `Not` of an unknown
+  subtype changes from hidden to shown. Two tests build a real subtype at run time with `Reflection.Emit`.
+  The subtype calls the protected copy constructor. The tests check the subtype directly, and inside `and`
   and `or`, with a known form as the control. The suite grows from 381 to 383 tests.
 - **The validator refuses a node-level key that it does not read.** It read four keys (`type`, `props`,
   `children` and `visible`) and ignored every other key. A misspelled `visible` key therefore left the
@@ -65,19 +72,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the key, as it does for an unknown prop: `Note: unknown node key "visble"`. The check runs
   before the props. 12 tests pin eight keys, the misspelled `visible` with a control, the four known
   keys, a nested node, and a node that is otherwise valid. The suite grows from 369 to 381 tests.
-  `TEST_COVERAGE.md` loses its first gap: both behaviours that it listed (the unchecked condition
-  path and the ignored node-level key) are now refused and pinned, and the two remaining gaps are
-  renumbered.
+  `TEST_COVERAGE.md` loses its first gap. It listed two behaviours: the unchecked condition path and
+  the ignored node-level key. The validator refuses both, and tests pin them. The two remaining gaps
+  have new numbers.
 - **The path of a `visible` condition follows the path rule of the prop types.**
   `VisibilityCondition.Parse` stored the path of a `path` condition and the path of a `path` operand
   without a check. A path with a quote, a slash, a space, a hyphen or no characters at all passed
   validation. Both parse sites now call one method, `VisibilityCondition.ParsePath`. The method
   applies `PropTypes.Path` and then refuses `$item`, because a condition reads the root data and a
   `$item` path never resolves. A tree that used `$item` in `visible` was accepted and the node stayed
-  hidden. The validator now refuses it with `Note.visible: visible.path: ...`. 31 tests pin both
+  hidden. The validator refuses such a tree with `Note.visible: visible.path: ...`. 31 tests pin both
   sites, the prototype guard, the `$item` refusal and a legal-path control. The suite grows from
-  338 to 369 tests. Two older tests built a `$item` condition through the validator and now build it
-  directly.
+  338 to 369 tests. Two older tests used a `$item` condition. Both build it directly. One validated a
+  tree that held the condition, and the other parsed it.
 - **The CHANGELOG has one `## [Unreleased]` heading.** A second block sat between 0.1.2 and 0.1.1.
   Commit 797cba4 wrote the block after the 0.1.1 release commit. Commit 611ade9 added the
   `[0.1.2]` heading above it and did not move it. The v0.1.2 tag therefore contains the block.

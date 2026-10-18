@@ -21,8 +21,9 @@ public static class PropTypes
 
     // Anchored, and deliberately narrow: identifier chars, dots and array brackets only. Anything
     // that could escape into another syntax - quotes, slashes, semicolons, whitespace - is absent
-    // by construction rather than blocked by a denylist.
-    private static readonly Regex LegalPath = new(@"^[A-Za-z0-9_.\[\]]+$", RegexOptions.Compiled);
+    // by construction rather than blocked by a denylist. The end anchor is \z, not $: in .NET `$`
+    // also matches before a final line feed, which would admit a path that ends in one.
+    private static readonly Regex LegalPath = new(@"^[A-Za-z0-9_.\[\]]+\z", RegexOptions.Compiled);
 
     // Checked as substrings, not as whole segments, because "a.__proto__.b" must fail too.
     private static readonly string[] ForbiddenPathTokens = { "__proto__", "constructor", "prototype" };
