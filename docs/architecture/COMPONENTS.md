@@ -280,7 +280,7 @@ version. `ServerVersion` reads the assembly version to three parts, so no litera
 carries the version. The assembly version comes from `<Version>` in `Directory.Build.props`. The
 instruction text names the four tools in one short paragraph.
 
-> `WithToolsFromAssembly()` discovers `[McpServerTool]` methods by **source generator**, so
+> `WithToolsFromAssembly()` discovers `[McpServerTool]` methods by **reflection at run time**, so
 > there is no `using UiMcp.Tools;` here. That is why static analysis reports `UiTools.cs` as
 > test-only — see [unused-analysis.md](unused-analysis.md).
 

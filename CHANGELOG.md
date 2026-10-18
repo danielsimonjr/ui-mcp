@@ -55,7 +55,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   wrong when written: CI has run `dotnet test` since commit 238895b.
 - **Two code comments no longer state a false fact.** The comment above `.WithToolsFromAssembly()` in
   `Program.cs` said the call is empty and that the tools land later. The call discovers the four
-  `UiTools` methods by source generator, and the comment now says so. The class comment of
+  `UiTools` methods by reflection at run time, and the comment now says so. The class comment of
   `VisibilityEvaluator` said an `auth` condition evaluates to hidden. The validator refuses such a
   tree before the evaluator runs, and the comment now says so. No behavior changes.
 
