@@ -244,8 +244,9 @@ public static class VisibilityEvaluator
 | `Eq` / `Neq` | equality / inequality of the two canonical operand values |
 | `Gt`, `Gte`, `Lt`, `Lte` | the numeric order of the two operands; `false` unless both are numbers |
 
-A path resolves against the root `data`, and never against a `Repeat` scope. A `$item` path
-therefore stays unresolved.
+A path resolves against the root `data`, and never against a `Repeat` scope. The validator
+therefore refuses a `$item` path in a condition. The evaluator leaves a `$item` path unresolved
+when a caller builds the condition without the validator.
 
 Truthiness follows JavaScript. `false`, `null`, `0` and the empty string are falsy. `true`, a
 non-zero number, a non-empty string, an array and an object are truthy. An unresolved path is

@@ -176,8 +176,8 @@ A condition has one of twelve forms:
 Each `c` is a condition. Each `a` and `b` is an operand. An operand is `{"path": "…"}`, which
 reads the data, or a literal: a string, a number, a boolean or `null`.
 
-- A path reads the root data. It never reads the `$item` scope of a `Repeat`, so a `$item` path
-  stays unresolved.
+- A path reads the root data. It never reads the `$item` scope of a `Repeat`, so the validator
+  refuses a `$item` path in a condition.
 - Truthiness follows JavaScript. `false`, `null`, `0` and the empty string are falsy. Every other
   value is truthy, and that includes an empty array and an empty object.
 - An unresolved path is falsy, so the node stays hidden.

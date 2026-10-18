@@ -58,7 +58,8 @@ without it, a "comprehensive" suite quietly stops being one.
 `1` and the string `"1"` differ, and that an ordering condition is false when an operand is not
 a number. An unresolved path is falsy in the same file. The same file pins the rules that a
 reader cannot settle by reading. An empty `and` is true, and an empty `or` is false. The first
-form key wins in the order of the forms. A `$item` path has no scope at the root. Truthiness
+form key wins in the order of the forms. The evaluator leaves a `$item` path unresolved at the
+root. Truthiness
 follows JavaScript, so `[]`, `{}` and `"0"` are truthy. Two unresolved operands are equal. An
 object or an array literal reduces to `null`.
 
