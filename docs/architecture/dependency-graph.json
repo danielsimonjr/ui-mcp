@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "ui-mcp",
+    "name": "fleet-uimcp",
     "schemaVersion": "2.0.0",
     "language": "csharp",
     "totalFiles": 25,
@@ -882,6 +882,8 @@
           "FluentAssertions"
         ],
         "nodeDependencies": [
+          "System.Reflection",
+          "System.Reflection.Emit",
           "System.Text.Json"
         ],
         "internalDependencies": [
@@ -936,7 +938,7 @@
     "totalTypeScriptFiles": 25,
     "totalSourceFiles": 25,
     "totalModules": 2,
-    "totalLinesOfCode": 4368,
+    "totalLinesOfCode": 4627,
     "totalExports": 42,
     "entryRoots": 1,
     "reachableFiles": 13,

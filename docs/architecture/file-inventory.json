@@ -26,7 +26,7 @@
       "package": "UiMcp.Abstractions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 196
+      "loc": 205
     },
     {
       "file": "src/UiMcp.Abstractions/PathResolver.cs",
@@ -68,14 +68,14 @@
       "package": "UiMcp.Abstractions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 177
+      "loc": 196
     },
     {
       "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
       "package": "UiMcp.Abstractions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 107
+      "loc": 111
     },
     {
       "file": "src/UiMcp/Hosting/IUiSurface.cs",
@@ -117,7 +117,7 @@
       "package": "UiMcp",
       "area": "src",
       "disposition": "test-only",
-      "loc": 159
+      "loc": 160
     },
     {
       "file": "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
@@ -131,7 +131,7 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 259
+      "loc": 312
     },
     {
       "file": "tests/UiMcp.Tests/PathResolverTests.cs",
@@ -166,7 +166,7 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 507
+      "loc": 510
     },
     {
       "file": "tests/UiMcp.Tests/UiSurfaceTests.cs",
@@ -187,14 +187,14 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 285
+      "loc": 311
     },
     {
       "file": "tests/UiMcp.Tests/VisibilityTests.cs",
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 485
+      "loc": 629
     }
   ],
   "skippedLinks": [],
