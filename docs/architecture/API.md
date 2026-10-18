@@ -37,7 +37,8 @@ create a second window.
 
 Render a catalog-constrained JSON UI tree, replacing whatever is displayed. **The tree is
 validated in full first** and drawn only if all of it passed; anything outside the catalog is
-refused rather than ignored.
+refused rather than ignored. The tool description names the optional `visible` condition of a node
+and points to this document, because a client reads the description and nothing else.
 
 | Param | Type | Required | Meaning |
 |---|---|---|---|

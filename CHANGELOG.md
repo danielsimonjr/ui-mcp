@@ -28,6 +28,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **The `ui_render` description names the `visible` condition.** A client reads the tool description and
+  nothing else, and the description never mentioned that a node can carry `visible`. It now has one
+  sentence that names the condition and points to `docs/architecture/API.md`. Two tests read the
+  description through its attribute: one for the `visible` name and the document path, and one control
+  that every catalog component is still named. The suite grows from 383 to 385 tests.
 - **The architecture documents describe the current code.** They named the retired
   `repo_map.py` and counted 21 source files and 223 tests. They did not cover the `visible`
   condition, the MCP 2.0 server metadata or the tool annotations. They now do. The numbers come

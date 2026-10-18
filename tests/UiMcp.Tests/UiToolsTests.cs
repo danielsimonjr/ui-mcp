@@ -282,4 +282,30 @@ public class UiToolsTests
         attrs["ui_close"].Title.Should().Be("Close Shared Window");
         attrs["ui_close"].Idempotent.Should().BeTrue();
     }
+
+    // ---- the ui_render description -----------------------------------------------------------------
+
+    private static string DescriptionOf(string methodName)
+        => ((System.ComponentModel.DescriptionAttribute)typeof(UiTools).GetMethod(methodName)!
+            .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).Single()).Description;
+
+    [Fact]
+    public void RenderDescription_NamesTheVisibleCondition_AndPointsToTheApiDocument()
+    {
+        // A client reads this text and nothing else. Without the sentence, no client learns that a
+        // node can carry a `visible` condition.
+        var description = DescriptionOf(nameof(UiTools.Render));
+
+        description.Should().Contain("`visible`");
+        description.Should().Contain("docs/architecture/API.md");
+    }
+
+    [Fact]
+    public void RenderDescription_StillNamesEveryCatalogComponent_ControlForTheNewSentence()
+    {
+        var description = DescriptionOf(nameof(UiTools.Render));
+
+        foreach (var component in CatalogValidator.ComponentNames)
+            description.Should().Contain(component);
+    }
 }

@@ -45,7 +45,8 @@ public sealed class UiTools
         "VALIDATED IN FULL FIRST and drawn only if all of it passed; anything outside the catalog is " +
         "refused rather than ignored. Components: StatusBanner, Panel, Row, Metric, Field, Gauge, " +
         "Repeat, Table, Note. Bind values with dotted paths into `data`; an unresolvable path renders " +
-        "as UNKNOWN, never as 0.")]
+        "as UNKNOWN, never as 0. A node can also carry a `visible` condition that hides it; the forms " +
+        "are listed in docs/architecture/API.md.")]
     public string Render(
         [Description("The UI tree, as a JSON object (a JSON string containing it is also accepted)")]
         JsonElement tree,
