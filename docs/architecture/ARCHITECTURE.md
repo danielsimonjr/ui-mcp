@@ -171,10 +171,10 @@ space and the renderer does not draw its children.
 holds: the tree cannot run code or choose an element type through `visible`. The decision sits
 in `Abstractions` because the renderer draws what the rules decide.
 
-**Trade-offs.** A condition cannot read the current item of a `Repeat`. A `visible` path goes
-straight to `PathResolver.Resolve`, and `PropTypes.Path` does not check it, so the path
-charset rule does not apply to it. The prototype guard in `PathResolver.Resolve` still refuses
-`__proto__`, `constructor` and `prototype`.
+**Trade-offs.** A condition cannot read the current item of a `Repeat`. The validator checks
+each `visible` path with `PropTypes.Path` and then refuses `$item`, so a path that can never
+resolve is a refusal and not a node that stays hidden. `PathResolver.Resolve` still refuses
+`__proto__`, `constructor` and `prototype` when it resolves a path.
 
 ### STDOUT is the transport
 

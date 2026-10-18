@@ -186,8 +186,9 @@ reads the data, or a literal: a string, a number, a boolean or `null`.
 - `gt`, `gte`, `lt` and `lte` are false unless both operands are numbers.
 - An object that holds more than one form key uses the first of these keys: `path`, `and`, `or`,
   `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
-- The path of a condition skips the path charset rule of the prop types. The prototype guard still
-  refuses `__proto__`, `constructor` and `prototype`.
+- The path of a condition follows the path rule of the prop types. The validator refuses a path
+  with an illegal character, an empty path, and a path that holds `__proto__`, `constructor` or
+  `prototype`. The validator also refuses `$item`, because a condition reads the root data.
 
 This tree shows the note only when `disk.usedPct` is 90 or more:
 

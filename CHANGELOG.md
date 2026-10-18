@@ -46,6 +46,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The path of a `visible` condition follows the path rule of the prop types.**
+  `VisibilityCondition.Parse` stored the path of a `path` condition and the path of a `path` operand
+  without a check. A path with a quote, a slash, a space, a hyphen or no characters at all passed
+  validation. Both parse sites now call one method, `VisibilityCondition.ParsePath`. The method
+  applies `PropTypes.Path` and then refuses `$item`, because a condition reads the root data and a
+  `$item` path never resolves. A tree that used `$item` in `visible` was accepted and the node stayed
+  hidden. The validator now refuses it with `Note.visible: visible.path: ...`. 31 tests pin both
+  sites, the prototype guard, the `$item` refusal and a legal-path control. The suite grows from
+  338 to 369 tests. Two older tests built a `$item` condition through the validator and now build it
+  directly.
 - **The CHANGELOG has one `## [Unreleased]` heading.** A second block sat between 0.1.2 and 0.1.1.
   Commit 797cba4 wrote the block after the 0.1.1 release commit. Commit 611ade9 added the
   `[0.1.2]` heading above it and did not move it. The v0.1.2 tag therefore contains the block.

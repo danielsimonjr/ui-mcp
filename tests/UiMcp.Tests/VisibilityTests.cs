@@ -432,7 +432,9 @@ public class VisibilityTests
     [InlineData("""{"x":{"y":1}}""")]
     public void IsVisible_AnItemPathIsUnresolvedAtTheRoot(string data)
     {
-        V(P("""{"path":"$item.x"}"""), data).Should().BeFalse();
+        // Built directly: the validator refuses a `$item` path in a condition, so only the evaluator
+        // can be asked what it does with one.
+        V(new VisibilityCondition.WhenPath("$item.x"), data).Should().BeFalse();
         V(P("""{"path":"x"}"""), data).Should().BeTrue("the same name without $item resolves");
     }
 
@@ -482,4 +484,84 @@ public class VisibilityTests
     public void Validator_APathCondition_IsAccepted_ControlForTheAuthRefusal()
         => Validate("""{"type":"Note","props":{"text":"hi"},"visible":{"path":"signedIn"}}""")
             .Visible.Should().BeOfType<VisibilityCondition.WhenPath>();
+
+    // ---- the path of a condition follows the path rule of the prop types --------------------------
+    // The path of a `visible` condition once skipped the charset rule that every prop path obeys.
+    // Both parse sites (the `path` form and a `path` operand) now share one check. The refusals
+    // below each have a positive control: a rule that refuses every path fails the control.
+
+    private static string PathObject(string path) => "{\"path\":" + JsonSerializer.Serialize(path) + "}";
+
+    public static TheoryData<string> IllegalPaths => new()
+    {
+        "a b", "a'b", "a\"b", "a/b", "a;b", "a-b", "", "$other", "$", "a$b",
+    };
+
+    [Theory]
+    [MemberData(nameof(IllegalPaths))]
+    public void Parse_APathWithIllegalCharacters_IsRefused(string path)
+        => ((Action)(() => VisibilityCondition.Parse(D(PathObject(path)))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+
+    [Theory]
+    [MemberData(nameof(IllegalPaths))]
+    public void Parse_AnOperandPathWithIllegalCharacters_IsRefused_OnEitherSide(string path)
+    {
+        ((Action)(() => VisibilityCondition.Parse(D("{\"eq\":[" + PathObject(path) + ",1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"gt\":[1," + PathObject(path) + "]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+    }
+
+    [Theory]
+    [InlineData("a")]
+    [InlineData("a.b")]
+    [InlineData("a.b[0]")]
+    [InlineData("_x1.Y2")]
+    public void Parse_ALegalPath_IsAccepted_AtBothSites_ControlForTheRefusals(string path)
+    {
+        P(PathObject(path)).Should().Be(new VisibilityCondition.WhenPath(path));
+        P("{\"eq\":[" + PathObject(path) + ",1]}").Should().BeOfType<VisibilityCondition.Eq>()
+            .Which.Left.Should().Be(new VisibilityOperand.PathRef(path));
+    }
+
+    [Theory]
+    [InlineData("a.__proto__.b")]
+    [InlineData("constructor")]
+    [InlineData("prototype")]
+    public void Parse_APrototypePath_IsRefused_AtBothSites(string path)
+    {
+        ((Action)(() => VisibilityCondition.Parse(D(PathObject(path)))))
+            .Should().Throw<UiValidationException>().WithMessage("*prototype access refused*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"neq\":[" + PathObject(path) + ",1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*prototype access refused*");
+    }
+
+    [Theory]
+    [InlineData("$item")]
+    [InlineData("$item.x")]
+    public void Parse_AnItemPath_IsRefused_AtBothSites(string path)
+    {
+        // A condition reads the root data. `$item` has no scope there, so the validator says so
+        // instead of accepting a path that can never resolve.
+        ((Action)(() => VisibilityCondition.Parse(D(PathObject(path)))))
+            .Should().Throw<UiValidationException>().WithMessage("*$item*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"lt\":[" + PathObject(path) + ",1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*$item*");
+    }
+
+    [Fact]
+    public void Parse_AnIllegalPath_InsideALogicForm_IsRefused()
+    {
+        ((Action)(() => VisibilityCondition.Parse(D("{\"not\":" + PathObject("a b") + "}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"and\":[true," + PathObject("a'b") + "]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+    }
+
+    [Fact]
+    public void Validator_AVisiblePathWithIllegalCharacters_IsRefused_NamingTheComponent()
+        => ((Action)(() => Validate(
+                "{\"type\":\"Note\",\"props\":{\"text\":\"hi\"},\"visible\":" + PathObject("a b") + "}")))
+            .Should().Throw<UiValidationException>().WithMessage("*Note.visible*illegal characters in path*");
 }

@@ -66,7 +66,8 @@ object or an array literal reduces to `null`.
 a node with a condition and reads the result on the STA thread. A hidden node is a collapsed
 `Border` with no child, and a hidden container draws none of its children. Every hidden case
 has a shown control. The condition reads the root data, so a `$item` path inside a `Repeat`
-hides the child of every item. `UiSurfaceWindowTests` pins that the tree hash ignores the
+hides the child of every item. The test builds that condition directly, because the validator
+refuses a `$item` path in a condition. `UiSurfaceWindowTests` pins that the tree hash ignores the
 condition and that the node count includes a hidden node.
 
 ### The mutation record

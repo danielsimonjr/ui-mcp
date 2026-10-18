@@ -220,8 +220,9 @@ case list above is the full list. A new case is a deliberate edit.
 An operand is a `PathRef` when it is an object with a string `path` key. Every other operand is
 a `Literal`. That includes an object without a string `path`.
 
-The parser stores the path of a `WhenPath` or a `PathRef` as written. The parser does not apply
-the `PropTypes.Path` charset rule to either path.
+The parser checks the path of a `WhenPath` and the path of a `PathRef` with one method,
+`VisibilityCondition.ParsePath`. `ParsePath` applies the `PropTypes.Path` rule and then refuses
+`$item`. A refusal throws `"visible.path: {message}"`.
 
 ### `VisibilityEvaluator.cs` — the decision
 
