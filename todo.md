@@ -213,6 +213,31 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       225 tests — so they are a local habit, not a gate. Deliberately left out of the v0.1.2
       sweep at the owner's direction.
 
+- [ ] (2026-10-18) **A condition object ignores extra keys.** `{"path":"a","pth":1}` is accepted,
+      and the form key that comes first wins. Node-level keys are refused, but a condition object is
+      not, because refusing its keys changes the accepted shapes. DONE WHEN: the parser refuses a key
+      that the chosen form does not read, a test per form covers the refusal, the bundle is
+      rebuilt, and the docs name the rule.
+
+- [ ] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
+      `VisibilityCondition.ParsePath` prefixes every path error with "visible.path:". The path form
+      and the `{"path": ...}` operand of `eq`, `neq`, `gt`, `gte`, `lt` and `lte` both call it, so a
+      bad operand of `gt` reports a key that the caller did not write. This is a message only.
+      DONE WHEN: the prefix names the real position, and one test pins the message for each of the
+      six operators.
+
+- [ ] (2026-10-18) **The `ui_render` description points to a repo-relative file.** The description
+      ends with "are listed in docs/architecture/API.md". A client that runs the installed bundle
+      has no checkout, so the pointer leads nowhere. DECIDE: list the twelve forms in the
+      description, or give an absolute URL. The description is part of the bundle, so the change
+      rebuilds `bundle/UiMcp.exe`.
+
+- [ ] (2026-10-18) **`Not` of an unknown condition subtype shows the node.** The default arm of
+      `IsVisible` returns false (fail closed), and `Not` negates the result, so the node is shown.
+      The class comment of `VisibilityEvaluator` documents this and a test pins it. The union is
+      closed, so no such subtype exists today. DECIDE: whether a future subtype must fail closed
+      under `Not` as well (three states, or a refusal at parse time).
+
 ## Done 2026-08-30
 
 - [x] (2026-08-30) **MCP 2.0 (`2026-07-28`) compliance.** Upgraded `ModelContextProtocol` to 2.2.0;
