@@ -46,6 +46,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`VisibilityEvaluator.IsVisible` hides a condition of an unknown subtype.** The `switch` ended with
+  `_ => true`, which showed the node, and the class comment promised the opposite. The arm is
+  unreachable today, because `VisibilityCondition` has a private constructor, so the change has no
+  effect at run time. It decides what a future subtype does. The arm now returns `false`. `Not`
+  negates the result, so a `Not` of an unknown subtype still shows the node, and the class comment
+  says so. Two tests build a real subtype at run time with `Reflection.Emit` (the record has a
+  protected copy constructor that a derived type may call) and check it directly and inside `and`
+  and `or`, with a known form as the control. The suite grows from 381 to 383 tests.
 - **The validator refuses a node-level key that it does not read.** It read four keys (`type`, `props`,
   `children` and `visible`) and ignored every other key. A misspelled `visible` key therefore left the
   node always shown. `CatalogValidator.Validate` now refuses any other key and names the component

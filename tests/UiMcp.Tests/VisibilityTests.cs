@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.Json;
 using FluentAssertions;
 using UiMcp.Abstractions;
@@ -564,4 +566,64 @@ public class VisibilityTests
         => ((Action)(() => Validate(
                 "{\"type\":\"Note\",\"props\":{\"text\":\"hi\"},\"visible\":" + PathObject("a b") + "}")))
             .Should().Throw<UiValidationException>().WithMessage("*Note.visible*illegal characters in path*");
+
+    // ---- an unknown condition subtype ---------------------------------------------------------------
+    // VisibilityCondition has a private constructor, so no code outside the type can add a subtype and
+    // the evaluator cannot meet an unknown one today. The arm still decides what a future subtype
+    // does. A condition that cannot be evaluated must not show a node. The stub below is a real
+    // subtype built at run time: the record has a protected copy constructor, and a derived type may
+    // call it.
+
+    private static VisibilityCondition StubSubtype()
+    {
+        var module = AssemblyBuilder
+            .DefineDynamicAssembly(new AssemblyName("UiMcp.Tests.StubCondition"), AssemblyBuilderAccess.Run)
+            .DefineDynamicModule("StubCondition");
+        var type = module.DefineType("StubCondition", TypeAttributes.Public | TypeAttributes.Sealed,
+            typeof(VisibilityCondition));
+
+        var copyCtor = typeof(VisibilityCondition).GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(VisibilityCondition) }, null)!;
+        var ctor = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard,
+            new[] { typeof(VisibilityCondition) });
+        var ctorIl = ctor.GetILGenerator();
+        ctorIl.Emit(OpCodes.Ldarg_0);
+        ctorIl.Emit(OpCodes.Ldarg_1);
+        ctorIl.Emit(OpCodes.Call, copyCtor);
+        ctorIl.Emit(OpCodes.Ret);
+
+        // An abstract record declares an abstract clone method, and the stub must override it.
+        var clone = typeof(VisibilityCondition).GetMethod("<Clone>$");
+        if (clone is { IsAbstract: true })
+        {
+            var cloneIl = type.DefineMethod("<Clone>$",
+                MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
+                typeof(VisibilityCondition), Type.EmptyTypes).GetILGenerator();
+            cloneIl.Emit(OpCodes.Ldarg_0);
+            cloneIl.Emit(OpCodes.Ret);
+        }
+
+        return (VisibilityCondition)Activator.CreateInstance(type.CreateType(), new VisibilityCondition.Always())!;
+    }
+
+    [Fact]
+    public void IsVisible_AnUnknownConditionSubtype_IsHidden()
+    {
+        var stub = StubSubtype();
+
+        stub.GetType().BaseType.Should().Be(typeof(VisibilityCondition), "the stub must be a subtype the switch does not name");
+        stub.GetType().DeclaringType.Should().BeNull();
+        V(stub, "{}").Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsVisible_AnUnknownConditionSubtype_InsideAnd_HidesTheNode_ControlTheKnownFormsStillShow()
+    {
+        var stub = StubSubtype();
+
+        V(new VisibilityCondition.And(new[] { stub }), "{}").Should().BeFalse();
+        V(new VisibilityCondition.Or(new[] { stub }), "{}").Should().BeFalse();
+        V(new VisibilityCondition.And(new VisibilityCondition[] { new VisibilityCondition.Always() }), "{}")
+            .Should().BeTrue("a known form still shows the node");
+    }
 }

@@ -257,8 +257,9 @@ An operand reduces to a canonical value. A number becomes a `double`. A string s
 `null`. `Eq` compares two canonical values with `object.Equals`, so the number `1` and the string
 `"1"` are different values, and two `null` values are equal.
 
-The `switch` ends with a default arm that returns `true`. No input reaches that arm, because the
-unions are closed.
+The `switch` ends with a default arm that returns `false`, so a condition of an unknown subtype
+is hidden. No input reaches that arm, because the unions are closed. `Not` negates the result, so
+a `Not` of an unknown subtype would show the node.
 
 ---
 
