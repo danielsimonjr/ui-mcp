@@ -208,10 +208,11 @@ name from `Describe` broke nothing because the compared trees still differ by ch
 
 ## 🟢 READY
 
-- [ ] **Add `dotnet test` to CI.** The workflow builds and gates bundle freshness plus MCP
-      `server/discover`, `tools/list`, and the legacy `initialize` handshake, but never runs the
-      225 tests — so they are a local habit, not a gate. Deliberately left out of the v0.1.2
-      sweep at the owner's direction.
+- [x] (2026-10-18) **`dotnet test` runs in CI.** `.github/workflows/ci.yml` runs
+      `dotnet test UiMcp.sln --no-build -c Release`, and it has done so since commit 238895b
+      (2026-08-15). The earlier text of this row, which said the workflow never runs the tests,
+      was written an hour after that commit and was wrong. The CI run on `main` for e715343
+      reports 398 tests and 398 passed.
 
 - [ ] (2026-10-18) **A condition object ignores extra keys.** `{"path":"a","pth":1}` is accepted,
       and the form key that comes first wins. Node-level keys are refused, but a condition object is
