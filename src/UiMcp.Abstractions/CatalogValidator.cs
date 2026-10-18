@@ -35,6 +35,11 @@ public static class CatalogValidator
     public const int MaxDepth = 12;
     public const int MaxChildren = 64;
 
+    // The node-level keys the validator reads. Any other key is refused, because a key that is
+    // ignored hides a typo: a misspelled `visible` would leave the node always shown.
+    private static readonly IReadOnlySet<string> NodeKeys =
+        new HashSet<string>(StringComparer.Ordinal) { "type", "props", "children", "visible" };
+
     private static PropRule Req(Func<JsonElement, object> f) => new(f);
     private static PropRule Opt(Func<JsonElement, object> f) => new(f, Optional: true);
 
@@ -135,6 +140,10 @@ public static class CatalogValidator
         var type = typeEl.GetString()!;
         if (!Catalog.TryGetValue(type, out var spec))
             throw new UiValidationException($"unknown component: {type}");
+
+        foreach (var member in node.EnumerateObject())
+            if (!NodeKeys.Contains(member.Name))
+                throw new UiValidationException($"{type}: unknown node key \"{member.Name}\"");
 
         var given = node.TryGetProperty("props", out var p) && p.ValueKind == JsonValueKind.Object
             ? p.EnumerateObject().ToDictionary(x => x.Name, x => x.Value, StringComparer.Ordinal)

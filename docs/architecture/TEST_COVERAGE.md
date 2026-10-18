@@ -16,7 +16,7 @@ nobody measured one.
 | `CatalogValidator` + `PropTypes` | 326 | `CatalogValidatorTests.cs` | 24 Fact + 7 Theory | Thorough |
 | `PathResolver` | 127 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
 | `RenderRules` | 121 | `RenderRulesTests.cs` | 31 Fact | Thorough |
-| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 65 Fact + 7 Theory | Thorough; see gap 1 |
+| `VisibilityCondition` + `VisibilityEvaluator` | 284 | `VisibilityTests.cs` | 65 Fact + 7 Theory | Thorough |
 | `UiThreadHost` | 150 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
 | `UiTools` | 159 | `UiToolsTests.cs` | 16 Fact | Thorough |
 | `TreeRenderer` | 321 | `TreeRendererTests.cs` | 31 Fact + 4 Theory | Good; the `visible` gate has its own tests |
@@ -130,17 +130,7 @@ untoned panel grey.
 
 ## The gaps that remain
 
-### 1. Two visibility behaviours have no test
-
-[API.md](API.md) and [COMPONENTS.md](COMPONENTS.md) state two behaviours that no test pins:
-
-- a `visible` path skips the parse-time path rule, which holds the charset check and the
-  prototype check;
-- the validator ignores a node-level key other than `type`, `props`, `children` and `visible`.
-
-A change to either behaviour does not fail the suite.
-
-### 2. The window-showing tests need an interactive desktop
+### 1. The window-showing tests need an interactive desktop
 
 `UiSurfaceWindowTests` briefly opens and closes real windows. Its 10 tests need an interactive
 desktop. On a host with no desktop they fail at `UiSurface.Open` — which is the **correct and
@@ -152,7 +142,7 @@ needs no window and runs anywhere. The two groups fail for different reasons: on
 the other for the environment. A suite that cannot tell those two apart teaches you to ignore
 it.
 
-### 3. `Program.cs` has metadata tests only
+### 2. `Program.cs` has metadata tests only
 
 67 lines of composition root. `ProgramMetadataTests` pins `ServerVersion` against
 `Directory.Build.props`, and pins that `ServerInstructions` names the four tools. Wire-level

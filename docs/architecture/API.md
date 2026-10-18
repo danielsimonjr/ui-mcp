@@ -105,8 +105,8 @@ stopped service.
 - `visible` — optional. A condition that hides the node when it is false (see
   [Visibility conditions](#visibility-conditions)). A `null` value counts as an absent key.
 
-The validator reads no other key of a node. The validator ignores an unknown key and does not
-refuse it.
+The validator refuses any other key of a node. The message names the component and the key, for
+example `Note: unknown node key "style"`.
 
 ### Components
 

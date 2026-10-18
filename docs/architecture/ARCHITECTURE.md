@@ -225,9 +225,6 @@ repository also commits the bundle, and the plugin cache clones it for each vers
 - **Last-write-wins.** Two agents rendering different trees is a race; `ui_status` names only
   the last render. Multi-agent arbitration is deferred.
 - **No partial update.** `ui_render` is a full replace; `ui_update` is deferred to v0.2.
-- **A key beside `props` is ignored unless it is `type`, `children` or `visible`.** The catalog
-  refuses an unknown prop, but the validator reads no other node-level key. A misspelled
-  `visible` key therefore does nothing, and the node is always visible.
 - **The desktop assumption is retired only for the interactive path.** An S4U-triggered host
   has no desktop by definition. No task that starts the host uses S4U today; if that changes,
   re-run `tools/probe-desktop.ps1` first. See SPEC 10.1.

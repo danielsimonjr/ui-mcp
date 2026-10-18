@@ -119,10 +119,10 @@ The validator throws on each rejection path below, and names the component and t
 A failing prop validator becomes `"{type}.{key}: {message}"`. The message `"expected string"`
 alone tells a reader nothing useful in a tree of 60 nodes.
 
-The validator reads four node-level keys: `type`, `props`, `children` and `visible`. It reads
-`visible` after the props and the children. A failure in the condition becomes
-`"{type}.visible: {message}"`. A `visible` value of `null` has the same result as an absent
-key. The validator reads no other node-level key, so it ignores an unknown one.
+The validator reads four node-level keys: `type`, `props`, `children` and `visible`. It refuses
+any other node-level key, before it reads the props, with `"{type}: unknown node key \"{key}\""`.
+It reads `visible` after the props and the children. A failure in the condition becomes
+`"{type}.visible: {message}"`. A `visible` value of `null` has the same result as an absent key.
 
 ### `PathResolver.cs` — binding, and the UNKNOWN rule
 

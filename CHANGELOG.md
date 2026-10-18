@@ -46,6 +46,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The validator refuses a node-level key that it does not read.** It read four keys (`type`, `props`,
+  `children` and `visible`) and ignored every other key. A misspelled `visible` key therefore left the
+  node always shown. `CatalogValidator.Validate` now refuses any other key and names the component
+  and the key, as it does for an unknown prop: `Note: unknown node key "visble"`. The check runs
+  before the props. 12 tests pin eight keys, the misspelled `visible` with a control, the four known
+  keys, a nested node, and a node that is otherwise valid. The suite grows from 369 to 381 tests.
+  `TEST_COVERAGE.md` loses its first gap: both behaviours that it listed (the unchecked condition
+  path and the ignored node-level key) are now refused and pinned, and the two remaining gaps are
+  renumbered.
 - **The path of a `visible` condition follows the path rule of the prop types.**
   `VisibilityCondition.Parse` stored the path of a `path` condition and the path of a `path` operand
   without a check. A path with a quote, a slash, a space, a hyphen or no characters at all passed
