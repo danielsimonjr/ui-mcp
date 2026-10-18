@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-10-18
+
 ### Added
 
 - **Tests for the renderer's `visible` gate and for the visibility rules that no test pinned.**
@@ -39,9 +41,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`bundle/UiMcp.exe` is rebuilt with the changes of this release.** The plugin runs the committed
   bundle, so a source fix reaches the plugin only through a rebuilt bundle. Two builds with
   `dotnet clean` between them give the same file, with the pinned SDK and the build properties of
-  `Directory.Build.props`. The version in `Directory.Build.props` and the plugin manifests does not
-  change in this commit. The plugin updater reads the version in the plugin manifest, so a release
-  bumps that version before the new bytes reach a plugin.
+  `Directory.Build.props`. A build on a second machine gives the same bytes. This release bumps the
+  version in `Directory.Build.props`, `.claude-plugin/plugin.json` and `package.json`, because the
+  plugin updater reads the version in the plugin manifest and does not see new bytes without it.
 - **The `ui_render` description names the `visible` condition.** The description never mentioned that a
   node can carry `visible`. It has one sentence that names the condition and points to
   `docs/architecture/API.md`. Two tests read the description through its attribute. One checks the
