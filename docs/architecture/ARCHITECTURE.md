@@ -157,8 +157,7 @@ apply:
 
 - A path condition is true when the path resolves to a truthy value. Truthiness follows
   JavaScript: `false`, `null`, `0` and the empty string are falsy.
-- An unresolved path is falsy. A condition that cannot be evaluated never shows a node that
-  should stay hidden.
+- An unresolved path is falsy, so a `path` condition hides its node.
 - `Eq` and `Neq` compare canonical values. The number `1` and the string `"1"` are different
   values. Two unresolved operands are equal.
 - An ordering operator is false unless both operands are numbers.
@@ -172,9 +171,10 @@ holds: the tree cannot run code or choose an element type through `visible`. The
 in `Abstractions` because the renderer draws what the rules decide.
 
 **Trade-offs.** A condition cannot read the current item of a `Repeat`. The validator checks
-each `visible` path with `PropTypes.Path`. The validator then refuses `$item`. A path that can
-never resolve is therefore a refusal, and not a node that stays hidden. `PathResolver.Resolve`
-still refuses `__proto__`, `constructor` and `prototype` when it resolves a path.
+each `visible` path with `PropTypes.Path`. The validator then refuses `$item`. A `$item` path is
+therefore a refusal, and not a node that stays hidden. `PathResolver.Resolve` returns `null` for
+a path that holds `__proto__`, `constructor` or `prototype`. The path rule is stricter than the
+JSON-UI schema, which accepts any string as a path. A tree that JSON-UI accepts can fail here.
 
 ### STDOUT is the transport
 

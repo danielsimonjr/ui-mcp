@@ -15,9 +15,9 @@ namespace UiMcp.Abstractions;
 /// </list>
 ///
 /// The absent case (no <c>visible</c> prop) is treated as always-visible, matching the JS behaviour.
-/// An unresolvable path is treated as falsy (hidden), so a visibility condition that cannot be
-/// evaluated never silently shows content that should be hidden. The validator checks every path
-/// of a condition with the path rule of the prop types and refuses <c>$item</c>.
+/// An unresolvable path is treated as falsy, so a <c>path</c> condition hides its node. The
+/// <c>not</c> and <c>neq</c> forms negate that result, so they show the node. The validator checks
+/// every path of a condition with the path rule of the prop types and refuses <c>$item</c>.
 ///
 /// Ported from <c>danielsimonjr/JSON-UI</c> — see <c>packages/core/src/visibility.ts</c> and
 /// <c>packages/core/src/types.ts</c>.

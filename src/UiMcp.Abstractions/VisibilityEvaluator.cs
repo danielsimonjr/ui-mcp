@@ -17,9 +17,10 @@ namespace UiMcp.Abstractions;
 /// An unresolvable path is treated as falsy — matching the JS behaviour where a missing path
 /// value is <c>undefined</c>, which is falsy in a boolean context.
 ///
-/// A condition of an unknown subtype is hidden. <see cref="VisibilityCondition"/> has a private
-/// constructor, so no such subtype exists today. <c>Not</c> negates the hidden result, so a
-/// <c>Not</c> of an unknown subtype shows the node.
+/// A condition of an unknown subtype is hidden. The private constructor of
+/// <see cref="VisibilityCondition"/> stops C# source outside the type from adding a subtype, and
+/// <c>Parse</c> builds only the twelve nested records, so a validated tree never reaches this case.
+/// <c>Not</c> negates the hidden result, so a <c>Not</c> of an unknown subtype shows the node.
 /// </summary>
 public static class VisibilityEvaluator
 {

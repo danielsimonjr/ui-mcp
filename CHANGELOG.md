@@ -19,7 +19,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   node count includes a hidden node. The suite grows from 290 to 334 tests. Deleting the gate
   fails 8 of them, and each of nine more mutations fails at least one. No source file changes.
   `TEST_COVERAGE.md`, `OVERVIEW.md` and the generated reports carry the new counts. Two behaviours
-  stay unpinned: the `visible` path that skips the path rule and the ignored node-level key.
+  had no test: the `visible` path that skips the path rule and the ignored node-level key. Entries
+  under Fixed pin both.
 - **A test pins that the validator refuses an `auth` condition.** `VisibilityCondition.Parse` has no
   `auth` branch. A tree with an `auth` condition in `visible` therefore fails validation with
   "unrecognised condition shape" and never reaches `VisibilityEvaluator`. Three `Theory` rows pin the
@@ -66,13 +67,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   The suite grows from 385 to 395 tests. `PathResolver` keeps its `$` anchor, because it resolves
   only paths that the validator accepted.
 - **`VisibilityEvaluator.IsVisible` hides a condition of an unknown subtype.** The `switch` ended with
-  `_ => true`, which showed the node. The `VisibilityCondition` summary says that a condition that
-  cannot be evaluated never silently shows content that should be hidden. A validated tree cannot reach
-  the arm, because `Parse` builds only the twelve nested records. The change therefore has no effect on a
-  tree the server validates. The arm returns `false`. `Not` negates the result, so a `Not` of an unknown
-  subtype changes from hidden to shown. Two tests build a real subtype at run time with `Reflection.Emit`.
-  The subtype calls the protected copy constructor. The tests check the subtype directly, and inside `and`
-  and `or`, with a known form as the control. The suite grows from 381 to 383 tests.
+  `_ => true`, which showed the node. A condition that the evaluator does not know must not show
+  content. A validated tree cannot reach the arm, because `Parse` builds only the twelve nested records.
+  The change therefore has no effect on a tree the server validates. The arm returns `false`. `Not`
+  negates the result, so a `Not` of an unknown subtype changes from hidden to shown. The summary of
+  `VisibilityCondition` said that a condition that cannot be evaluated never shows content that should
+  be hidden. That sentence was false for `not` and `neq` over an unresolved path, and it now describes
+  the `path` form only. Two tests build a real subtype at run time with `Reflection.Emit`. The subtype
+  calls the protected copy constructor. The tests check the subtype directly, and inside `and` and `or`,
+  with a known form as the control. The suite grows from 381 to 383 tests.
 - **The validator refuses a node-level key that it does not read.** It read four keys (`type`, `props`,
   `children` and `visible`) and ignored every other key. A misspelled `visible` key therefore left the
   node always shown. `CatalogValidator.Validate` now refuses any other key and names the component

@@ -38,7 +38,7 @@ create a second window.
 Render a catalog-constrained JSON UI tree, replacing whatever is displayed. **The tree is
 validated in full first** and drawn only if all of it passed; anything outside the catalog is
 refused rather than ignored. The tool description names the optional `visible` condition of a node
-and points to this document, because a client reads the description and nothing else.
+and points to this document.
 
 | Param | Type | Required | Meaning |
 |---|---|---|---|
@@ -129,7 +129,7 @@ example `Note: unknown node key "style"`.
 |---|---|
 | text | string, ≤ 500 chars |
 | tone | one of `nominal` · `attention` · `critical` · `degraded` · `muted` · `info` |
-| path | `^[A-Za-z0-9_.\[\]]+$`, optionally prefixed `$item` or `$item.`; `__proto__`, `constructor`, `prototype` refused anywhere in the string |
+| path | `^[A-Za-z0-9_.\[\]]+\z`, optionally prefixed `$item` or `$item.`; `__proto__`, `constructor`, `prototype` refused anywhere in the string |
 | cols | one of 1, 2, 3, 4 |
 | columns | array of ≤ 8 `{header, valuePath}`; each `valuePath` validated as a path |
 

@@ -59,17 +59,16 @@ without it, a "comprehensive" suite quietly stops being one.
 a number. An unresolved path is falsy in the same file. The same file pins the rules that a
 reader cannot settle by reading. An empty `and` is true, and an empty `or` is false. The first
 form key wins in the order of the forms. The evaluator leaves a `$item` path unresolved at the
-root. Truthiness
-follows JavaScript, so `[]`, `{}` and `"0"` are truthy. Two unresolved operands are equal. An
-object or an array literal reduces to `null`.
+root. Truthiness follows JavaScript, so `[]`, `{}` and `"0"` are truthy. Two unresolved operands are
+equal. An object or an array literal reduces to `null`.
 
 **The renderer's `visible` gate is tested through the renderer.** `TreeRendererTests` renders
 a node with a condition and reads the result on the STA thread. A hidden node is a collapsed
 `Border` with no child, and a hidden container draws none of its children. Every hidden case
 has a shown control. The condition reads the root data, so a `$item` path inside a `Repeat`
-hides the child of every item. The test builds that condition directly, because the validator
-refuses a `$item` path in a condition. `UiSurfaceWindowTests` pins that the tree hash ignores the
-condition and that the node count includes a hidden node.
+hides the child of every item. The validator refuses such a path, so `TreeRendererTests` builds
+the condition directly. `UiSurfaceWindowTests` pins that the tree hash ignores the condition and
+that the node count includes a hidden node.
 
 ### The mutation record
 

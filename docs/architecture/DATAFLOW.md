@@ -141,7 +141,7 @@ UiTools.Status() ──▶ _surface.Status
 | Where it happens | What the caller sees | What happens to the server |
 |---|---|---|
 | Malformed `tree`/`data` JSON | `{ok:false, rejected: "tree is not valid JSON: …"}` | unaffected |
-| Anything the catalog refuses | `{ok:false, rejected: "<Type>.<prop>: <reason>"}` | unaffected; **UI untouched** |
+| Anything the catalog refuses | `{ok:false, rejected: "<reason>"}` | unaffected; **UI untouched** |
 | A `visible` value that does not parse | `{ok:false, rejected: "<Type>.visible: <reason>"}` | unaffected; **UI untouched** |
 | A `visible` path that does not resolve | the node is hidden | unaffected; render completes |
 | Unresolvable binding path | renders `UNKNOWN` in place | unaffected; render completes |
