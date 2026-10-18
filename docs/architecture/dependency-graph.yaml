@@ -563,6 +563,8 @@ modules:
       externalDependencies:
         - FluentAssertions
       nodeDependencies:
+        - System.Reflection
+        - System.Reflection.Emit
         - System.Text.Json
       internalDependencies:
         - file: src/UiMcp.Abstractions/CatalogValidator.cs
@@ -595,7 +597,7 @@ statistics:
   totalTypeScriptFiles: 25
   totalSourceFiles: 25
   totalModules: 2
-  totalLinesOfCode: 4368
+  totalLinesOfCode: 4676
   totalExports: 42
   entryRoots: 1
   reachableFiles: 13

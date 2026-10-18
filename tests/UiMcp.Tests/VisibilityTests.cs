@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.Json;
 using FluentAssertions;
 using UiMcp.Abstractions;
@@ -432,7 +434,9 @@ public class VisibilityTests
     [InlineData("""{"x":{"y":1}}""")]
     public void IsVisible_AnItemPathIsUnresolvedAtTheRoot(string data)
     {
-        V(P("""{"path":"$item.x"}"""), data).Should().BeFalse();
+        // Built directly: the validator refuses a `$item` path in a condition, so only the evaluator
+        // can be asked what it does with one.
+        V(new VisibilityCondition.WhenPath("$item.x"), data).Should().BeFalse();
         V(P("""{"path":"x"}"""), data).Should().BeTrue("the same name without $item resolves");
     }
 
@@ -482,4 +486,153 @@ public class VisibilityTests
     public void Validator_APathCondition_IsAccepted_ControlForTheAuthRefusal()
         => Validate("""{"type":"Note","props":{"text":"hi"},"visible":{"path":"signedIn"}}""")
             .Visible.Should().BeOfType<VisibilityCondition.WhenPath>();
+
+    // ---- the path of a condition follows the path rule of the prop types --------------------------
+    // The path of a `visible` condition once skipped the charset rule that every prop path obeys.
+    // Both parse sites (the `path` form and a `path` operand) now share one check. The refusals
+    // below each have a positive control: a rule that refuses every path fails the control.
+
+    private static string PathObject(string path) => "{\"path\":" + JsonSerializer.Serialize(path) + "}";
+
+    public static TheoryData<string> IllegalPaths => new()
+    {
+        "a b", "a'b", "a\"b", "a/b", "a;b", "a-b", "", "$other", "$", "a$b",
+        // .NET `$` also matches before a final line feed, so a path that ends in one is a case of its own.
+        "a\n", "a.b\n",
+    };
+
+    [Theory]
+    [MemberData(nameof(IllegalPaths))]
+    public void Parse_APathWithIllegalCharacters_IsRefused(string path)
+        => ((Action)(() => VisibilityCondition.Parse(D(PathObject(path)))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+
+    [Theory]
+    [MemberData(nameof(IllegalPaths))]
+    public void Parse_AnOperandPathWithIllegalCharacters_IsRefused_OnEitherSide(string path)
+    {
+        ((Action)(() => VisibilityCondition.Parse(D("{\"eq\":[" + PathObject(path) + ",1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"gt\":[1," + PathObject(path) + "]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+    }
+
+    [Theory]
+    [InlineData("a")]
+    [InlineData("a.b")]
+    [InlineData("a.b[0]")]
+    [InlineData("_x1.Y2")]
+    public void Parse_ALegalPath_IsAccepted_AtBothSites_ControlForTheRefusals(string path)
+    {
+        P(PathObject(path)).Should().Be(new VisibilityCondition.WhenPath(path));
+        P("{\"eq\":[" + PathObject(path) + ",1]}").Should().BeOfType<VisibilityCondition.Eq>()
+            .Which.Left.Should().Be(new VisibilityOperand.PathRef(path));
+    }
+
+    [Theory]
+    [InlineData("a.__proto__.b")]
+    [InlineData("constructor")]
+    [InlineData("prototype")]
+    public void Parse_APrototypePath_IsRefused_AtBothSites(string path)
+    {
+        ((Action)(() => VisibilityCondition.Parse(D(PathObject(path)))))
+            .Should().Throw<UiValidationException>().WithMessage("*prototype access refused*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"neq\":[" + PathObject(path) + ",1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*prototype access refused*");
+    }
+
+    [Theory]
+    [InlineData("$item")]
+    [InlineData("$item.x")]
+    public void Parse_AnItemPath_IsRefused_AtBothSites(string path)
+    {
+        // A condition reads the root data. `$item` has no scope there, so the validator says so
+        // instead of accepting a path that can never resolve.
+        ((Action)(() => VisibilityCondition.Parse(D(PathObject(path)))))
+            .Should().Throw<UiValidationException>().WithMessage("*$item*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"lt\":[" + PathObject(path) + ",1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*$item*");
+    }
+
+    [Fact]
+    public void Parse_AnIllegalPath_InsideALogicForm_IsRefused()
+    {
+        ((Action)(() => VisibilityCondition.Parse(D("{\"not\":" + PathObject("a b") + "}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+        ((Action)(() => VisibilityCondition.Parse(D("{\"and\":[true," + PathObject("a'b") + "]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+    }
+
+    [Fact]
+    public void Validator_AVisiblePathWithIllegalCharacters_IsRefused_NamingTheComponent()
+        => ((Action)(() => Validate(
+                "{\"type\":\"Note\",\"props\":{\"text\":\"hi\"},\"visible\":" + PathObject("a b") + "}")))
+            .Should().Throw<UiValidationException>().WithMessage("*Note.visible*illegal characters in path*");
+
+    // ---- an unknown condition subtype ---------------------------------------------------------------
+    // VisibilityCondition has a private constructor, so C# source outside the type cannot add a
+    // subtype, and Parse builds only the twelve nested records. A validated tree never reaches the
+    // default arm. The arm decides what a subtype does that reaches it anyway, and it must hide the
+    // node. The stub below is a real subtype built at run time: the record has a protected copy
+    // constructor, and a derived type may call it.
+
+    private static VisibilityCondition StubSubtype()
+    {
+        var module = AssemblyBuilder
+            .DefineDynamicAssembly(new AssemblyName("UiMcp.Tests.StubCondition"), AssemblyBuilderAccess.Run)
+            .DefineDynamicModule("StubCondition");
+        var type = module.DefineType("StubCondition", TypeAttributes.Public | TypeAttributes.Sealed,
+            typeof(VisibilityCondition));
+
+        var copyCtor = typeof(VisibilityCondition).GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(VisibilityCondition) }, null)!;
+        var ctor = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard,
+            new[] { typeof(VisibilityCondition) });
+        var ctorIl = ctor.GetILGenerator();
+        ctorIl.Emit(OpCodes.Ldarg_0);
+        ctorIl.Emit(OpCodes.Ldarg_1);
+        ctorIl.Emit(OpCodes.Call, copyCtor);
+        ctorIl.Emit(OpCodes.Ret);
+
+        // An abstract record declares an abstract clone method, and the stub must override it.
+        var clone = typeof(VisibilityCondition).GetMethod("<Clone>$");
+        if (clone is { IsAbstract: true })
+        {
+            var cloneIl = type.DefineMethod("<Clone>$",
+                MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
+                typeof(VisibilityCondition), Type.EmptyTypes).GetILGenerator();
+            cloneIl.Emit(OpCodes.Ldarg_0);
+            cloneIl.Emit(OpCodes.Ret);
+        }
+
+        return (VisibilityCondition)Activator.CreateInstance(type.CreateType(), new VisibilityCondition.Always())!;
+    }
+
+    [Fact]
+    public void IsVisible_AnUnknownConditionSubtype_IsHidden()
+    {
+        var stub = StubSubtype();
+
+        stub.GetType().BaseType.Should().Be(typeof(VisibilityCondition), "the stub must be a subtype the switch does not name");
+        V(stub, "{}").Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsVisible_AnUnknownConditionSubtype_InsideAnd_HidesTheNode_ControlTheKnownFormsStillShow()
+    {
+        var stub = StubSubtype();
+
+        V(new VisibilityCondition.And(new[] { stub }), "{}").Should().BeFalse();
+        V(new VisibilityCondition.Or(new[] { stub }), "{}").Should().BeFalse();
+        V(new VisibilityCondition.And(new VisibilityCondition[] { new VisibilityCondition.Always() }), "{}")
+            .Should().BeTrue("a known form still shows the node");
+    }
+
+    [Fact]
+    public void IsVisible_ANotOfAnUnknownConditionSubtype_ShowsTheNode_AsTheDocumentsSay()
+    {
+        // Not negates the hidden result of the unknown subtype. The architecture documents state this
+        // on purpose, and no test read it.
+        V(new VisibilityCondition.Not(StubSubtype()), "{}").Should().BeTrue();
+    }
 }

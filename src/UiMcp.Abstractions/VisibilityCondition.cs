@@ -15,8 +15,9 @@ namespace UiMcp.Abstractions;
 /// </list>
 ///
 /// The absent case (no <c>visible</c> prop) is treated as always-visible, matching the JS behaviour.
-/// An unresolvable path is treated as falsy (hidden), so a visibility condition that cannot be
-/// evaluated never silently shows content that should be hidden.
+/// An unresolvable path is treated as falsy, so a <c>path</c> condition hides its node. The
+/// <c>not</c> and <c>neq</c> forms negate that result, so they show the node. The validator checks
+/// every path of a condition with the path rule of the prop types and refuses <c>$item</c>.
 ///
 /// Ported from <c>danielsimonjr/JSON-UI</c> — see <c>packages/core/src/visibility.ts</c> and
 /// <c>packages/core/src/types.ts</c>.
@@ -81,7 +82,7 @@ public abstract record VisibilityCondition
         {
             if (pathEl.ValueKind != JsonValueKind.String)
                 throw new UiValidationException("visible.path must be a string");
-            return new WhenPath(pathEl.GetString()!);
+            return new WhenPath(ParsePath(pathEl));
         }
 
         if (el.TryGetProperty("and", out var andEl))
@@ -132,6 +133,24 @@ public abstract record VisibilityCondition
         throw new UiValidationException("visible: unrecognised condition shape");
     }
 
+    /// <summary>
+    /// Check the path of a condition. A condition path follows the same rule as a prop path
+    /// (<see cref="PropTypes.Path"/>), and both parse sites call this one method. A condition reads
+    /// the root data. A <c>$item</c> scope does not exist there, so the validator refuses
+    /// <c>$item</c> instead of accepting a path that never resolves.
+    /// </summary>
+    internal static string ParsePath(JsonElement el)
+    {
+        string path;
+        try { path = (string)PropTypes.Path(el); }
+        catch (UiValidationException e) { throw new UiValidationException($"visible.path: {e.Message}", e); }
+
+        if (path.StartsWith('$'))
+            throw new UiValidationException(
+                "visible.path: $item is not available in a condition, which reads the root data");
+        return path;
+    }
+
     private static IReadOnlyList<VisibilityCondition> ParseArray(JsonElement el, string key)
     {
         if (el.ValueKind != JsonValueKind.Array)
@@ -170,7 +189,7 @@ public abstract record VisibilityOperand
         // {path: "..."} is a reference; everything else is a literal.
         if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("path", out var p)
             && p.ValueKind == JsonValueKind.String)
-            return new PathRef(p.GetString()!);
+            return new PathRef(VisibilityCondition.ParsePath(p));
 
         return new Literal(el);
     }

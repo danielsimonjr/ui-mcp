@@ -157,8 +157,7 @@ apply:
 
 - A path condition is true when the path resolves to a truthy value. Truthiness follows
   JavaScript: `false`, `null`, `0` and the empty string are falsy.
-- An unresolved path is falsy. A condition that cannot be evaluated never shows a node that
-  should stay hidden.
+- An unresolved path is falsy, so a `path` condition hides its node.
 - `Eq` and `Neq` compare canonical values. The number `1` and the string `"1"` are different
   values. Two unresolved operands are equal.
 - An ordering operator is false unless both operands are numbers.
@@ -171,10 +170,11 @@ space and the renderer does not draw its children.
 holds: the tree cannot run code or choose an element type through `visible`. The decision sits
 in `Abstractions` because the renderer draws what the rules decide.
 
-**Trade-offs.** A condition cannot read the current item of a `Repeat`. A `visible` path goes
-straight to `PathResolver.Resolve`, and `PropTypes.Path` does not check it, so the path
-charset rule does not apply to it. The prototype guard in `PathResolver.Resolve` still refuses
-`__proto__`, `constructor` and `prototype`.
+**Trade-offs.** A condition cannot read the current item of a `Repeat`. The validator checks
+each `visible` path with `PropTypes.Path`. The validator then refuses `$item`. A `$item` path is
+therefore a refusal, and not a node that stays hidden. `PathResolver.Resolve` returns `null` for
+a path that holds `__proto__`, `constructor` or `prototype`. The path rule is stricter than the
+JSON-UI schema, which accepts any string as a path. A tree that JSON-UI accepts can fail here.
 
 ### STDOUT is the transport
 
@@ -225,16 +225,13 @@ repository also commits the bundle, and the plugin cache clones it for each vers
 - **Last-write-wins.** Two agents rendering different trees is a race; `ui_status` names only
   the last render. Multi-agent arbitration is deferred.
 - **No partial update.** `ui_render` is a full replace; `ui_update` is deferred to v0.2.
-- **A key beside `props` is ignored unless it is `type`, `children` or `visible`.** The catalog
-  refuses an unknown prop, but the validator reads no other node-level key. A misspelled
-  `visible` key therefore does nothing, and the node is always visible.
 - **The desktop assumption is retired only for the interactive path.** An S4U-triggered host
   has no desktop by definition. No task that starts the host uses S4U today; if that changes,
   re-run `tools/probe-desktop.ps1` first. See SPEC 10.1.
 
 ## Verification
 
-Generated 2026-10-16 by `repo-tools map`.
+Generated 2026-10-18 by `repo-tools map`.
 Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |

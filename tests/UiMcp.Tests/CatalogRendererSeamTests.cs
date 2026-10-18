@@ -140,6 +140,28 @@ public class CatalogRendererSeamTests : IClassFixture<StaFixture>
         var attempt = () => PropTypes.Path(JsonDocument.Parse(JsonSerializer.Serialize(path)).RootElement);
         attempt.Should().Throw<UiValidationException>();
     }
+
+    [Theory]
+    [InlineData("a\n")]
+    [InlineData("a.b\n")]
+    [InlineData("$item.x\n")]
+    public void APathEndingInALineFeed_IsRefused(string path)
+    {
+        // .NET `$` matches at the end of the text AND before a final line feed. An anchor of `$` let
+        // "a\n" through a rule that claims to admit identifier characters, dots and brackets only.
+        var attempt = () => PropTypes.Path(JsonDocument.Parse(JsonSerializer.Serialize(path)).RootElement);
+        attempt.Should().Throw<UiValidationException>().WithMessage("*illegal characters in path*");
+    }
+
+    [Theory]
+    [InlineData("a")]
+    [InlineData("a.b[0]")]
+    [InlineData("$item.x")]
+    public void ALegalPath_IsAccepted_ControlForTheLineFeedRefusal(string path)
+    {
+        var attempt = () => PropTypes.Path(JsonDocument.Parse(JsonSerializer.Serialize(path)).RootElement);
+        attempt.Should().NotThrow();
+    }
 }
 
 /// <summary>Harvests TextBlock text. Runs ON the UI thread - see <see cref="StaFixture"/>.</summary>

@@ -37,7 +37,8 @@ create a second window.
 
 Render a catalog-constrained JSON UI tree, replacing whatever is displayed. **The tree is
 validated in full first** and drawn only if all of it passed; anything outside the catalog is
-refused rather than ignored.
+refused rather than ignored. The tool description names the optional `visible` condition of a node
+and points to this document.
 
 | Param | Type | Required | Meaning |
 |---|---|---|---|
@@ -105,8 +106,8 @@ stopped service.
 - `visible` — optional. A condition that hides the node when it is false (see
   [Visibility conditions](#visibility-conditions)). A `null` value counts as an absent key.
 
-The validator reads no other key of a node. The validator ignores an unknown key and does not
-refuse it.
+The validator refuses any other key of a node. The message names the component and the key, for
+example `Note: unknown node key "style"`.
 
 ### Components
 
@@ -128,7 +129,7 @@ refuse it.
 |---|---|
 | text | string, ≤ 500 chars |
 | tone | one of `nominal` · `attention` · `critical` · `degraded` · `muted` · `info` |
-| path | `^[A-Za-z0-9_.\[\]]+$`, optionally prefixed `$item` or `$item.`; `__proto__`, `constructor`, `prototype` refused anywhere in the string |
+| path | `^[A-Za-z0-9_.\[\]]+\z`, optionally prefixed `$item` or `$item.`; `__proto__`, `constructor`, `prototype` refused anywhere in the string |
 | cols | one of 1, 2, 3, 4 |
 | columns | array of ≤ 8 `{header, valuePath}`; each `valuePath` validated as a path |
 
@@ -176,8 +177,8 @@ A condition has one of twelve forms:
 Each `c` is a condition. Each `a` and `b` is an operand. An operand is `{"path": "…"}`, which
 reads the data, or a literal: a string, a number, a boolean or `null`.
 
-- A path reads the root data. It never reads the `$item` scope of a `Repeat`, so a `$item` path
-  stays unresolved.
+- A path reads the root data. It never reads the `$item` scope of a `Repeat`, so the validator
+  refuses a `$item` path in a condition.
 - Truthiness follows JavaScript. `false`, `null`, `0` and the empty string are falsy. Every other
   value is truthy, and that includes an empty array and an empty object.
 - An unresolved path is falsy, so the node stays hidden.
@@ -186,8 +187,9 @@ reads the data, or a literal: a string, a number, a boolean or `null`.
 - `gt`, `gte`, `lt` and `lte` are false unless both operands are numbers.
 - An object that holds more than one form key uses the first of these keys: `path`, `and`, `or`,
   `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
-- The path of a condition skips the path charset rule of the prop types. The prototype guard still
-  refuses `__proto__`, `constructor` and `prototype`.
+- The path of a condition follows the path rule of the prop types. The validator refuses a path
+  with an illegal character, an empty path, and a path that holds `__proto__`, `constructor` or
+  `prototype`. The validator also refuses `$item`, because a condition reads the root data.
 
 This tree shows the note only when `disk.usedPct` is 90 or more:
 
@@ -259,7 +261,7 @@ executable.
 
 ## Verification
 
-Generated 2026-10-16 by `repo-tools map`.
+Generated 2026-10-18 by `repo-tools map`.
 Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |

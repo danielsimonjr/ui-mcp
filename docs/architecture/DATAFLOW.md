@@ -141,7 +141,7 @@ UiTools.Status() ──▶ _surface.Status
 | Where it happens | What the caller sees | What happens to the server |
 |---|---|---|
 | Malformed `tree`/`data` JSON | `{ok:false, rejected: "tree is not valid JSON: …"}` | unaffected |
-| Anything the catalog refuses | `{ok:false, rejected: "<Type>.<prop>: <reason>"}` | unaffected; **UI untouched** |
+| Anything the catalog refuses | `{ok:false, rejected: "<reason>"}` | unaffected; **UI untouched** |
 | A `visible` value that does not parse | `{ok:false, rejected: "<Type>.visible: <reason>"}` | unaffected; **UI untouched** |
 | A `visible` path that does not resolve | the node is hidden | unaffected; render completes |
 | Unresolvable binding path | renders `UNKNOWN` in place | unaffected; render completes |
@@ -155,7 +155,7 @@ the process and takes MCP tool serving down with the display.
 
 ## Verification
 
-Generated 2026-10-16 by `repo-tools map`.
+Generated 2026-10-18 by `repo-tools map`.
 Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |

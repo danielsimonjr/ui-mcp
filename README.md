@@ -23,10 +23,10 @@ thread and marshals every update through the `Dispatcher`.
 
 ## Safety model
 
-The tree is **data to validate, never instructions to obey**. Unknown components and props are
-refused rather than ignored. No value from the JSON becomes a type name, a member name, or
-executable text. A value that cannot be resolved renders as **UNKNOWN**, never as `0` — a blind
-spot displayed as a green zero reads as health.
+The tree is **data to validate, never instructions to obey**. The server refuses unknown components,
+props and node-level keys instead of ignoring them. No value from the JSON becomes a type name,
+a member name, or executable text. A value that cannot be resolved renders as **UNKNOWN**,
+never as `0` — a blind spot displayed as a green zero reads as health.
 
 ## Catalog
 

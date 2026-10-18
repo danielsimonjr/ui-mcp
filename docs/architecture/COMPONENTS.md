@@ -63,8 +63,9 @@ public static object RowCols(JsonElement v);  // must be in RowColumnCounts
 public static object Columns(JsonElement v);  // ≤8 ValidatedColumn, each path guarded
 ```
 
-The path charset is `^[A-Za-z0-9_.\[\]]+$` — anchored and deliberately narrow. Quotes, slashes,
-semicolons and whitespace are absent **by construction**, not blocked by a denylist.
+The path charset is `^[A-Za-z0-9_.\[\]]+\z` — anchored and deliberately narrow. The end anchor is
+`\z` because .NET `$` also matches before a final line feed. Quotes, slashes, semicolons and
+whitespace are absent **by construction**, not blocked by a denylist.
 
 `PropTypes.Path` handles `$item` as a **literal prefix**, and does not add `$` to the charset.
 A wider charset would have been one character of difference, and it would have made every
@@ -103,12 +104,13 @@ The nine components and their props:
 | `Table` | `fromPath`, `columns` | `emptyText` | no |
 | `Note` | `text` | `tone` | no |
 
-The validator throws on each rejection path below, and names the component and the prop:
+The validator throws on each rejection path below:
 
 - a depth greater than 12,
 - a node that is not an object,
 - a `type` that is missing or is not a string,
 - an unknown component,
+- a node-level key other than `type`, `props`, `children` and `visible`,
 - an **unknown prop**,
 - a missing required prop,
 - children on a component that accepts none,
@@ -119,10 +121,10 @@ The validator throws on each rejection path below, and names the component and t
 A failing prop validator becomes `"{type}.{key}: {message}"`. The message `"expected string"`
 alone tells a reader nothing useful in a tree of 60 nodes.
 
-The validator reads four node-level keys: `type`, `props`, `children` and `visible`. It reads
-`visible` after the props and the children. A failure in the condition becomes
-`"{type}.visible: {message}"`. A `visible` value of `null` has the same result as an absent
-key. The validator reads no other node-level key, so it ignores an unknown one.
+The validator reads four node-level keys: `type`, `props`, `children` and `visible`. It refuses
+any other node-level key, before it reads the props, with `"{type}: unknown node key \"{key}\""`.
+It reads `visible` after the props and the children. A failure in the condition becomes
+`"{type}.visible: {message}"`. A `visible` value of `null` has the same result as an absent key.
 
 ### `PathResolver.cs` — binding, and the UNKNOWN rule
 
@@ -202,8 +204,10 @@ public abstract record VisibilityOperand
 }
 ```
 
-The private constructor closes both unions. Only the nested records can derive from them, so the
-case list above is the full list. A new case is a deliberate edit.
+The private constructor stops C# source outside the type from adding a case. The protected copy
+constructor lets a derived type exist at run time, and a test builds such a type. `Parse` builds
+only the twelve nested records, so no validated tree reaches another subtype. A new case is a
+deliberate edit.
 
 `VisibilityCondition.Parse` maps the JSON shapes as follows:
 
@@ -220,8 +224,9 @@ case list above is the full list. A new case is a deliberate edit.
 An operand is a `PathRef` when it is an object with a string `path` key. Every other operand is
 a `Literal`. That includes an object without a string `path`.
 
-The parser stores the path of a `WhenPath` or a `PathRef` as written. The parser does not apply
-the `PropTypes.Path` charset rule to either path.
+The parser checks the path of a `WhenPath` and the path of a `PathRef` with one method,
+`VisibilityCondition.ParsePath`. `ParsePath` applies the `PropTypes.Path` rule and then refuses
+`$item`. A refusal throws `"visible.path: {message}"`.
 
 ### `VisibilityEvaluator.cs` — the decision
 
@@ -243,20 +248,22 @@ public static class VisibilityEvaluator
 | `Eq` / `Neq` | equality / inequality of the two canonical operand values |
 | `Gt`, `Gte`, `Lt`, `Lte` | the numeric order of the two operands; `false` unless both are numbers |
 
-A path resolves against the root `data`, and never against a `Repeat` scope. A `$item` path
-therefore stays unresolved.
+A path resolves against the root `data`, and never against a `Repeat` scope. The validator
+therefore refuses a `$item` path in a condition. The evaluator leaves a `$item` path unresolved
+when a caller builds the condition without the validator.
 
 Truthiness follows JavaScript. `false`, `null`, `0` and the empty string are falsy. `true`, a
 non-zero number, a non-empty string, an array and an object are truthy. An unresolved path is
-falsy, so a condition that cannot be evaluated does not show a node.
+falsy, so a `path` condition hides its node.
 
 An operand reduces to a canonical value. A number becomes a `double`. A string stays a string.
 `true` and `false` stay booleans. `null`, an unresolved path, an array and an object become
 `null`. `Eq` compares two canonical values with `object.Equals`, so the number `1` and the string
 `"1"` are different values, and two `null` values are equal.
 
-The `switch` ends with a default arm that returns `true`. No input reaches that arm, because the
-unions are closed.
+The `switch` ends with a default arm that returns `false`, so a condition of an unknown subtype
+is hidden. No JSON input reaches that arm, because `Parse` builds only the twelve forms. `Not`
+negates the result, so a `Not` of an unknown subtype shows the node.
 
 ---
 
@@ -406,7 +413,7 @@ distinct brush so `UNKNOWN` is visually loud. Text goes through a single `Text(.
 
 ## Verification
 
-Generated 2026-10-16 by `repo-tools map`.
+Generated 2026-10-18 by `repo-tools map`.
 Regenerate: `repo-tools map <repo> --out=<dir>` · Check: `repo-tools check <repo> --docs=docs/architecture`
 
 | Claim | Value | Source |

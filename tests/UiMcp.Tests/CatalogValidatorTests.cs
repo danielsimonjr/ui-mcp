@@ -256,4 +256,64 @@ public class CatalogValidatorTests
         => Validating("""{"type":"Metric","props":{"label":"L","valuePath":"a b"}}""")
             .Should().Throw<UiValidationException>()
             .WithMessage("*Metric*valuePath*");
+
+    // ---- node-level keys ----------------------------------------------------------------------
+    // The validator reads four node-level keys: type, props, children and visible. It once ignored
+    // every other key, so a misspelled `visible` left the node always shown. An unknown key is now
+    // refused and named, as an unknown prop is. Each refusal has a positive control.
+
+    [Theory]
+    [InlineData("id")]
+    [InlineData("key")]
+    [InlineData("style")]
+    [InlineData("onclick")]
+    [InlineData("child")]
+    [InlineData("prop")]
+    [InlineData("Visible")]
+    [InlineData("visble")]
+    public void UnknownNodeKey_IsRejected_AndNamed(string key)
+        => Validating("{\"type\":\"Note\",\"props\":{\"text\":\"hi\"},\"" + key + "\":true}")
+            .Should().Throw<UiValidationException>()
+            .WithMessage("Note: unknown node key \"" + key + "\"");
+
+    [Fact]
+    public void AMisspelledVisibleKey_IsRejected_ControlTheSpelledKeyHidesTheNode()
+    {
+        Validating("""{"type":"Note","props":{"text":"hi"},"visble":false}""")
+            .Should().Throw<UiValidationException>().WithMessage("*unknown node key \"visble\"*");
+        Validate("""{"type":"Note","props":{"text":"hi"},"visible":false}""")
+            .Visible.Should().BeOfType<VisibilityCondition.Never>();
+    }
+
+    [Fact]
+    public void AllFourKnownNodeKeys_AreAccepted_PositiveControl()
+    {
+        var node = Validate("""
+            {"type":"Panel","props":{"title":"t"},"visible":true,
+             "children":[{"type":"Note","props":{"text":"hi"}}]}
+            """);
+        node.Type.Should().Be("Panel");
+        node.Visible.Should().BeOfType<VisibilityCondition.Always>();
+        node.Children.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void AnUnknownKeyOnANestedNode_IsRejected_NamingTheNestedComponent()
+        => Validating("""
+            {"type":"Panel","props":{"title":"t"},
+             "children":[{"type":"Note","props":{"text":"hi"},"style":"x"}]}
+            """)
+            .Should().Throw<UiValidationException>().WithMessage("Note: unknown node key \"style\"");
+
+    [Fact]
+    public void AnUnknownNodeKey_IsRejected_EvenWhenEveryOtherPartIsValid()
+        => Validating("""{"type":"Note","props":{"text":"hi"},"visible":true,"extra":1}""")
+            .Should().Throw<UiValidationException>().WithMessage("*unknown node key \"extra\"*");
+
+    [Fact]
+    public void TheNodeKeyCheck_RunsBeforeTheProps_SoANodeWithBothFaultsNamesTheNodeKey()
+        // The props of this node are also wrong. The node-key refusal is the one that must win: a
+        // node key is the outer shape of the node, and the docs say the check runs first.
+        => Validating("""{"type":"Note","props":{"onclick":1},"style":"x"}""")
+            .Should().Throw<UiValidationException>().WithMessage("Note: unknown node key \"style\"");
 }

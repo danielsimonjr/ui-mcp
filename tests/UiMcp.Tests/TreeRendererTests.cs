@@ -471,14 +471,17 @@ public class TreeRendererTests : IClassFixture<StaFixture>
     public void TheGateReadsTheRootData_NotTheItemScopeOfARepeat()
     {
         // The condition is evaluated against the ROOT data. A `$item` path has no scope there, so it
-        // is unresolved and hides the child of EVERY item, even where the item field is true.
+        // is unresolved and hides the child of EVERY item, even where the item field is true. The
+        // validator refuses a `$item` path in a condition, so the `byItem` tree is built from a
+        // validated tree whose child then takes the condition directly.
         const string rows = """{"flag":true,"rows":[{"show":true,"name":"first"},{"show":true,"name":"second"}]}""";
 
-        var byItem = Texts("""
+        var plain = Valid("""
             {"type":"Repeat","props":{"fromPath":"rows"},
-             "children":[{"type":"Field","props":{"label":"n","valuePath":"$item.name"},
-                          "visible":{"path":"$item.show"}}]}
-            """, rows);
+             "children":[{"type":"Field","props":{"label":"n","valuePath":"$item.name"}}]}
+            """);
+        var gated = plain.Children[0] with { Visible = new VisibilityCondition.WhenPath("$item.show") };
+        var byItem = Probe(plain with { Children = new[] { gated } }, rows, el => AllTexts(el));
         var byRoot = Texts("""
             {"type":"Repeat","props":{"fromPath":"rows"},
              "children":[{"type":"Field","props":{"label":"n","valuePath":"$item.name"},
