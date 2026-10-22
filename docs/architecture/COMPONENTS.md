@@ -268,7 +268,9 @@ An operand reduces to a canonical value. A number becomes a `double`. A string s
 
 The `switch` ends with a default arm that returns `false`, so a condition of an unknown subtype
 is hidden. No JSON input reaches that arm, because `Parse` builds only the twelve forms. `Not`
-negates the result, so a `Not` of an unknown subtype shows the node.
+negates the result, so a `Not` of an unknown subtype shows the node. A test table lists the twelve
+subtypes. A new nested subtype fails the build until the table has a row for it. A row that only the
+default arm decides fails too.
 
 ---
 

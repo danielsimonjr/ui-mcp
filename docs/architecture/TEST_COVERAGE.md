@@ -1,7 +1,7 @@
 # ui-mcp — Test Coverage
 
-**447 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
-files and 1 fixture) and 2,954 lines. The 2,954 lines are 61% of the 4,830 lines in the
+**449 tests, 0 failures, 0 skipped** (`dotnet test`). The test project holds 11 files (10 test
+files and 1 fixture) and 2,999 lines. The 2,999 lines are 62% of the 4,874 lines in the
 repository's `.cs` files. CI runs the suite on every push to `main` and on every pull request,
 with `dotnet test UiMcp.sln --no-build -c Release` on `windows-latest`.
 
@@ -16,7 +16,7 @@ nobody measured one.
 | `CatalogValidator` + `PropTypes` | 336 | `CatalogValidatorTests.cs` | 29 Fact + 8 Theory | Thorough |
 | `PathResolver` | 127 | `PathResolverTests.cs` | 26 Fact + 1 Theory | Thorough |
 | `RenderRules` | 121 | `RenderRulesTests.cs` | 31 Fact | Thorough |
-| `VisibilityCondition` + `VisibilityEvaluator` | 344 | `VisibilityTests.cs` | 76 Fact + 17 Theory | Thorough |
+| `VisibilityCondition` + `VisibilityEvaluator` | 344 | `VisibilityTests.cs` | 78 Fact + 17 Theory | Thorough |
 | `UiThreadHost` | 150 | `UiThreadHostTests.cs` | 13 Fact | Thorough |
 | `UiTools` | 165 | `UiToolsTests.cs` | 20 Fact | Thorough |
 | `TreeRenderer` | 321 | `TreeRendererTests.cs` | 31 Fact + 4 Theory | Good; the `visible` gate has its own tests |
@@ -25,8 +25,8 @@ nobody measured one.
 | `Program` | 67 | `ProgramMetadataTests.cs` | 2 Fact | Metadata only; the wiring runs in every end-to-end run |
 
 `VisibilityTests.cs` also covers the `visible` key of the validator. The table counts `Fact` and
-`Theory` attributes. A `Theory` runs once for each data row, so the executed count (447) is
-higher than the attribute count (280).
+`Theory` attributes. A `Theory` runs once for each data row, so the executed count (449) is
+higher than the attribute count (282).
 
 `StaFixture.cs` (31 lines) is shared infrastructure, not a test: one STA thread, built from the
 same `UiThreadHost` production uses.
@@ -61,6 +61,12 @@ reader cannot settle by reading. An empty `and` is true, and an empty `or` is fa
 form key wins in the order of the forms. The evaluator leaves a `$item` path unresolved at the
 root. Truthiness follows JavaScript, so `[]`, `{}` and `"0"` are truthy. Two unresolved operands are
 equal. An object or an array literal reduces to `null`.
+
+A table with one row for each subtype of the union guards the closed set. One test requires that
+the table names every nested subtype of `VisibilityCondition`, so a new subtype without a row
+fails the build. A second test parses each row, checks the subtype, and checks the result of the
+row and of the `Not` of the row. A row that only the default arm of `IsVisible` decides fails.
+The default arm returns `false`, so the condition of a new row must be true.
 
 **The renderer's `visible` gate is tested through the renderer.** `TreeRendererTests` renders
 a node with a condition and reads the result on the STA thread. A hidden node is a collapsed
@@ -99,6 +105,8 @@ SHA-256**. The rows after them were verified with an empty `git diff` after `git
 | A `$item` path resolved against the root | 2 — both rows of `IsVisible_AnItemPathIsUnresolvedAtTheRoot` |
 | `Parse` tries `and` before `path` | exactly 1 — a row of `Parse_TheFirstFormKeyWins_InTheOrderOfTheForms` |
 | The default arm of `IsVisible` returns `true` | exactly 3 — the three unknown-subtype tests |
+| The `Gte` arm deleted from `IsVisible` | exactly 1 — `EveryRow_ParsesToItsSubtype_AndIsDecidedByAnArm_NotByTheDefault` |
+| A nested subtype added to the union without a row | exactly 1 — `EveryNestedSubtypeOfTheUnion_HasARowInTheSubtypeTable` |
 | `ParsePath` does not refuse `$item` | exactly 2 — both rows of `Parse_AnItemPath_IsRefused_AtBothSites` |
 | The operand parse site skips `ParsePath` | 17 — the 12 rows of the operand theory, 3 prototype rows and 2 `$item` rows |
 | The node-key refusal removed | 12 — the 8 rows of `UnknownNodeKey_IsRejected_AndNamed` and 4 facts |
@@ -171,13 +179,13 @@ namespace rule, so do not read a coverage percentage from it.
 | Claim | Value | Source |
 |---|---|---|
 | totalSourceFiles | 25 | dependency-graph.json |
-| totalLinesOfCode | 4830 | dependency-graph.json |
+| totalLinesOfCode | 4874 | dependency-graph.json |
 | testOnlyFiles | 1 | dependency-graph.json |
 
-**Claims the gate cannot hold:** the **447 tests / 0 failures** figure is `dotnet test` output.
+**Claims the gate cannot hold:** the **449 tests / 0 failures** figure is `dotnet test` output.
 Both counts come from a local `dotnet test UiMcp.sln -c Release` run, which CI also runs.
 A count of the `Fact` and `Theory` attributes in each test file gives the per-file numbers. Note that the attribute
 count and the executed-test count differ, because a `Theory` runs one time for each `InlineData`
-row or `MemberData` row. The 2,954 test lines and the per-component LOC come from
+row or `MemberData` row. The 2,999 test lines and the per-component LOC come from
 `file-inventory.json`'s per-file `loc`. Every mutation result in the table above was produced by
 applying that mutation, running the suite, and restoring the file. The restore checks are the ones that the mutation record names.
