@@ -18,6 +18,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and that rendered before is now refused. The test that pinned the old order of the form keys now
   pins the refusal, and a guard test fails when a form is added to the union without a test row.
 
+### Fixed
+
+- **A path error of an operand names the operand.** `ParsePath` prefixed every path error with
+  `visible.path:`, so a bad operand of `gt` reported a key that the caller did not write. The
+  message now starts with `visible.<form>[<index>].path`, for example `visible.gt[0].path`. The path
+  form keeps `visible.path`. The message does not name an enclosing `and`, `or` or `not`. Only the
+  message changes: the accepted shapes are the same. One test row for each of the six comparison
+  operators pins the left operand, and one row each pins the right operand.
+
 ## [0.1.5] - 2026-10-18
 
 ### Added

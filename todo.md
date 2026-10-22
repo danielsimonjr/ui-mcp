@@ -223,12 +223,14 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       Ten theory rows cover the refusal, with the extra key after and before the form key, and ten
       control rows parse the same forms without it. The docs name the rule.
 
-- [ ] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
+- [x] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
       `VisibilityCondition.ParsePath` prefixes every path error with "visible.path:". The path form
       and the `{"path": ...}` operand of `eq`, `neq`, `gt`, `gte`, `lt` and `lte` both call it, so a
       bad operand of `gt` reports a key that the caller did not write. This is a message only.
       DONE WHEN: the prefix names the real position, and one test pins the message for each of the
       six operators.
+      FIX (2026-10-22): `ParsePath` takes the position of the path. The message of an operand starts
+      with `visible.<form>[<index>].path`. It does not name an enclosing `and`, `or` or `not`.
 
 - [ ] (2026-10-18) **The `ui_render` description points to a repo-relative file.** The description
       ends with "are listed in docs/architecture/API.md". A client that runs the installed bundle
