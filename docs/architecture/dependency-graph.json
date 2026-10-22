@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "ui-mcp",
+    "name": "repo",
     "schemaVersion": "2.0.0",
     "language": "csharp",
     "totalFiles": 25,
@@ -938,7 +938,7 @@
     "totalTypeScriptFiles": 25,
     "totalSourceFiles": 25,
     "totalModules": 2,
-    "totalLinesOfCode": 4676,
+    "totalLinesOfCode": 4720,
     "totalExports": 42,
     "entryRoots": 1,
     "reachableFiles": 13,

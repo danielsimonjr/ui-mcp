@@ -233,11 +233,13 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       description, or give an absolute URL. The description is part of the bundle, so the change
       rebuilds `bundle/UiMcp.exe`.
 
-- [ ] (2026-10-18) **`Not` of an unknown condition subtype shows the node.** The default arm of
+- [x] (2026-10-18) **`Not` of an unknown condition subtype shows the node.** The default arm of
       `IsVisible` returns false (fail closed), and `Not` negates the result, so the node is shown.
       The class comment of `VisibilityEvaluator` documents this and a test pins it. The union is
       closed, so no such subtype exists today. DECIDE: whether a future subtype must fail closed
       under `Not` as well (three states, or a refusal at parse time).
+      FIX (2026-10-22): no behaviour change. A table of the twelve subtypes in `VisibilityTests`
+      fails the build when a nested subtype has no row, or when the default arm alone decides a row.
 
 ## Done 2026-08-30
 

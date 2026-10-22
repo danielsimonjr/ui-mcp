@@ -68,7 +68,7 @@ This report lists each source file that the map census finds, with a disposition
 | `tests/UiMcp.Tests/UiSurfaceTests.cs` | UiMcp.Tests | tests | test | 241 |
 | `tests/UiMcp.Tests/UiThreadHostTests.cs` | UiMcp.Tests | tests | test | 173 |
 | `tests/UiMcp.Tests/UiToolsTests.cs` | UiMcp.Tests | tests | test | 320 |
-| `tests/UiMcp.Tests/VisibilityTests.cs` | UiMcp.Tests | tests | test | 638 |
+| `tests/UiMcp.Tests/VisibilityTests.cs` | UiMcp.Tests | tests | test | 682 |
 
 ## Skipped links
 

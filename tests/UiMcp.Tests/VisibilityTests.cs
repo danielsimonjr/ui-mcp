@@ -635,4 +635,48 @@ public class VisibilityTests
         // on purpose, and no test read it.
         V(new VisibilityCondition.Not(StubSubtype()), "{}").Should().BeTrue();
     }
+
+    // ---- a new condition subtype must come with a row and an evaluator arm --------------------------
+    //
+    // The default arm hides a subtype that it does not know, and Not shows the node when its inner
+    // condition is hidden, so a new subtype without an arm fails open under Not. The union is closed
+    // today, and Parse builds the twelve records only. This table turns the future risk into a red
+    // build. A new nested record fails the first test until it has a row. A row whose condition shows
+    // the node fails the second test until the evaluator has an arm for the subtype. Never is the one
+    // subtype that the default arm decides correctly, because its answer is false.
+
+    private static readonly (string Subtype, string Json, string DataJson, bool Expected)[] SubtypeRows =
+    {
+        ("Always",   "true",               "{}",          true),
+        ("Never",    "false",              "{}",          false),
+        ("WhenPath", """{"path":"a"}""",   """{"a":1}""", true),
+        ("And",      """{"and":[true]}""", "{}",          true),
+        ("Or",       """{"or":[true]}""",  "{}",          true),
+        ("Not",      """{"not":false}""",  "{}",          true),
+        ("Eq",       """{"eq":[1,1]}""",   "{}",          true),
+        ("Neq",      """{"neq":[1,2]}""",  "{}",          true),
+        ("Gt",       """{"gt":[2,1]}""",   "{}",          true),
+        ("Gte",      """{"gte":[1,1]}""",  "{}",          true),
+        ("Lt",       """{"lt":[1,2]}""",   "{}",          true),
+        ("Lte",      """{"lte":[1,1]}""",  "{}",          true),
+    };
+
+    [Fact]
+    public void EveryNestedSubtypeOfTheUnion_HasARowInTheSubtypeTable()
+        => SubtypeRows.Select(r => r.Subtype).OrderBy(n => n, StringComparer.Ordinal)
+            .Should().Equal(
+                typeof(VisibilityCondition).GetNestedTypes().Select(t => t.Name).OrderBy(n => n, StringComparer.Ordinal),
+                "a new subtype needs a row here and an arm in VisibilityEvaluator.IsVisible");
+
+    [Fact]
+    public void EveryRow_ParsesToItsSubtype_AndIsDecidedByAnArm_NotByTheDefault()
+    {
+        foreach (var (subtype, json, dataJson, expected) in SubtypeRows)
+        {
+            var condition = P(json);
+            condition.GetType().Name.Should().Be(subtype, "the row {0} must build that subtype", json);
+            V(condition, dataJson).Should().Be(expected, "{0} must be decided by its own arm", subtype);
+            V(new VisibilityCondition.Not(condition), dataJson).Should().Be(!expected, "Not of {0}", subtype);
+        }
+    }
 }

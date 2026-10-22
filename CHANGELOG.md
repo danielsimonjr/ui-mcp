@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **A guard test for the closed union of visibility conditions.** The default arm of `IsVisible`
+  hides a condition of an unknown subtype, and `Not` shows the node when its inner condition is
+  hidden, so a new subtype without an evaluator arm would fail open under `Not`. `VisibilityTests`
+  now holds a table with one row for each of the twelve subtypes. One test requires that the table
+  names every nested subtype of `VisibilityCondition`. A second test parses each row, checks the
+  subtype, and checks the result of the row and of its `Not`, so a row that only the default arm
+  decides fails. Deleting the `Gte` arm fails the second test, and a new nested subtype without a
+  row fails the first. No source file changes and no behaviour changes. The condition of a row for
+  a new subtype must be true, because the default arm already returns `false`.
+
 ## [0.1.5] - 2026-10-18
 
 ### Added
