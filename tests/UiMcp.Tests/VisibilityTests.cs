@@ -222,6 +222,72 @@ public class VisibilityTests
             .Should().Throw<UiValidationException>()
             .WithMessage("visible.gt[0].path: $item is not available in a condition*");
 
+    // ---- an operand object holds a string `path` key, or the condition is refused ------------------
+    //
+    // An operand object without a string `path` was a literal that reduced to null, so {"pth":"a"}
+    // was equal to null and the condition decided without reading any data. It is refused now, like a
+    // second key next to `path`. An array stays a literal; the control below pins that.
+
+    public static TheoryData<string> OperandObjectsWithoutAPath => new()
+    {
+        "{}",
+        "{\"pth\":\"a\"}",
+        "{\"a\":1}",
+        "{\"Path\":\"a\"}",
+    };
+
+    public static TheoryData<string> OperandObjectsWhosePathIsNotAString => new()
+    {
+        "{\"path\":5}",
+        "{\"path\":null}",
+        "{\"path\":true}",
+        "{\"path\":[\"a\"]}",
+        "{\"path\":{\"path\":\"a\"}}",
+    };
+
+    [Theory, MemberData(nameof(OperandObjectsWithoutAPath))]
+    public void Parse_LeftOperandObjectWithoutAPathKey_Throws(string operand)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"eq\":[" + operand + ",1]}"))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.eq[0]: an operand object needs a \"path\" key");
+
+    [Theory, MemberData(nameof(OperandObjectsWithoutAPath))]
+    public void Parse_RightOperandObjectWithoutAPathKey_Throws(string operand)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"eq\":[1," + operand + "]}"))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.eq[1]: an operand object needs a \"path\" key");
+
+    [Theory, MemberData(nameof(ComparisonOperators))]
+    public void Parse_OperandObjectWithoutAPathKey_NamesTheOperatorAndTheIndex(string op)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"" + op + "\":[1,{\"pth\":\"a\"}]}"))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible." + op + "[1]: an operand object needs a \"path\" key");
+
+    [Theory, MemberData(nameof(OperandObjectsWhosePathIsNotAString))]
+    public void Parse_LeftOperandObjectWhosePathIsNotAString_Throws(string operand)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"eq\":[" + operand + ",1]}"))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.eq[0].path must be a string");
+
+    [Theory, MemberData(nameof(OperandObjectsWhosePathIsNotAString))]
+    public void Parse_RightOperandObjectWhosePathIsNotAString_Throws(string operand)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"eq\":[1," + operand + "]}"))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.eq[1].path must be a string");
+
+    [Fact]
+    public void Parse_OperandArrayAndScalars_AreStillLiterals_ControlForTheObjectRefusal()
+        => ((Action)(() => VisibilityCondition.Parse(
+                D("""{"and":[{"eq":[[1,2],{"path":"a"}]},{"neq":["x",null]},{"gt":[1,2.5]},{"eq":[true,false]}]}"""))))
+            .Should().NotThrow();
+
+    [Fact]
+    public void Validate_NodeWhoseOperandObjectHasNoPath_IsRefusedAtTheNode()
+        => ((Action)(() => Validate(
+                """{"type":"Note","props":{"text":"hi"},"visible":{"eq":[{"pth":"a"},1]}}""")))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("Note.visible: visible.eq[0]: an operand object needs a \"path\" key*");
+
     [Fact]
     public void Parse_BadPathInThePathForm_StillNamesVisiblePath()
         => ((Action)(() => VisibilityCondition.Parse(D("""{"path":"bad path"}"""))))
@@ -564,12 +630,10 @@ public class VisibilityTests
         => V(P(conditionJson), "{}").Should().Be(expected);
 
     [Theory]
-    [InlineData("""{"eq":[{"a":1},null]}""", true)]
     [InlineData("""{"eq":[[1,2],null]}""", true)]
-    [InlineData("""{"eq":[{"a":1},{"b":2}]}""", true)]
-    [InlineData("""{"eq":[{"a":1},1]}""", false)]
+    [InlineData("""{"eq":[[1,2],[3]]}""", true)]
     [InlineData("""{"eq":[[1,2],1]}""", false)]
-    public void IsVisible_AnObjectOrArrayLiteralReducesToNull(string conditionJson, bool expected)
+    public void IsVisible_AnArrayLiteralReducesToNull(string conditionJson, bool expected)
         => V(P(conditionJson), "{}").Should().Be(expected);
 
     [Theory]

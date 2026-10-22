@@ -223,6 +223,16 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       Ten theory rows cover the refusal, with the extra key after and before the form key, and ten
       control rows parse the same forms without it. The docs name the rule.
 
+- [x] (2026-10-22) **An operand object without a string `path` was a literal that reduced to
+      `null`.** `{"eq":[{"pth":"a"},null]}` was true and read no data, so a typo failed nothing.
+      PR 17 refused a second key next to `path` and left this shape open. DONE WHEN: the parser
+      refuses an operand object without a string `path`, a test row covers each shape on the left
+      and on the right, the bundle is rebuilt, and the docs name the rule.
+      FIX (2026-10-22): `VisibilityOperand.Parse` refuses an object without a `path` key and an
+      object whose `path` is not a string. An array and the scalars stay literals. Twenty-five new
+      test rows cover the refusal, and a mutant that makes such an object a literal again fails
+      exactly those 25.
+
 - [x] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
       `VisibilityCondition.ParsePath` prefixes every path error with "visible.path:". The path form
       and the `{"path": ...}` operand of `eq`, `neq`, `gt`, `gte`, `lt` and `lte` both call it, so a

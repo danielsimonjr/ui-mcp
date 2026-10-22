@@ -51,7 +51,8 @@ public sealed class UiTools
         "{\"or\": [c, ...]} combine conditions; {\"not\": c} negates one; {\"eq\": [a, b]} and " +
         "{\"neq\": [a, b]} compare two operands; {\"gt\": [a, b]}, {\"gte\": [a, b]}, {\"lt\": [a, b]} and " +
         "{\"lte\": [a, b]} compare numbers. Each c is a condition. Each a and b is {\"path\": \"a.b\"} or a " +
-        "string, number, boolean or null. A condition path reads the root data and never `$item`.")]
+        "string, number, boolean or null; any other object is refused. A condition path reads the root data " +
+        "and never `$item`.")]
     public string Render(
         [Description("The UI tree, as a JSON object (a JSON string containing it is also accepted)")]
         JsonElement tree,

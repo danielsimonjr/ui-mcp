@@ -200,7 +200,7 @@ public abstract record VisibilityOperand
     public sealed record Literal(JsonElement Value) : VisibilityOperand;
     public sealed record PathRef(string Path) : VisibilityOperand;
 
-    public static VisibilityOperand Parse(JsonElement el);
+    public static VisibilityOperand Parse(JsonElement el, string position = "visible.operand");
 }
 ```
 
@@ -222,10 +222,14 @@ deliberate edit.
 - `eq`, `neq`, `gt`, `gte`, `lt` and `lte` take an array of exactly two operands.
 - An object with none of these keys throws `"visible: unrecognised condition shape"`.
 
-An operand is a `PathRef` when it is an object with a string `path` key. An operand object holds
-exactly one key: the parser refuses a second key with
-`visible.<form>[<index>]: unknown key "<key>" next to "path"`. Every other operand is a `Literal`.
-That includes an object without a string `path`.
+An operand object is a `PathRef`. It holds exactly one key, a string `path`, and the parser
+refuses everything else:
+
+- A second key gives `visible.<form>[<index>]: unknown key "<key>" next to "path"`.
+- An object without a `path` key gives `visible.<form>[<index>]: an operand object needs a "path" key`.
+- A `path` that is not a string gives `visible.<form>[<index>].path must be a string`.
+
+Every other operand is a `Literal`: a string, a number, a boolean, `null` or an array.
 
 The parser checks the path of a `WhenPath` and the path of a `PathRef` with one method,
 `VisibilityCondition.ParsePath`. `ParsePath` applies the `PropTypes.Path` rule and then refuses
@@ -262,8 +266,8 @@ non-zero number, a non-empty string, an array and an object are truthy. An unres
 falsy, so a `path` condition hides its node.
 
 An operand reduces to a canonical value. A number becomes a `double`. A string stays a string.
-`true` and `false` stay booleans. `null`, an unresolved path, an array and an object become
-`null`. `Eq` compares two canonical values with `object.Equals`, so the number `1` and the string
+`true` and `false` stay booleans. `null`, an unresolved path and an array become `null`.
+A path can resolve to an object, and that object also becomes `null`. `Eq` compares two canonical values with `object.Equals`, so the number `1` and the string
 `"1"` are different values, and two `null` values are equal.
 
 The `switch` ends with a default arm that returns `false`, so a condition of an unknown subtype

@@ -1,5 +1,5 @@
 metadata:
-  name: repo
+  name: ui-mcp
   schemaVersion: 2.0.0
   language: csharp
   totalFiles: 25
@@ -597,7 +597,7 @@ statistics:
   totalTypeScriptFiles: 25
   totalSourceFiles: 25
   totalModules: 2
-  totalLinesOfCode: 4874
+  totalLinesOfCode: 4955
   totalExports: 42
   entryRoots: 1
   reachableFiles: 13

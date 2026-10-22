@@ -30,6 +30,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and that rendered before is now refused. The test that pinned the old order of the form keys now
   pins the refusal, and a guard test fails when a form is added to the union without a test row.
 
+- **BEHAVIOUR CHANGE: an operand object needs a string `path` key, and any other object is
+  refused.** Before, an operand object without a string `path`, such as `{"pth":"a"}` or
+  `{"path":5}`, was a literal that reduced to `null`. The condition `{"eq":[{"pth":"a"},null]}`
+  was then true and read no data, so a typo failed nothing. `VisibilityOperand.Parse` now refuses an
+  object without a `path` key with `visible.eq[0]: an operand object needs a "path" key`. It
+  refuses an object whose `path` is not a string with `visible.eq[0].path must be a string`. An
+  array and the scalars stay literals. A tree that held such an object and that rendered before is
+  now refused. The three object rows of the theory that pinned the reduction to `null` move to the
+  refusal tests, and the `ui_render` description says that any other object is refused. The bundle
+  changes with the parser and the description.
+
 - **The `ui_render` description lists the twelve forms of `visible`, and does not point to a file.**
   The description ended with "are listed in docs/architecture/API.md". A client that runs the
   installed bundle has no checkout, so the pointer led nowhere. The description now holds the forms,
