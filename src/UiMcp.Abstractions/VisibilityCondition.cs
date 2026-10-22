@@ -91,7 +91,7 @@ public abstract record VisibilityCondition
         {
             if (pathEl.ValueKind != JsonValueKind.String)
                 throw new UiValidationException("visible.path must be a string");
-            return new WhenPath(ParsePath(pathEl));
+            return new WhenPath(ParsePath(pathEl, "visible.path"));
         }
 
         if (el.TryGetProperty("and", out var andEl))
@@ -163,15 +163,21 @@ public abstract record VisibilityCondition
     /// the root data. A <c>$item</c> scope does not exist there, so the validator refuses
     /// <c>$item</c> instead of accepting a path that never resolves.
     /// </summary>
-    internal static string ParsePath(JsonElement el)
+    /// <param name="el">The path as written.</param>
+    /// <param name="position">
+    /// The place of the path in the condition, for the message: <c>visible.path</c> for the path form,
+    /// or <c>visible.&lt;form&gt;[&lt;index&gt;].path</c> for an operand. It does not name an
+    /// enclosing <c>and</c>, <c>or</c> or <c>not</c>.
+    /// </param>
+    internal static string ParsePath(JsonElement el, string position)
     {
         string path;
         try { path = (string)PropTypes.Path(el); }
-        catch (UiValidationException e) { throw new UiValidationException($"visible.path: {e.Message}", e); }
+        catch (UiValidationException e) { throw new UiValidationException($"{position}: {e.Message}", e); }
 
         if (path.StartsWith('$'))
             throw new UiValidationException(
-                "visible.path: $item is not available in a condition, which reads the root data");
+                $"{position}: $item is not available in a condition, which reads the root data");
         return path;
     }
 
@@ -218,7 +224,7 @@ public abstract record VisibilityOperand
             && p.ValueKind == JsonValueKind.String)
         {
             VisibilityCondition.RefuseOtherKeys(el, "path", position);
-            return new PathRef(VisibilityCondition.ParsePath(p));
+            return new PathRef(VisibilityCondition.ParsePath(p, position + ".path"));
         }
 
         return new Literal(el);

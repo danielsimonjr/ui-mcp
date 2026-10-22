@@ -198,6 +198,35 @@ public class VisibilityTests
             .Should().Throw<UiValidationException>()
             .WithMessage("Note.visible: visible: unknown key \"pth\" next to \"path\"*");
 
+    // ---- an operand error names the position that the caller wrote -------------------------------
+    //
+    // ParsePath used to prefix every path error with "visible.path:", so a bad operand of gt reported a
+    // key that the caller never wrote. The position now names the form and the index of the operand. It
+    // does not name an enclosing and, or or not.
+
+    public static TheoryData<string> ComparisonOperators => new() { "eq", "neq", "gt", "gte", "lt", "lte" };
+
+    [Theory, MemberData(nameof(ComparisonOperators))]
+    public void Parse_BadPathInTheLeftOperand_NamesTheOperatorAndTheIndex(string op)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"" + op + "\":[{\"path\":\"bad path\"},1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("visible." + op + "[0].path: *");
+
+    [Theory, MemberData(nameof(ComparisonOperators))]
+    public void Parse_BadPathInTheRightOperand_NamesTheOperatorAndTheIndex(string op)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"" + op + "\":[1,{\"path\":\"bad path\"}]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("visible." + op + "[1].path: *");
+
+    [Fact]
+    public void Parse_ItemScopeInAnOperand_NamesTheOperatorAndTheIndex()
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"gt":[{"path":"$item.x"},1]}"""))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.gt[0].path: $item is not available in a condition*");
+
+    [Fact]
+    public void Parse_BadPathInThePathForm_StillNamesVisiblePath()
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"path":"bad path"}"""))))
+            .Should().Throw<UiValidationException>().WithMessage("visible.path: *");
+
     // ---- VisibilityEvaluator.IsVisible ------------------------------------------------
 
     private static bool V(VisibilityCondition? cond, string dataJson)

@@ -229,7 +229,9 @@ That includes an object without a string `path`.
 
 The parser checks the path of a `WhenPath` and the path of a `PathRef` with one method,
 `VisibilityCondition.ParsePath`. `ParsePath` applies the `PropTypes.Path` rule and then refuses
-`$item`. A refusal throws `"visible.path: {message}"`.
+`$item`. A refusal throws `"{position}: {message}"`. The position is `visible.path` for the path form
+and `visible.<form>[<index>].path` for an operand, for example `visible.gt[0].path`. The position
+does not name an enclosing `and`, `or` or `not`.
 
 ### `VisibilityEvaluator.cs` — the decision
 
