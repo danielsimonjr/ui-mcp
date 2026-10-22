@@ -185,8 +185,11 @@ reads the data, or a literal: a string, a number, a boolean or `null`.
 - `eq` and `neq` compare the value and its type. The number `1` and the string `"1"` differ. An
   unresolved path and `null` are equal.
 - `gt`, `gte`, `lt` and `lte` are false unless both operands are numbers.
-- An object that holds more than one form key uses the first of these keys: `path`, `and`, `or`,
-  `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
+- A condition object holds exactly one form key: `path`, `and`, `or`, `not`, `eq`, `neq`, `gt`,
+  `gte`, `lt` or `lte`. The validator refuses a second key, whether a typo or another form, and the
+  message names it: `visible: unknown key "pth" next to "path"`. An operand object `{"path": "…"}`
+  follows the same rule, and its message starts with the position of the operand, for example
+  `visible.eq[0]`.
 - The path of a condition follows the path rule of the prop types. The validator refuses a path
   with an illegal character, an empty path, and a path that holds `__proto__`, `constructor` or
   `prototype`. The validator also refuses `$item`, because a condition reads the root data.

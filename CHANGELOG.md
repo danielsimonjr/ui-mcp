@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **BEHAVIOUR CHANGE: a condition object holds exactly one form key, and a second key is refused.**
+  Before, the object `{"path":"a","pth":1}` was accepted. The parser took the first form key in the
+  order `path`, `and`, `or`, `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte` and dropped every other
+  key, so a typo hid nothing and failed nothing. `VisibilityCondition.Parse` now refuses the object
+  with `visible: unknown key "pth" next to "path"`. An operand object with a string `path` key
+  follows the same rule, and its message starts with the operand position, for example
+  `visible.eq[0]`. The rule matches the one for a node-level key. A tree that holds such an object
+  and that rendered before is now refused. The test that pinned the old order of the form keys now
+  pins the refusal, and a guard test fails when a form is added to the union without a test row.
+
 ## [0.1.5] - 2026-10-18
 
 ### Added

@@ -214,11 +214,14 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       was written an hour after that commit and was wrong. The CI run on `main` for e715343
       reports 398 tests and 398 passed.
 
-- [ ] (2026-10-18) **A condition object ignores extra keys.** `{"path":"a","pth":1}` is accepted,
+- [x] (2026-10-18) **A condition object ignores extra keys.** `{"path":"a","pth":1}` is accepted,
       and the form key that comes first wins. Node-level keys are refused, but a condition object is
       not, because refusing its keys changes the accepted shapes. DONE WHEN: the parser refuses a key
       that the chosen form does not read, a test per form covers the refusal, the bundle is
       rebuilt, and the docs name the rule.
+      FIX (2026-10-22): `VisibilityCondition.Parse` and `VisibilityOperand.Parse` refuse a second key.
+      Ten theory rows cover the refusal, with the extra key after and before the form key, and ten
+      control rows parse the same forms without it. The docs name the rule.
 
 - [ ] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
       `VisibilityCondition.ParsePath` prefixes every path error with "visible.path:". The path form
