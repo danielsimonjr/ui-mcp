@@ -18,6 +18,8 @@ namespace UiMcp.Abstractions;
 /// An unresolvable path is treated as falsy, so a <c>path</c> condition hides its node. The
 /// <c>not</c> and <c>neq</c> forms negate that result, so they show the node. The validator checks
 /// every path of a condition with the path rule of the prop types and refuses <c>$item</c>.
+/// A condition object holds exactly one form key. A second key is refused, because a typo such as
+/// <c>pth</c> would otherwise be dropped without a trace.
 ///
 /// Ported from <c>danielsimonjr/JSON-UI</c> — see <c>packages/core/src/visibility.ts</c> and
 /// <c>packages/core/src/types.ts</c>.
@@ -25,6 +27,9 @@ namespace UiMcp.Abstractions;
 public abstract record VisibilityCondition
 {
     private VisibilityCondition() { }
+
+    // The object forms, in the order that Parse reads them. Parse refuses every other key of the object.
+    private static readonly string[] FormKeys = ["path", "and", "or", "not", "eq", "neq", "gt", "gte", "lt", "lte"];
 
     /// <summary>Always visible (literal <c>true</c>).</summary>
     public sealed record Always : VisibilityCondition;
@@ -78,11 +83,15 @@ public abstract record VisibilityCondition
         if (el.ValueKind != JsonValueKind.Object)
             throw new UiValidationException("visible must be true, false, or an object");
 
+        var form = FormKeys.FirstOrDefault(key => el.TryGetProperty(key, out _));
+        if (form is not null)
+            RefuseOtherKeys(el, form, "visible");
+
         if (el.TryGetProperty("path", out var pathEl))
         {
             if (pathEl.ValueKind != JsonValueKind.String)
                 throw new UiValidationException("visible.path must be a string");
-            return new WhenPath(ParsePath(pathEl));
+            return new WhenPath(ParsePath(pathEl, "visible.path"));
         }
 
         if (el.TryGetProperty("and", out var andEl))
@@ -134,20 +143,41 @@ public abstract record VisibilityCondition
     }
 
     /// <summary>
+    /// Refuse every key of <paramref name="el"/> other than <paramref name="form"/>. A condition object and
+    /// an operand object hold exactly one form key, so an unknown key is a typo that Parse would drop.
+    /// </summary>
+    /// <param name="el">The object to check.</param>
+    /// <param name="form">The one key that the chosen form reads.</param>
+    /// <param name="position">The place of the object in the condition, for the message.</param>
+    internal static void RefuseOtherKeys(JsonElement el, string form, string position)
+    {
+        foreach (var member in el.EnumerateObject())
+            if (member.Name != form)
+                throw new UiValidationException(
+                    $"{position}: unknown key \"{member.Name}\" next to \"{form}\"");
+    }
+
+    /// <summary>
     /// Check the path of a condition. A condition path follows the same rule as a prop path
     /// (<see cref="PropTypes.Path"/>), and both parse sites call this one method. A condition reads
     /// the root data. A <c>$item</c> scope does not exist there, so the validator refuses
     /// <c>$item</c> instead of accepting a path that never resolves.
     /// </summary>
-    internal static string ParsePath(JsonElement el)
+    /// <param name="el">The path as written.</param>
+    /// <param name="position">
+    /// The place of the path in the condition, for the message: <c>visible.path</c> for the path form,
+    /// or <c>visible.&lt;form&gt;[&lt;index&gt;].path</c> for an operand. It does not name an
+    /// enclosing <c>and</c>, <c>or</c> or <c>not</c>.
+    /// </param>
+    internal static string ParsePath(JsonElement el, string position)
     {
         string path;
         try { path = (string)PropTypes.Path(el); }
-        catch (UiValidationException e) { throw new UiValidationException($"visible.path: {e.Message}", e); }
+        catch (UiValidationException e) { throw new UiValidationException($"{position}: {e.Message}", e); }
 
         if (path.StartsWith('$'))
             throw new UiValidationException(
-                "visible.path: $item is not available in a condition, which reads the root data");
+                $"{position}: $item is not available in a condition, which reads the root data");
         return path;
     }
 
@@ -165,7 +195,8 @@ public abstract record VisibilityCondition
         var items = el.EnumerateArray().ToList();
         if (items.Count != 2)
             throw new UiValidationException($"visible.{key} must have exactly 2 elements");
-        return (VisibilityOperand.Parse(items[0]), VisibilityOperand.Parse(items[1]));
+        return (VisibilityOperand.Parse(items[0], $"visible.{key}[0]"),
+                VisibilityOperand.Parse(items[1], $"visible.{key}[1]"));
     }
 }
 
@@ -184,12 +215,17 @@ public abstract record VisibilityOperand
     public sealed record PathRef(string Path) : VisibilityOperand;
 
     /// <summary>Parse a raw JSON element into an operand.</summary>
-    public static VisibilityOperand Parse(JsonElement el)
+    /// <param name="el">The operand as written.</param>
+    /// <param name="position">The place of the operand in the condition, for a message.</param>
+    public static VisibilityOperand Parse(JsonElement el, string position = "visible.operand")
     {
         // {path: "..."} is a reference; everything else is a literal.
         if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("path", out var p)
             && p.ValueKind == JsonValueKind.String)
-            return new PathRef(VisibilityCondition.ParsePath(p));
+        {
+            VisibilityCondition.RefuseOtherKeys(el, "path", position);
+            return new PathRef(VisibilityCondition.ParsePath(p, position + ".path"));
+        }
 
         return new Literal(el);
     }

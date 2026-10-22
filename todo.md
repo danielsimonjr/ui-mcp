@@ -214,24 +214,31 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       was written an hour after that commit and was wrong. The CI run on `main` for e715343
       reports 398 tests and 398 passed.
 
-- [ ] (2026-10-18) **A condition object ignores extra keys.** `{"path":"a","pth":1}` is accepted,
+- [x] (2026-10-18) **A condition object ignores extra keys.** `{"path":"a","pth":1}` is accepted,
       and the form key that comes first wins. Node-level keys are refused, but a condition object is
       not, because refusing its keys changes the accepted shapes. DONE WHEN: the parser refuses a key
       that the chosen form does not read, a test per form covers the refusal, the bundle is
       rebuilt, and the docs name the rule.
+      FIX (2026-10-22): `VisibilityCondition.Parse` and `VisibilityOperand.Parse` refuse a second key.
+      Ten theory rows cover the refusal, with the extra key after and before the form key, and ten
+      control rows parse the same forms without it. The docs name the rule.
 
-- [ ] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
+- [x] (2026-10-18) **The operand error names `visible.path` for an operand of any comparison.**
       `VisibilityCondition.ParsePath` prefixes every path error with "visible.path:". The path form
       and the `{"path": ...}` operand of `eq`, `neq`, `gt`, `gte`, `lt` and `lte` both call it, so a
       bad operand of `gt` reports a key that the caller did not write. This is a message only.
       DONE WHEN: the prefix names the real position, and one test pins the message for each of the
       six operators.
+      FIX (2026-10-22): `ParsePath` takes the position of the path. The message of an operand starts
+      with `visible.<form>[<index>].path`. It does not name an enclosing `and`, `or` or `not`.
 
-- [ ] (2026-10-18) **The `ui_render` description points to a repo-relative file.** The description
+- [x] (2026-10-18) **The `ui_render` description points to a repo-relative file.** The description
       ends with "are listed in docs/architecture/API.md". A client that runs the installed bundle
       has no checkout, so the pointer leads nowhere. DECIDE: list the twelve forms in the
       description, or give an absolute URL. The description is part of the bundle, so the change
       rebuilds `bundle/UiMcp.exe`.
+      FIX (2026-10-22): the description lists the twelve forms inline. The bundle is rebuilt in the
+      last commit of the same change.
 
 - [x] (2026-10-18) **`Not` of an unknown condition subtype shows the node.** The default arm of
       `IsVisible` returns false (fail closed), and `Not` negates the result, so the node is shown.

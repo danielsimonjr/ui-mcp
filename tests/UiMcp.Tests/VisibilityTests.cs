@@ -130,6 +130,103 @@ public class VisibilityTests
         => ((Action)(() => VisibilityCondition.Parse(D("""{"eq":[1]}"""))))
             .Should().Throw<UiValidationException>();
 
+    // ---- a condition object holds exactly one form key ------------------------------------------
+    //
+    // The node validator refuses a key that it does not know. A condition object did not: the object
+    // {"path":"a","pth":1} was accepted and `pth` was dropped, so a typo hid nothing and failed nothing.
+    // Each of the ten object forms has a refusal test and a positive control that parses the same form
+    // without the extra key.
+
+    public static TheoryData<string, string> FormObjects => new()
+    {
+        { "path", "\"a\"" },
+        { "and", "[true]" },
+        { "or", "[true]" },
+        { "not", "true" },
+        { "eq", "[1,1]" },
+        { "neq", "[1,2]" },
+        { "gt", "[2,1]" },
+        { "gte", "[1,1]" },
+        { "lt", "[1,2]" },
+        { "lte", "[1,1]" },
+    };
+
+    private static string Obj(string form, string value, string? extra = null, bool extraFirst = false)
+    {
+        var main = "\"" + form + "\":" + value;
+        if (extra is null) return "{" + main + "}";
+        return extraFirst ? "{" + extra + "," + main + "}" : "{" + main + "," + extra + "}";
+    }
+
+    [Fact]
+    public void FormObjects_ListsEveryObjectForm_OfTheUnion()
+        // Always and Never are the literals true and false. Every other nested record has an object form,
+        // and the theories below must list it, or a new form would escape the one-key rule untested.
+        => typeof(VisibilityCondition).GetNestedTypes().Length.Should().Be(FormObjects.Count() + 2);
+
+    [Theory, MemberData(nameof(FormObjects))]
+    public void Parse_FormWithOnlyItsKey_IsAccepted(string form, string value)
+        => ((Action)(() => VisibilityCondition.Parse(D(Obj(form, value)))))
+            .Should().NotThrow();
+
+    [Theory, MemberData(nameof(FormObjects))]
+    public void Parse_FormWithAnExtraKey_Throws(string form, string value)
+        => ((Action)(() => VisibilityCondition.Parse(D(Obj(form, value, "\"pth\":1")))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible: unknown key \"pth\" next to \"" + form + "\"*");
+
+    [Theory, MemberData(nameof(FormObjects))]
+    public void Parse_FormWithAnExtraKeyBeforeIt_Throws(string form, string value)
+        => ((Action)(() => VisibilityCondition.Parse(D(Obj(form, value, "\"pth\":1", extraFirst: true)))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible: unknown key \"pth\" next to \"" + form + "\"*");
+
+    [Fact]
+    public void Parse_OperandPathWithOnlyItsKey_IsAccepted()
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"eq":[{"path":"a"},1]}"""))))
+            .Should().NotThrow();
+
+    [Fact]
+    public void Parse_OperandPathWithAnExtraKey_Throws()
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"eq":[{"path":"a","pth":1},1]}"""))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.eq[0]: unknown key \"pth\" next to \"path\"*");
+
+    [Fact]
+    public void Validate_NodeWhoseConditionHoldsAnExtraKey_IsRefusedAtTheNode()
+        => ((Action)(() => Validate("""{"type":"Note","props":{"text":"hi"},"visible":{"path":"a","pth":1}}""")))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("Note.visible: visible: unknown key \"pth\" next to \"path\"*");
+
+    // ---- an operand error names the position that the caller wrote -------------------------------
+    //
+    // ParsePath used to prefix every path error with "visible.path:", so a bad operand of gt reported a
+    // key that the caller never wrote. The position now names the form and the index of the operand. It
+    // does not name an enclosing and, or or not.
+
+    public static TheoryData<string> ComparisonOperators => new() { "eq", "neq", "gt", "gte", "lt", "lte" };
+
+    [Theory, MemberData(nameof(ComparisonOperators))]
+    public void Parse_BadPathInTheLeftOperand_NamesTheOperatorAndTheIndex(string op)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"" + op + "\":[{\"path\":\"bad path\"},1]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("visible." + op + "[0].path: *");
+
+    [Theory, MemberData(nameof(ComparisonOperators))]
+    public void Parse_BadPathInTheRightOperand_NamesTheOperatorAndTheIndex(string op)
+        => ((Action)(() => VisibilityCondition.Parse(D("{\"" + op + "\":[1,{\"path\":\"bad path\"}]}"))))
+            .Should().Throw<UiValidationException>().WithMessage("visible." + op + "[1].path: *");
+
+    [Fact]
+    public void Parse_ItemScopeInAnOperand_NamesTheOperatorAndTheIndex()
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"gt":[{"path":"$item.x"},1]}"""))))
+            .Should().Throw<UiValidationException>()
+            .WithMessage("visible.gt[0].path: $item is not available in a condition*");
+
+    [Fact]
+    public void Parse_BadPathInThePathForm_StillNamesVisiblePath()
+        => ((Action)(() => VisibilityCondition.Parse(D("""{"path":"bad path"}"""))))
+            .Should().Throw<UiValidationException>().WithMessage("visible.path: *");
+
     // ---- VisibilityEvaluator.IsVisible ------------------------------------------------
 
     private static bool V(VisibilityCondition? cond, string dataJson)
@@ -419,15 +516,18 @@ public class VisibilityTests
         => V(P(conditionJson), "{}").Should().Be(expected);
 
     [Theory]
-    [InlineData("""{"and":[],"path":"a"}""", typeof(VisibilityCondition.WhenPath))]
-    [InlineData("""{"not":true,"or":[]}""", typeof(VisibilityCondition.Or))]
-    [InlineData("""{"eq":[1,1],"not":true}""", typeof(VisibilityCondition.Not))]
-    [InlineData("""{"gt":[2,1],"eq":[1,1]}""", typeof(VisibilityCondition.Eq))]
-    [InlineData("""{"lte":[1,1],"gt":[1,1]}""", typeof(VisibilityCondition.Gt))]
-    public void Parse_TheFirstFormKeyWins_InTheOrderOfTheForms(string conditionJson, Type expected)
-        // The key order inside the JSON text does not decide the form: each case lists the later form
-        // first, and the earlier form in the order path, and, or, not, eq, neq, gt, gte, lt, lte wins.
-        => P(conditionJson).Should().BeOfType(expected);
+    [InlineData("""{"and":[],"path":"a"}""", "unknown key \"and\" next to \"path\"")]
+    [InlineData("""{"not":true,"or":[]}""", "unknown key \"not\" next to \"or\"")]
+    [InlineData("""{"eq":[1,1],"not":true}""", "unknown key \"eq\" next to \"not\"")]
+    [InlineData("""{"gt":[2,1],"eq":[1,1]}""", "unknown key \"gt\" next to \"eq\"")]
+    [InlineData("""{"lte":[1,1],"gt":[1,1]}""", "unknown key \"lte\" next to \"gt\"")]
+    public void Parse_TwoFormKeys_AreRefused_WhateverTheirOrder(string conditionJson, string expectedMessage)
+        // A condition object holds exactly one form key. Each case lists the later form first. The form
+        // that comes first in the order path, and, or, not, eq, neq, gt, gte, lt, lte is the chosen one,
+        // and the other form key is the unknown key of the message. Before, the chosen form won and the
+        // other key was dropped.
+        => ((Action)(() => P(conditionJson)))
+            .Should().Throw<UiValidationException>().WithMessage("visible: " + expectedMessage);
 
     [Theory]
     [InlineData("""{"x":1}""")]

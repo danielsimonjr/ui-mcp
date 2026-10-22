@@ -45,8 +45,13 @@ public sealed class UiTools
         "VALIDATED IN FULL FIRST and drawn only if all of it passed; anything outside the catalog is " +
         "refused rather than ignored. Components: StatusBanner, Panel, Row, Metric, Field, Gauge, " +
         "Repeat, Table, Note. Bind values with dotted paths into `data`; an unresolvable path renders " +
-        "as UNKNOWN, never as 0. A node can also carry a `visible` condition that hides it; the forms " +
-        "are listed in docs/architecture/API.md.")]
+        "as UNKNOWN, never as 0. A node can also carry a `visible` condition that hides it. A condition " +
+        "is `true`, `false`, or an object with exactly ONE key (a second key is refused): " +
+        "{\"path\": \"a.b\"} shows the node when the path is truthy; {\"and\": [c, ...]} and " +
+        "{\"or\": [c, ...]} combine conditions; {\"not\": c} negates one; {\"eq\": [a, b]} and " +
+        "{\"neq\": [a, b]} compare two operands; {\"gt\": [a, b]}, {\"gte\": [a, b]}, {\"lt\": [a, b]} and " +
+        "{\"lte\": [a, b]} compare numbers. Each c is a condition. Each a and b is {\"path\": \"a.b\"} or a " +
+        "string, number, boolean or null. A condition path reads the root data and never `$item`.")]
     public string Render(
         [Description("The UI tree, as a JSON object (a JSON string containing it is also accepted)")]
         JsonElement tree,

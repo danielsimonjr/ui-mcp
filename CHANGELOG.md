@@ -18,6 +18,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   row fails the first. No source file changes and no behaviour changes. The condition of a row for
   a new subtype must be true, because the default arm already returns `false`.
 
+### Changed
+
+- **BEHAVIOUR CHANGE: a condition object holds exactly one form key, and a second key is refused.**
+  Before, the object `{"path":"a","pth":1}` was accepted. The parser took the first form key in the
+  order `path`, `and`, `or`, `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte` and dropped every other
+  key, so a typo hid nothing and failed nothing. `VisibilityCondition.Parse` now refuses the object
+  with `visible: unknown key "pth" next to "path"`. An operand object with a string `path` key
+  follows the same rule, and its message starts with the operand position, for example
+  `visible.eq[0]`. The rule matches the one for a node-level key. A tree that holds such an object
+  and that rendered before is now refused. The test that pinned the old order of the form keys now
+  pins the refusal, and a guard test fails when a form is added to the union without a test row.
+
+- **The `ui_render` description lists the twelve forms of `visible`, and does not point to a file.**
+  The description ended with "are listed in docs/architecture/API.md". A client that runs the
+  installed bundle has no checkout, so the pointer led nowhere. The description now holds the forms,
+  the rule of one key, and the rule that a condition path reads the root data. The bundle changes
+  with it. The test that pointed to the document, and the test that checked the document exists,
+  are replaced by tests that read the forms and refuse any repository path in the text.
+
+### Fixed
+
+- **A path error of an operand names the operand.** `ParsePath` prefixed every path error with
+  `visible.path:`, so a bad operand of `gt` reported a key that the caller did not write. The
+  message now starts with `visible.<form>[<index>].path`, for example `visible.gt[0].path`. The path
+  form keeps `visible.path`. The message does not name an enclosing `and`, `or` or `not`. Only the
+  message changes: the accepted shapes are the same. One test row for each of the six comparison
+  operators pins the left operand, and one row each pins the right operand.
+
 ## [0.1.5] - 2026-10-18
 
 ### Added

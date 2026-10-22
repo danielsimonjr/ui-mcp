@@ -37,8 +37,8 @@ create a second window.
 
 Render a catalog-constrained JSON UI tree, replacing whatever is displayed. **The tree is
 validated in full first** and drawn only if all of it passed; anything outside the catalog is
-refused rather than ignored. The tool description names the optional `visible` condition of a node
-and points to this document.
+refused rather than ignored. The tool description lists the twelve forms of the optional `visible`
+condition of a node, because an installed client has no checkout to read.
 
 | Param | Type | Required | Meaning |
 |---|---|---|---|
@@ -185,8 +185,11 @@ reads the data, or a literal: a string, a number, a boolean or `null`.
 - `eq` and `neq` compare the value and its type. The number `1` and the string `"1"` differ. An
   unresolved path and `null` are equal.
 - `gt`, `gte`, `lt` and `lte` are false unless both operands are numbers.
-- An object that holds more than one form key uses the first of these keys: `path`, `and`, `or`,
-  `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`.
+- A condition object holds exactly one form key: `path`, `and`, `or`, `not`, `eq`, `neq`, `gt`,
+  `gte`, `lt` or `lte`. The validator refuses a second key, whether a typo or another form, and the
+  message names it: `visible: unknown key "pth" next to "path"`. An operand object `{"path": "…"}`
+  follows the same rule, and its message starts with the position of the operand, for example
+  `visible.eq[0]`.
 - The path of a condition follows the path rule of the prop types. The validator refuses a path
   with an illegal character, an empty path, and a path that holds `__proto__`, `constructor` or
   `prototype`. The validator also refuses `$item`, because a condition reads the root data.
@@ -204,7 +207,9 @@ This tree shows the note only when `disk.usedPct` is 90 or more:
 ```
 
 A condition that does not parse refuses the whole tree. The message starts with
-`<Type>.visible:`:
+`<Type>.visible:`. A path error then names the position of the path: `visible.path` for the path
+form, and `visible.gt[0].path` for the left operand of `gt`. The position does not name an
+enclosing `and`, `or` or `not`. An unrecognised shape gives this message:
 
 ```json
 { "ok": false, "rejected": "Panel.visible: visible: unrecognised condition shape" }
