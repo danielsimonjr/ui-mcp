@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-22
+
 ### Added
 
 - **A guard test for the closed union of visibility conditions.** The default arm of `IsVisible`
