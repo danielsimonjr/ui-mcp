@@ -214,15 +214,18 @@ deliberate edit.
 - `true` gives `Always`. `false` gives `Never`.
 - Any other value that is not an object throws `"visible must be true, false, or an object"`.
 - For an object, the parser tests these keys in order: `path`, `and`, `or`, `not`, `eq`, `neq`,
-  `gt`, `gte`, `lt`, `lte`. The first key that the object holds decides the form. The parser
-  ignores the other keys.
+  `gt`, `gte`, `lt`, `lte`. The first key that the object holds decides the form. An object
+  holds exactly one form key, so the parser refuses every other key with
+  `visible: unknown key "<key>" next to "<form>"`.
 - `and` and `or` take an array of conditions. `not` takes one condition. The parser reads each
   nested condition with the same rules.
 - `eq`, `neq`, `gt`, `gte`, `lt` and `lte` take an array of exactly two operands.
 - An object with none of these keys throws `"visible: unrecognised condition shape"`.
 
-An operand is a `PathRef` when it is an object with a string `path` key. Every other operand is
-a `Literal`. That includes an object without a string `path`.
+An operand is a `PathRef` when it is an object with a string `path` key. An operand object holds
+exactly one key: the parser refuses a second key with
+`visible.<form>[<index>]: unknown key "<key>" next to "path"`. Every other operand is a `Literal`.
+That includes an object without a string `path`.
 
 The parser checks the path of a `WhenPath` and the path of a `PathRef` with one method,
 `VisibilityCondition.ParsePath`. `ParsePath` applies the `PropTypes.Path` rule and then refuses
