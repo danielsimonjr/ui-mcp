@@ -89,6 +89,12 @@ pushed does not deploy. Then run `claude plugin marketplace update local-marketp
 `claude plugin update ui-mcp@local-marketplace`. The updater reads the version in
 `.claude-plugin/plugin.json`, so a new bundle needs a new version there.
 
+**Build the bundle from a clean clone.** CI rebuilds the bundle and compares its SHA256 with the
+committed file. The `.gitattributes` file pins the line endings of the `.cs` files to CRLF, because
+the PDB inside the bundle stores a checksum of each source file. A clone made with that file gives
+the same bytes whatever `core.autocrlf` says on the machine. A clone made before that file existed
+keeps its old line endings until the files are checked out again, so make a new clone to build.
+
 ## Install as a plugin
 
 Registered in `.claude-plugin/marketplace.json` of the `local-marketplace` marketplace

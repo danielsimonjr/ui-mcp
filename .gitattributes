@@ -1,0 +1,5 @@
+# The bundle is rebuilt in CI and compared with the committed file byte for byte. The PDB inside
+# the bundle stores a checksum of each source file, so the line endings of the .cs files change
+# the bytes. This rule gives every checkout the same source bytes, whatever core.autocrlf says on
+# the machine. CRLF is the form that a Windows checkout has, and Windows is where the bundle builds.
+*.cs text eol=crlf

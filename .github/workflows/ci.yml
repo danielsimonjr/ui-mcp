@@ -120,12 +120,11 @@ jobs:
       # launcher plus ~45 loose DLLs instead of the single-file exe that
       # .mcp.json points at. See README "Build".
       #
-      # The step compares total length and prints the SHA256 of both files. Length alone passes
-      # for a different build (the same commit built with two package versions gives one length
-      # and two hashes), so read the two SHA256 lines when the step is in doubt. A content compare
-      # is not used: the hash holds only when the checkout has the line endings of the build that
-      # made the bundle (the PDB stores a checksum of each source file), and a checkout setting
-      # would then fail a correct bundle. This step runs last, after the artifact steps.
+      # The step compares the SHA256 of the two files and prints both hashes and both lengths.
+      # Length alone passes for a different build (the same commit built with two package versions
+      # gives one length and two hashes). The hash holds because .gitattributes pins the line
+      # endings of the .cs files (the PDB stores a checksum of each source file), so every checkout
+      # holds the same source bytes. This step runs last, after the artifact steps.
       - name: Bundle is not stale
         shell: pwsh
         run: |
@@ -136,12 +135,14 @@ jobs:
           Write-Host "committed: $($committed.Length) bytes"
           Write-Host "rebuilt  : $($built.Length) bytes"
           Write-Host "sdk      : $(dotnet --version)"
-          Write-Host "committed sha256: $((Get-FileHash $committed.FullName -Algorithm SHA256).Hash)"
-          Write-Host "rebuilt   sha256: $((Get-FileHash $built.FullName -Algorithm SHA256).Hash)"
-          if ($built.Length -ne $committed.Length) {
+          $committedHash = (Get-FileHash $committed.FullName -Algorithm SHA256).Hash
+          $builtHash     = (Get-FileHash $built.FullName -Algorithm SHA256).Hash
+          Write-Host "committed sha256: $committedHash"
+          Write-Host "rebuilt   sha256: $builtHash"
+          if ($builtHash -ne $committedHash) {
             Write-Error @"
           bundle/UiMcp.exe is STALE - a rebuild produces a different artifact.
-          Re-publish and commit it, or the plugin keeps serving the previous build:
+          Re-publish from a clean clone and commit it, or the plugin keeps serving the previous build:
             dotnet publish src/UiMcp -c Release -o bundle -r win-x64 --self-contained false -p:PublishSingleFile=true
           "@
             exit 1
