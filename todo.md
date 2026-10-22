@@ -232,11 +232,13 @@ name from `Describe` broke nothing because the compared trees still differ by ch
       FIX (2026-10-22): `ParsePath` takes the position of the path. The message of an operand starts
       with `visible.<form>[<index>].path`. It does not name an enclosing `and`, `or` or `not`.
 
-- [ ] (2026-10-18) **The `ui_render` description points to a repo-relative file.** The description
+- [x] (2026-10-18) **The `ui_render` description points to a repo-relative file.** The description
       ends with "are listed in docs/architecture/API.md". A client that runs the installed bundle
       has no checkout, so the pointer leads nowhere. DECIDE: list the twelve forms in the
       description, or give an absolute URL. The description is part of the bundle, so the change
       rebuilds `bundle/UiMcp.exe`.
+      FIX (2026-10-22): the description lists the twelve forms inline. The bundle is rebuilt in the
+      last commit of the same change.
 
 - [ ] (2026-10-18) **`Not` of an unknown condition subtype shows the node.** The default arm of
       `IsVisible` returns false (fail closed), and `Not` negates the result, so the node is shown.
