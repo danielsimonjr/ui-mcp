@@ -372,7 +372,7 @@ graph TD
 |----------|-------|
 | Total Source Files | 25 |
 | Subsystems | 2 |
-| Total Lines of Code | 4676 |
+| Total Lines of Code | 4830 |
 | Total Exports | 42 |
 | Type-only Imports | 0 |
 | Runtime Cyclic Components | 0 |

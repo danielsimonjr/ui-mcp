@@ -209,7 +209,7 @@ This tree shows the note only when `disk.usedPct` is 90 or more:
 A condition that does not parse refuses the whole tree. The message starts with
 `<Type>.visible:`. A path error then names the position of the path: `visible.path` for the path
 form, and `visible.gt[0].path` for the left operand of `gt`. The position does not name an
-enclosing `and`, `or` or `not`. This is the message for an unrecognised shape:
+enclosing `and`, `or` or `not`. An unrecognised shape gives this message:
 
 ```json
 { "ok": false, "rejected": "Panel.visible: visible: unrecognised condition shape" }
