@@ -18,8 +18,9 @@
     committed bundle/UiMcp.exe cannot be checked against a CI rebuild. Without these four
     properties a build embeds the checkout path (PDB data) and the commit (SourceLink data and
     the informational version), so every path and every commit gives a different file.
-    The line endings of the .cs files still change the bytes: the PDB stores a checksum of each
-    source file.
+    The line endings of the .cs files also change the bytes: the PDB stores a checksum of each
+    source file. The .gitattributes file pins them to CRLF for every checkout. The SDK is pinned in
+    global.json, and dotnet reads that file from the working directory, so build from inside the clone.
   -->
   <PropertyGroup>
     <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>

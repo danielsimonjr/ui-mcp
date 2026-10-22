@@ -89,6 +89,15 @@ pushed does not deploy. Then run `claude plugin marketplace update local-marketp
 `claude plugin update ui-mcp@local-marketplace`. The updater reads the version in
 `.claude-plugin/plugin.json`, so a new bundle needs a new version there.
 
+**Build the bundle from a clean clone.** CI rebuilds the bundle and compares its SHA256 with the
+committed file. The PDB inside the bundle stores a checksum of each source file. The `.gitattributes`
+file therefore pins the line endings of the `.cs` files to CRLF. A clone made with that file gives
+the same bytes whatever `core.autocrlf` says on the machine. A clone made before that file existed
+keeps its old line endings. Make a new clone to build.
+Run the publish command from inside the clone. The `global.json` file pins the SDK, and `dotnet`
+finds that file from the working directory, not from the project path. A command run from another
+directory uses the newest SDK on the machine and gives a different bundle.
+
 ## Install as a plugin
 
 Registered in `.claude-plugin/marketplace.json` of the `local-marketplace` marketplace

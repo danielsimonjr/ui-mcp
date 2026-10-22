@@ -20,6 +20,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **CI compares the SHA256 of the bundle, and `.gitattributes` pins the line endings of the `.cs`
+  files to CRLF.** The step "Bundle is not stale" failed on a difference of length only, so a
+  bundle that came from another build passed when it had the same length. The committed 0.1.5
+  bundle (SHA256 `5A3BF7A8...A032`) is such a file: a clean rebuild of its tag gives SHA256
+  `2798550B...B37D` on the CI runner, on two Windows machines and in a fresh clone, with the same
+  length. The step now fails when the two hashes differ. The hash holds on every checkout,
+  because the PDB inside the bundle stores a checksum of each source file and the new rule gives
+  every checkout the same source bytes. The next release rebuilds the bundle from a clean clone.
+
 - **BEHAVIOUR CHANGE: a condition object holds exactly one form key, and a second key is refused.**
   Before, the object `{"path":"a","pth":1}` was accepted. The parser took the first form key in the
   order `path`, `and`, `or`, `not`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte` and dropped every other
