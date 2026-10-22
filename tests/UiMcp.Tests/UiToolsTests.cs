@@ -290,23 +290,36 @@ public class UiToolsTests
             .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).Single()).Description;
 
     [Fact]
-    public void RenderDescription_NamesTheVisibleCondition_AndPointsToTheApiDocument()
+    public void RenderDescription_NamesTheVisibleCondition_AndListsTheTwelveForms()
     {
-        // This is the text a client reads when it lists the tools. Without the sentence, the text does
-        // not tell a client that a node can carry a `visible` condition.
+        // This is the text a client reads when it lists the tools. A client that runs the installed
+        // bundle has no checkout, so the text must hold the forms and not point to a file.
         var description = DescriptionOf(nameof(UiTools.Render));
 
         description.Should().Contain("`visible`");
-        description.Should().Contain("docs/architecture/API.md");
+        description.Should().Contain("`true`");
+        description.Should().Contain("`false`");
+        foreach (var form in new[] { "path", "and", "or", "not", "eq", "neq", "gt", "gte", "lt", "lte" })
+            description.Should().Contain("{\"" + form + "\":");
     }
 
     [Fact]
-    public void RenderDescription_PointsToADocumentThatExists()
+    public void RenderDescription_StatesTheOneKeyRule_AndTheRootDataRule()
     {
-        // Renaming the document must fail a test and not leave a dead pointer in the description.
-        var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+        var description = DescriptionOf(nameof(UiTools.Render));
 
-        File.Exists(Path.Combine(root, "docs", "architecture", "API.md")).Should().BeTrue();
+        description.Should().Contain("exactly ONE key");
+        description.Should().Contain("root data");
+    }
+
+    [Fact]
+    public void RenderDescription_PointsToNoRepositoryFile()
+    {
+        // A client without a checkout cannot open a repo-relative path, so a pointer leads nowhere.
+        var description = DescriptionOf(nameof(UiTools.Render));
+
+        description.Should().NotContain("docs/");
+        description.Should().NotContain(".md");
     }
 
     [Fact]

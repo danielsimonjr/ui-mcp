@@ -18,6 +18,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and that rendered before is now refused. The test that pinned the old order of the form keys now
   pins the refusal, and a guard test fails when a form is added to the union without a test row.
 
+- **The `ui_render` description lists the twelve forms of `visible`, and does not point to a file.**
+  The description ended with "are listed in docs/architecture/API.md". A client that runs the
+  installed bundle has no checkout, so the pointer led nowhere. The description now holds the forms,
+  the rule of one key, and the rule that a condition path reads the root data. The bundle changes
+  with it. The test that pointed to the document, and the test that checked the document exists,
+  are replaced by tests that read the forms and refuse any repository path in the text.
+
 ### Fixed
 
 - **A path error of an operand names the operand.** `ParsePath` prefixed every path error with
