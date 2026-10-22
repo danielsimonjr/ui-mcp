@@ -68,7 +68,7 @@
       "package": "UiMcp.Abstractions",
       "area": "src",
       "disposition": "reachable",
-      "loc": 196
+      "loc": 232
     },
     {
       "file": "src/UiMcp.Abstractions/VisibilityEvaluator.cs",
@@ -117,7 +117,7 @@
       "package": "UiMcp",
       "area": "src",
       "disposition": "test-only",
-      "loc": 160
+      "loc": 165
     },
     {
       "file": "tests/UiMcp.Tests/CatalogRendererSeamTests.cs",
@@ -187,14 +187,14 @@
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 320
+      "loc": 333
     },
     {
       "file": "tests/UiMcp.Tests/VisibilityTests.cs",
       "package": "UiMcp.Tests",
       "area": "tests",
       "disposition": "test",
-      "loc": 638
+      "loc": 738
     }
   ],
   "skippedLinks": [],
