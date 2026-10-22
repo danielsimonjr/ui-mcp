@@ -175,7 +175,8 @@ A condition has one of twelve forms:
 | gt, gte, lt, lte | `{"gt": [a, b]}` | both operands are numbers and the order holds |
 
 Each `c` is a condition. Each `a` and `b` is an operand. An operand is `{"path": "…"}`, which
-reads the data, or a literal: a string, a number, a boolean or `null`.
+reads the data, or a literal: a string, a number, a boolean, `null` or an array. An array reduces
+to `null` when it is compared. Any other object is not an operand, and the validator refuses it.
 
 - A path reads the root data. It never reads the `$item` scope of a `Repeat`, so the validator
   refuses a `$item` path in a condition.
@@ -190,6 +191,9 @@ reads the data, or a literal: a string, a number, a boolean or `null`.
   message names it: `visible: unknown key "pth" next to "path"`. An operand object `{"path": "…"}`
   follows the same rule, and its message starts with the position of the operand, for example
   `visible.eq[0]`.
+- An operand object holds a `path` key with a string value, and nothing else. An object without a
+  `path` key gives `visible.eq[0]: an operand object needs a "path" key`. A `path` that is not a
+  string gives `visible.eq[0].path must be a string`.
 - The path of a condition follows the path rule of the prop types. The validator refuses a path
   with an illegal character, an empty path, and a path that holds `__proto__`, `constructor` or
   `prototype`. The validator also refuses `$item`, because a condition reads the root data.

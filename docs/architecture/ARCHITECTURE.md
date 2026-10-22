@@ -148,7 +148,8 @@ A node can carry a `visible` key beside `type`, `props` and `children`. The key 
 The validator parses the key into a `VisibilityCondition`. That type is a closed union with
 twelve cases: `Always`, `Never`, `WhenPath`, `And`, `Or`, `Not`, `Eq`, `Neq`, `Gt`, `Gte`, `Lt`
 and `Lte`. The operand of a comparison is a path reference, which is an object with a string
-`path` key, or a literal. A condition of any other shape is refused with a message that starts
+`path` key, or a literal. The parser refuses every other object. A condition of any other shape
+is refused with a message that starts
 with `<Type>.visible:`. A condition object holds exactly one form key, so the parser refuses a
 second key and does not drop it. The node-level keys follow the same rule. A `null` value means
 the same as an absent key, and the node is always visible.

@@ -208,25 +208,31 @@ public abstract record VisibilityOperand
 {
     private VisibilityOperand() { }
 
-    /// <summary>A literal JSON value (string, number, boolean, or null).</summary>
+    /// <summary>A literal JSON value: a string, a number, a boolean, null or an array.</summary>
     public sealed record Literal(JsonElement Value) : VisibilityOperand;
 
     /// <summary>A data-path reference; resolved at evaluation time.</summary>
     public sealed record PathRef(string Path) : VisibilityOperand;
 
-    /// <summary>Parse a raw JSON element into an operand.</summary>
+    /// <summary>
+    /// Parse a raw JSON element into an operand, or throw <see cref="UiValidationException"/>.
+    /// An object is a path reference and holds exactly one key, a string <c>path</c>. Any other object is
+    /// refused: it would be a literal that reduces to null, and a typo such as <c>{"pth": "a"}</c> would
+    /// decide the condition without reading any data. Every other value is a literal.
+    /// </summary>
     /// <param name="el">The operand as written.</param>
     /// <param name="position">The place of the operand in the condition, for a message.</param>
     public static VisibilityOperand Parse(JsonElement el, string position = "visible.operand")
     {
-        // {path: "..."} is a reference; everything else is a literal.
-        if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("path", out var p)
-            && p.ValueKind == JsonValueKind.String)
-        {
-            VisibilityCondition.RefuseOtherKeys(el, "path", position);
-            return new PathRef(VisibilityCondition.ParsePath(p, position + ".path"));
-        }
+        if (el.ValueKind != JsonValueKind.Object)
+            return new Literal(el);
 
-        return new Literal(el);
+        if (!el.TryGetProperty("path", out var p))
+            throw new UiValidationException($"{position}: an operand object needs a \"path\" key");
+        if (p.ValueKind != JsonValueKind.String)
+            throw new UiValidationException($"{position}.path must be a string");
+
+        VisibilityCondition.RefuseOtherKeys(el, "path", position);
+        return new PathRef(VisibilityCondition.ParsePath(p, position + ".path"));
     }
 }

@@ -313,6 +313,16 @@ public class UiToolsTests
     }
 
     [Fact]
+    public void RenderDescription_StatesThatAnOperandObjectNeedsAPath()
+    {
+        // An operand object without a string `path` is refused. The text says so, because a client
+        // that wrote {"pth": "a"} learns the rule from the refusal and from this text.
+        var description = DescriptionOf(nameof(UiTools.Render));
+
+        description.Should().Contain("any other object is refused");
+    }
+
+    [Fact]
     public void RenderDescription_PointsToNoRepositoryFile()
     {
         // A client without a checkout cannot open a repo-relative path, so a pointer leads nowhere.
